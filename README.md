@@ -1,2 +1,2 @@
-# p3
+# P^3^
 Personal Project Portfolio
