@@ -1,0 +1,75 @@
+/*
+    Bryant Smith
+    BYU-I CSE 121B
+    W6 Task Project
+    27 May 2023
+    project.css
+*/
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+}
+#wrapper {
+    max-width: 500px;
+    margin: 0 auto;
+    border: 5px ridge black;
+}
+.wrapper {
+    background-color: #f2f2f2;
+}
+#game-rows {
+    margin: 5%;
+}
+.round {
+    padding: 2%;
+}
+.letter {
+    display: inline-block;
+    vertical-align: bottom;
+    box-sizing: border-box;
+    max-height: 50px;
+    min-height: 50px;
+    max-width: 50px;
+    min-width: 50px;
+    margin: 0 1%;
+    border-radius: 5px;
+    border: 1px solid #d3d6da;
+    padding: 5px;
+    font-size: xx-large;
+}
+.rows {
+    display: block;
+    padding: 0.5%;
+}
+.keys {
+    display: inline-block;
+    vertical-align: bottom;
+    box-sizing: border-box;
+    border: 1px solid black;
+    background-color: white;
+    height: 25px;
+    width: 25px;
+    padding: 3px
+}
+.unused {
+    background-color: white;
+}
+.used {
+    background-color: #6e7173;
+    color: white;
+}
+.within {
+    background-color: #bfa556;
+    color: white;
+}
+.match {
+    background-color: #6ca663;
+    color: white;
+}
+.win {
+    background-color: gold;
+}
+.lose {
+    background-color: red;
+}
