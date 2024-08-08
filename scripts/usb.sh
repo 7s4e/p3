@@ -20,7 +20,7 @@ CHKOUT_DIR="usb"
 clone_repo() {
 
     # Clone the repository and configure sparse checkout
-    git clone --no-checkout "https://$TOKEN@$HOST/$NAME/$REPO.git"
+    git clone --no-checkout "https://$TOKEN@$GIT_HOST/$NAME/$REPO.git"
     cd "$BOOT_MNT_PT/$REPO" || exit
     git config core.sparseCheckout true
     echo "/$CHKOUT_DIR/" > .git/info/sparse-checkout
@@ -28,7 +28,7 @@ clone_repo() {
 
     # Store credentials and configure git
     git config credential.helper store
-    echo "https://$TOKEN@$HOST" > .git-credentials
+    echo "https://$TOKEN@$GIT_HOST" > .git-credentials
     echo ".git-credentials" >> .gitignore
     echo ".gitignore" >> .git/info/sparse-checkout
 
