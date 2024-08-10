@@ -35,8 +35,8 @@ CHKOUT_DIR="usb"
 # Parameters: $1: mount point path
 check_mountpoint() {
     local mnt_pt="$1"
-    if mountpoint "$mnt_pt"; then
-        findmnt --noheadings --output --verbose SOURCE "$mnt_pt"
+    if mountpoint --quiet "$mnt_pt"; then
+        findmnt --noheadings --output SOURCE "$mnt_pt"
     else
         echo "There is no USB partition mounted at $mnt_pt."
         return 1
