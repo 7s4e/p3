@@ -35,8 +35,8 @@ CHKOUT_DIR="usb"
 # Parameters: $1: mount point path
 check_mountpoint() {
     local mnt_pt="$1"
-    if mountpoint --quiet "$mnt_pt"; then
-        findmnt --noheadings --output SOURCE "$mnt_pt"
+    if mountpoint "$mnt_pt"; then
+        findmnt --noheadings --output --verbose SOURCE "$mnt_pt"
     else
         echo "There is no USB partition mounted at $mnt_pt."
         return 1
@@ -74,7 +74,7 @@ configure_git() {
 # Description: Link GRUB configuration to updated copy in the C3 repository
 # Parameters: none
 configure_grub() {
-    ln --symbolic "$BOOT_MNT_PT/$REPO/$CHKOUT_DIR/grub.cfg" \
+    ln --symbolic --verbose "$BOOT_MNT_PT/$REPO/$CHKOUT_DIR/grub.cfg" \
         "$BOOT_MNT_PT/boot/grub/grub.cfg"
 }
 
@@ -110,7 +110,7 @@ get_data() {
 install_grub() {
     local device
     device=$(df "$BOOT_MNT_PT/$REPO" | awk "NR==2 {print $1}")
-    mkdir boot
+    mkdir --verbose boot
     grub-install --target=x86_64-efi --efi-directory="$ESP_MNT_PT" \
         --boot-directory="$BOOT_MNT_PT/boot" --removable --recheck --no-floppy \
         "$device"
@@ -134,7 +134,7 @@ update_repo() {
     git rebase origin/main
 }
 
-# MAIN SCRIPT EXECUTION
+# MAIN SCRIPT EXECUTION #
 confirm_mounting
 
 if [[ -d "$BOOT_MNT_PT/$REPO" ]]; then
@@ -146,6 +146,7 @@ else
     else
         get_data
     fi
+
     cd "$BOOT_MNT_PT" || exit
     clone_repo
     install_grub
