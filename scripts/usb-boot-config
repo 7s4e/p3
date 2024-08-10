@@ -74,8 +74,8 @@ configure_git() {
 # Description: Link GRUB configuration to updated copy in the C3 repository
 # Parameters: none
 configure_grub() {
-    ln --symbolic \
-        "$BOOT_MNT_PT/$REPO/$CHKOUT_DIR/grub.cfg" "$BOOT_MNT_PT/grub/grub.cfg"
+    ln --symbolic "$BOOT_MNT_PT/$REPO/$CHKOUT_DIR/grub.cfg" \
+        "$BOOT_MNT_PT/boot/grub/grub.cfg"
 }
 
 # Function Name: confirm_mounting
@@ -110,8 +110,9 @@ get_data() {
 install_grub() {
     local device
     device=$(df "$BOOT_MNT_PT/$REPO" | awk "NR==2 {print $1}")
+    mkdir boot
     grub-install --target=x86_64-efi --efi-directory="$ESP_MNT_PT" \
-        --boot-directory="$BOOT_MNT_PT" --removable --recheck --no-floppy \
+        --boot-directory="$BOOT_MNT_PT/boot" --removable --recheck --no-floppy \
         "$device"
 }
 
