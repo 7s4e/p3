@@ -5,7 +5,8 @@
 # Parameters: none
 elevate_privileges() {
     if [[ $EUID -ne 0 ]]; then
-        exec sudo "$0" "$@"
+        export CURRENT_USER=$(whoami)
+        exec sudo --preserve-env "$0" "$@"
     fi
 }
 

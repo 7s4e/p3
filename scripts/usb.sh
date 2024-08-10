@@ -1,18 +1,34 @@
 #!/bin/bash
 
+
+# SETUP #
 # Source of elevate_privileges(), query_boolean(), and set_vars_from_obj()
 source functions.sh
 
-# CONSTANTS
+# Capture CURRENT_USER and elevate to superuser
+elevate_privileges
+
+
+# CONSTANTS #
+# Confidential Configuration Cache (C3)
+CURRENT_HOME="/home/$CURRENT_USER"
+LOCAL_DIR="Repositories"
+REPO="c3"
+DATA_DIR="data"
+DATA_SRC="data.json"
+
+# Script Values
+DATA_FILE="$CURRENT_HOME/$LOCAL_DIR/$REPO/$DATA_DIR/$DATA_SRC"
 BOOT_MNT_PT="/mnt/boot"
-DATA_FILE="/home/bryant/Repositories/c3/data/data.json"
 ESP_MNT_PT="/mnt/esp"
 GIT_HOST="github.com"
-REPO="c3"
 CHKOUT_DIR="usb"
 
 # NAME, EMAIL, TOKEN are also set either as environment variables with 
-# read_data() or as global variables with get_data().
+#   read_data() or as global variables with get_data().
+
+
+# SCRIPT FUNCTIONS #
 
 # Function Name: check_mountpoint
 # Description: checks if a USB partition is mounted
@@ -36,10 +52,8 @@ clone_repo() {
     git config core.sparseCheckout true
     echo "/$CHKOUT_DIR/" > .git/info/sparse-checkout
     git checkout
-
     configure_git
     echo ".gitignore" >> .git/info/sparse-checkout
-
     git read-tree -mu HEAD
     git add .gitignore
     git commit --message "Ignore credentials"
@@ -101,7 +115,7 @@ install_grub() {
         "$device"
 }
 
-# Function Name: read data
+# Function Name: read_data
 # Description: Read Github configuration data from file, if able
 # Parameters: none
 read_data() {
@@ -120,7 +134,6 @@ update_repo() {
 }
 
 # MAIN SCRIPT EXECUTION
-elevate_privileges
 confirm_mounting
 
 if [[ -d "$BOOT_MNT_PT/$REPO" ]]; then
