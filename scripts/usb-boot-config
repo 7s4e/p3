@@ -1,4 +1,7 @@
 #!/bin/bash
+# This script installs GRUB with the EFI and boot directories on separate 
+# partitions, or it updates the GRUB configuration file with the latest version 
+# at c3/usb/grub.cfg. See c3/usb/README.md for details.
 
 
 # SETUP #

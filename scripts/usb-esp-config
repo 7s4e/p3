@@ -1,4 +1,5 @@
 #!/bin/bash
+# Introduction
 
 
 # SETUP #
@@ -6,7 +7,7 @@
 source functions.sh
 
 # Capture CURRENT_USER and elevate to superuser
-elevate_privileges
+# elevate_privileges
 
 
 # CONSTANTS #
@@ -134,21 +135,151 @@ update_repo() {
     git rebase origin/main
 }
 
+
+get_devices() {
+    devices='{}'
+    while read -r name size vendor model; do
+        echo "Processing: $name $size $vendor $model"  # Debug statement
+        device=$(jq -n --arg size "$size" --arg vendor "$vendor" --arg model "$model" \
+            '{size: $size, vendor: $vendor, model: $model}')
+        echo "$device"
+        devices=$(echo "$devices" | jq --arg name "$name" --argjson details "$device" \
+            '. + {($name): $details}')
+    done < <(lsblk -d --noheadings --output NAME,SIZE,VENDOR,MODEL | awk '$1 ~ /^sd/')
+
+    echo "$devices"  # Now this will contain the final JSON object
+}
+
+# get_devices() {
+#     devices='{}'
+#     while read -r name size vendor model; do
+#         echo "Processing: $name $size $vendor $model"
+#         device=$(jq -n --arg size "$size" --arg vendor "$vendor" --arg model "$model" \
+#             '{size: $size, vendor: $vendor, model: $model}')
+#         devices=$(echo "$devices" | jq --arg name "$name" --argjson details "$device" \
+#             '. + {($name): $details}')
+#     done <<-EOF
+#     $(lsblk -d --noheadings --output NAME,SIZE,VENDOR,MODEL | awk '$1 ~ /^sd/')
+#     EOF
+
+#     echo "$devices"  # This will contain the final JSON object
+# }
+
+
+# get_devices() {
+#     devices='{}'
+#     mapfile -t lines < <(lsblk -d --noheadings --output NAME,SIZE,VENDOR,MODEL | awk '$1 ~ /^sd/')
+#     for line in "${lines[@]}"; do
+#         read -r name size vendor model <<< "$line"
+#         echo "Processing: $name $size $vendor $model"
+#         device=$(jq -n --arg size "$size" --arg vendor "$vendor" --arg model "$model" \
+#             '{size: $size, vendor: $vendor, model: $model}')
+#         devices=$(echo "$devices" | jq --arg name "$name" --argjson details "$device" \
+#             '. + {($name): $details}')
+#     done
+
+#     echo "$devices"  # This will contain the final JSON object
+# }
+
+# get_devices() {
+#     devices='{}'
+#     tmpfile=$(mktemp)
+#     lsblk -d --noheadings --output NAME,SIZE,VENDOR,MODEL | awk '$1 ~ /^sd/' > "$tmpfile"
+
+#     while read -r name size vendor model; do
+#         echo "Processing: $name $size $vendor $model"
+#         device=$(jq -n --arg size "$size" --arg vendor "$vendor" --arg model "$model" \
+#             '{size: $size, vendor: $vendor, model: $model}')
+#         devices=$(echo "$devices" | jq --arg name "$name" --argjson details "$device" \
+#             '. + {($name): $details}')
+#     done < "$tmpfile"
+
+#     rm -f "$tmpfile"
+#     echo "$devices"  # This will contain the final JSON object
+# }
+
+
+# get_devices() {
+#     devices='{}'
+#     for line in $(lsblk -d --noheadings --output NAME,SIZE,VENDOR,MODEL | awk '$1 ~ /^sd/'); do
+#         set -- $line
+#         name=$1
+#         size=$2
+#         vendor=$3
+#         model=$4
+#         echo "Processing: $name $size $vendor $model"
+#         device=$(jq -n --arg size "$size" --arg vendor "$vendor" --arg model "$model" \
+#             '{size: $size, vendor: $vendor, model: $model}')
+#         devices=$(echo "$devices" | jq --arg name "$name" --argjson details "$device" \
+#             '. + {($name): $details}')
+#     done
+
+#     echo "$devices"  # This will contain the final JSON object
+# }
+
+
+# get_devices() {
+#     devices='{}'
+#     lsblk -d --noheadings --output NAME,SIZE,VENDOR,MODEL | awk '$1 ~ /^sd/' | while read -r name size vendor model; do
+#         echo "Processing: $name $size $vendor $model"  # Debug statement
+#         device=$(jq -n --arg size "$size" --arg vendor "$vendor" --arg model "$model" '{size: $size, vendor: $vendor, model: $model}')
+#         echo "$device"
+#         devices=$(echo "$devices" | jq --arg name "$name" --argjson details "$device" '. + {($name): $details}')
+#         echo "$devices"
+#     done
+#     echo "$devices"
+# }
+
+# get_devices2() {
+#     devices='{}'
+#     lsblk -d --noheadings --output NAME,SIZE,VENDOR,MODEL | awk '$1 ~ /^sd/' | while read -r name size vendor model; do
+#         echo "Name: $name, Size: $size, Vendor: $vendor, Model: $model"
+#         device=$(jq -n --arg name "$name" --arg size "$size" --arg vendor "$vendor" --arg model "$model" '. + {($name): {size: $size, vendor: $vendor, model: $model}}')
+#         echo "$device"
+#         devices=$(echo "$devices" | jq --arg name "$name" --arg device "$device" '. + {($name): $device}')
+#     done
+#     echo "$devices"
+#     # lsblk -d --noheadings --output NAME,SIZE,VENDOR,MODEL | awk '$1 ~ /^sd/' | while read -r name size vendor model; do
+#     #     device=$(jq -n --arg size "$size" --arg vendor "$vendor" --arg model "$model" '{size: $size, vendor: $vendor, model: $model}')
+#     #     devices=$(echo "$devices" | jq --arg name "$name" --argjson details "$device" '. + {($name): $details}')
+#     # done
+
+#     # Output the final JSON object
+#     array=$(echo "$devices" | jq -c '.')
+#     echo "$array"
+# }
+
+
+# put_block_devices() {
+#     echo "*     CONNECTED USB DEVICES     *"
+#     echo "================================="
+#     echo "NAME     SIZE  VENDOR     MODEL     "
+#     lsblk -d --noheadings --output NAME,SIZE,VENDOR,MODEL | \
+#         awk '$1 ~ /^sd/ {
+#             printf "%-6s %6s  %-10s %-20s\n", $1, $2, $3, $4
+#         }'
+#     # display cols: NAME,LABEL,FSTYPE
+#     # capture cols: PATH,MOUNTPOINT,UUID,MODEL,MOUNTPOINTS,TRAN,PKNAME,VENDOR
+# }
+
 # MAIN SCRIPT EXECUTION #
-confirm_mounting
+# put_block_devices
+get_devices
 
-if [[ -d "$BOOT_MNT_PT/$REPO" ]]; then
-    cd "$BOOT_MNT_PT/$REPO" || exit
-    update_repo
-else
-    if [[ -f "$DATA_FILE" ]]; then
-        read_data
-    else
-        get_data
-    fi
+# confirm_mounting
 
-    cd "$BOOT_MNT_PT" || exit
-    clone_repo
-    install_grub
-    configure_grub
-fi
+# if [[ -d "$BOOT_MNT_PT/$REPO" ]]; then
+#     cd "$BOOT_MNT_PT/$REPO" || exit
+#     update_repo
+# else
+#     if [[ -f "$DATA_FILE" ]]; then
+#         read_data
+#     else
+#         get_data
+#     fi
+
+#     cd "$BOOT_MNT_PT" || exit
+#     clone_repo
+#     install_grub
+#     configure_grub
+# fi
