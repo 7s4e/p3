@@ -10,37 +10,46 @@ elevate_privileges() {
     fi
 }
 
-# Function Name: query_boolean
+query_menu_selection() {
+    local prompt="$1"
+    local range="$2"
+    local response
+    while true; do
+        read -p "$prompt" response
+        echo
+        if [[ "$response" =~ ^[0-9]+$ ]] && \
+            (( response >= 1 && response <= $range )); then
+            break
+        else
+            echo "Enter the number for your selection."
+        fi
+    done
+    echo "$response"
+}
+
+# Function Name: query_yes_no
 # Description: prompt user to respond yes or no
-# Parameters:
-#   $1 - prompt put to user
-#   $2 - (default true) affirmative bias toward the response:
-#           true - requires an explicit negative response and accepts all other 
-#               responses as affirmative
-#           false - requires an explicit positive response and accepts all 
-#               other responses as negative
+# Parameters: $1 - prompt put to user
 # Returns:
 #   0 - true
 #   1 - false
-query_boolean() {
+# Issue: can't use -n 1 without the prompt on same line as invalid input
+query_yes_no() {
     local prompt="$1"
-    local has_affirmative_bias="${2:-true}"
-    local response=""
-    read -p "$prompt" response
-    response=$(echo "${response:0:1}" | tr "[:upper:]" "[:lower:]")
-    if [[ $has_affirmative_bias == true ]]; then
-        if [[ "$response" == "n"  ]]; then
-            return 1
+    local response
+    while true; do
+        read -p "$prompt" response
+        echo
+        if [[ "$response" =~ ^[ynYN]$ ]]; then
+            if [[ "$response" == "y" ||  "$response" == "Y" ]]; then
+                return 0
+            else
+                return 1
+            fi
         else
-            return 0
+            continue
         fi
-    else
-        if [[ "$response" == "y"  ]]; then
-            return 0
-        else
-            return 1
-        fi
-    fi
+    done
 }
 
 # Function Name: set_vars_from_obj

@@ -136,135 +136,167 @@ update_repo() {
 }
 
 
-get_devices() {
-    devices='{}'
-    while read -r name size vendor model; do
-        echo "Processing: $name $size $vendor $model"  # Debug statement
-        device=$(jq -n --arg size "$size" --arg vendor "$vendor" --arg model "$model" \
-            '{size: $size, vendor: $vendor, model: $model}')
-        echo "$device"
-        devices=$(echo "$devices" | jq --arg name "$name" --argjson details "$device" \
-            '. + {($name): $details}')
-    done < <(lsblk -d --noheadings --output NAME,SIZE,VENDOR,MODEL | awk '$1 ~ /^sd/')
 
-    echo "$devices"  # Now this will contain the final JSON object
+
+    # echo "*     CONNECTED USB diskS     *"
+    # echo "================================="
+    # echo "NAME     SIZE  VENDOR     MODEL     "
+    # lsblk --noheadings --output NAME,SIZE,VENDOR,MODEL | \
+    #     awk '$1 ~ /^sdb/ {
+    #         printf "%-6s %6s  %-10s %-20s\n", $1, $2, $3, $4
+    #     }'
+    # lsblk -o KNAME,NAME,TYPE,LABEL,FSTYPE,MOUNTPOINTS | awk '$1 ~ /^sdb/' 
+    # capture cols: KNAME,PATH,MOUNTPOINT,UUID,MODEL,MOUNTPOINTS,TRAN,PKNAME,VENDOR
+
+confirm_disk() {
+    local disk="$1"
+    local prompt
+    put_partitions "$disk"
+    prompt="Are you sure you want the ESP on the disk "$disk"? (y/n) "
+    echo "$(query_yes_no "$prompt")"
 }
 
-# get_devices() {
-#     devices='{}'
-#     while read -r name size vendor model; do
-#         echo "Processing: $name $size $vendor $model"
-#         device=$(jq -n --arg size "$size" --arg vendor "$vendor" --arg model "$model" \
-#             '{size: $size, vendor: $vendor, model: $model}')
-#         devices=$(echo "$devices" | jq --arg name "$name" --argjson details "$device" \
-#             '. + {($name): $details}')
-#     done <<-EOF
-#     $(lsblk -d --noheadings --output NAME,SIZE,VENDOR,MODEL | awk '$1 ~ /^sd/')
-#     EOF
+get_disks() {
+    local disks='[]'
+    while read -r name vendor size; do
+        disk=$(
+            jq -n --arg name "$name" --arg vendor "$vendor" --arg size "$size" \
+                '{name: $name, vendor: $vendor, size: $size}'
+        )
+        disks=$(
+            echo "$disks" | jq -c --argjson disk "$disk" '. += [$disk]'
+        )
+    done < <(lsblk -d --noheadings --output NAME,VENDOR,SIZE | gawk '$1 ~ /^sd/')
+    echo "$disks"
+}
 
-#     echo "$devices"  # This will contain the final JSON object
-# }
-
-
-# get_devices() {
-#     devices='{}'
-#     mapfile -t lines < <(lsblk -d --noheadings --output NAME,SIZE,VENDOR,MODEL | awk '$1 ~ /^sd/')
-#     for line in "${lines[@]}"; do
-#         read -r name size vendor model <<< "$line"
-#         echo "Processing: $name $size $vendor $model"
-#         device=$(jq -n --arg size "$size" --arg vendor "$vendor" --arg model "$model" \
-#             '{size: $size, vendor: $vendor, model: $model}')
-#         devices=$(echo "$devices" | jq --arg name "$name" --argjson details "$device" \
-#             '. + {($name): $details}')
-#     done
-
-#     echo "$devices"  # This will contain the final JSON object
-# }
-
-# get_devices() {
-#     devices='{}'
-#     tmpfile=$(mktemp)
-#     lsblk -d --noheadings --output NAME,SIZE,VENDOR,MODEL | awk '$1 ~ /^sd/' > "$tmpfile"
-
-#     while read -r name size vendor model; do
-#         echo "Processing: $name $size $vendor $model"
-#         device=$(jq -n --arg size "$size" --arg vendor "$vendor" --arg model "$model" \
-#             '{size: $size, vendor: $vendor, model: $model}')
-#         devices=$(echo "$devices" | jq --arg name "$name" --argjson details "$device" \
-#             '. + {($name): $details}')
-#     done < "$tmpfile"
-
-#     rm -f "$tmpfile"
-#     echo "$devices"  # This will contain the final JSON object
-# }
-
-
-# get_devices() {
-#     devices='{}'
-#     for line in $(lsblk -d --noheadings --output NAME,SIZE,VENDOR,MODEL | awk '$1 ~ /^sd/'); do
-#         set -- $line
-#         name=$1
-#         size=$2
-#         vendor=$3
-#         model=$4
-#         echo "Processing: $name $size $vendor $model"
-#         device=$(jq -n --arg size "$size" --arg vendor "$vendor" --arg model "$model" \
-#             '{size: $size, vendor: $vendor, model: $model}')
-#         devices=$(echo "$devices" | jq --arg name "$name" --argjson details "$device" \
-#             '. + {($name): $details}')
-#     done
-
-#     echo "$devices"  # This will contain the final JSON object
-# }
+put_disks() {
+    local disks="$1"
+    local table_width="${2:-36}"
+    local border_style="="
+    local heading_text="CONNECTED DEVICES"
+    local heading_padding="$(( ($table_width - ${#heading_text}) / 2 ))"
+    echo
+    printf "%*s%s\n" "$heading_padding" "" "$heading_text"
+    printf '%s\n' "$(printf '%*s' $table_width | tr ' ' '=')"
+    echo "$disks" | jq -r '
+        (.[0] | keys_unsorted) as $keys |
+        ($keys | join("\t")) as $header |
+        "#\t\($header)\n" + (
+            to_entries |
+            map([.key + 1, .value[$keys[]]]) |
+            map(join("\t")) |
+            join("\n")
+        )
+    ' | gawk --assign OFS='\t' --assign tbl_width="$table_width" '
+        BEGIN {
+            content_witdh = 0
+            col_width[1] = 1
+            col_padding = 2
+        }
+        {
+            for (i = 1; i <= NF; i++) {
+                if (NR == 1) data[NR, i] = toupper($i)
+                else data[NR, i] = $i
+                col_width[i] = length($i) > col_width[i] ? length($i) : col_width[i]
+            }
+        }
+        END {
+            for (i=1; i<=length(col_width); i++) {
+                content_width += col_width[i]
+            }
+            tbl_padding = (tbl_width - content_width - col_padding * (NF - 1)) / 2
+            for (i = 1; i <= NR; i++) {
+                printf "%*s", tbl_padding, ""
+                for (j = 1; j <= NF; j++) {
+                    if (j == 4) printf "%*s", col_width[j], data[i, j]
+                    else printf "%-*s", col_width[j] + col_padding, data[i, j]
+                }
+                printf "\n"
+            }
+        }
+    '
+    printf '%s\n' "$(printf '%*s' $table_width | tr ' ' '=')"
+}
 
 
-# get_devices() {
-#     devices='{}'
-#     lsblk -d --noheadings --output NAME,SIZE,VENDOR,MODEL | awk '$1 ~ /^sd/' | while read -r name size vendor model; do
-#         echo "Processing: $name $size $vendor $model"  # Debug statement
-#         device=$(jq -n --arg size "$size" --arg vendor "$vendor" --arg model "$model" '{size: $size, vendor: $vendor, model: $model}')
-#         echo "$device"
-#         devices=$(echo "$devices" | jq --arg name "$name" --argjson details "$device" '. + {($name): $details}')
-#         echo "$devices"
-#     done
-#     echo "$devices"
-# }
+put_partitions() {
+    local disk=$(echo "$disk" | tr -d '"')
+    local border_style="="
+    local max_width=80
+    local heading_text="SELECTED DEVICE"
+    local output=$(lsblk --output NAME,TYPE,FSTYPE,LABEL,MOUNTPOINTS | \
+        gawk --assign disk="$disk" 'NR==1 || $1 ~ disk')
 
-# get_devices2() {
-#     devices='{}'
-#     lsblk -d --noheadings --output NAME,SIZE,VENDOR,MODEL | awk '$1 ~ /^sd/' | while read -r name size vendor model; do
-#         echo "Name: $name, Size: $size, Vendor: $vendor, Model: $model"
-#         device=$(jq -n --arg name "$name" --arg size "$size" --arg vendor "$vendor" --arg model "$model" '. + {($name): {size: $size, vendor: $vendor, model: $model}}')
-#         echo "$device"
-#         devices=$(echo "$devices" | jq --arg name "$name" --arg device "$device" '. + {($name): $device}')
-#     done
-#     echo "$devices"
-#     # lsblk -d --noheadings --output NAME,SIZE,VENDOR,MODEL | awk '$1 ~ /^sd/' | while read -r name size vendor model; do
-#     #     device=$(jq -n --arg size "$size" --arg vendor "$vendor" --arg model "$model" '{size: $size, vendor: $vendor, model: $model}')
-#     #     devices=$(echo "$devices" | jq --arg name "$name" --argjson details "$device" '. + {($name): $details}')
-#     # done
+    echo
+    echo "$output" | gawk --assign border="$border_style" \
+        --assign max="$max_width" --assign heading="$heading_text" '
+        BEGIN {
+            content_width = 0
+            col_width[1] = 0
+            col_padding = 2
+        }
+        {
+            for (i = 1; i <= NF; i++) {
+                data[NR, i] = $i
+                col_width[i] = length($i) > col_width[i] ? length($i) : col_width[i]
+            }
+        }
+        END {
+            for (i = 1; i <= length(col_width); i++) {
+                content_width += col_width[i]
+            }
+            content_width += col_padding * (NF -1)
+            if (content_width > max) content_width = max
+            hdg_padding = int((content_width - length(heading)) / 2)
+            printf "%*s%s\n", hdg_padding, "", heading
+            border_line = sprintf("%*s", content_width, "")
+            gsub(/ /, border, border_line)
+            print border_line
+            for (i = 1; i <= NR; i++) {
+                for (j = 1; j <= NF; j++) {
+                    printf "%-*s", col_width[j] + col_padding, data[i, j]
+                }
+                printf "\n"
+            }
+            print border_line
+        }
+    '
+}
 
-#     # Output the final JSON object
-#     array=$(echo "$devices" | jq -c '.')
-#     echo "$array"
-# }
+select_disk() {
+    local disk selection
+    local disks="$(get_disks)"
+    local count="$(echo "$disks" | jq 'length')"
+    case $count in
+        0)
+            echo "Connect a device and press any key to continue..."
+            read -sn 1
+            select_disk
+            ;;
+        1)
+            disk="$(echo "$disks" | jq -c '.[0].name')"
+            ;;
+        *)
+            prompt="The ESP is for which device (1-$count)? "
+            put_disks "$disks" "${#prompt}"
+            selection="$(query_menu_selection "$prompt" "$count")"
+            echo "selection: n$selection"
+            disk="$(echo "$disks" | jq -c ".[$((selection - 1))].name")"
+            ;;
+    esac
+    confirm_disk "$disk"
+    echo "done"
+    echo "$?"
+    if [ $? -eq 1 ]; then
+        echo "Connect the correct device, then press any key to continue..."
+        read -sn 1
+        select_disk
+    fi
+}
 
-
-# put_block_devices() {
-#     echo "*     CONNECTED USB DEVICES     *"
-#     echo "================================="
-#     echo "NAME     SIZE  VENDOR     MODEL     "
-#     lsblk -d --noheadings --output NAME,SIZE,VENDOR,MODEL | \
-#         awk '$1 ~ /^sd/ {
-#             printf "%-6s %6s  %-10s %-20s\n", $1, $2, $3, $4
-#         }'
-#     # display cols: NAME,LABEL,FSTYPE
-#     # capture cols: PATH,MOUNTPOINT,UUID,MODEL,MOUNTPOINTS,TRAN,PKNAME,VENDOR
-# }
-
-# MAIN SCRIPT EXECUTION #
-# put_block_devices
-get_devices
+# MAIN SCRIPT EXECUTION 
+select_disk
 
 # confirm_mounting
 
