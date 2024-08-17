@@ -11,17 +11,19 @@ elevate_privileges() {
 }
 
 query_menu_selection() {
-    local prompt="$1"
+    local prompt="${1:-"Enter your selection: "}"
     local range="$2"
     local response
+
     while true; do
         read -p "$prompt" response
         echo
-        if [[ "$response" =~ ^[0-9]+$ ]] && \
-            (( response >= 1 && response <= $range )); then
-            break
+        if [[ ! "$response" =~ ^[0-9]+$ ]] || {
+            [ -v range ] && (( response < 1 || response > range ));
+        }; then
+            echo "Error: '$response' is an invalid response." >&2
         else
-            echo "Enter the number for your selection."
+            break
         fi
     done
     echo "$response"
@@ -37,6 +39,7 @@ query_menu_selection() {
 query_yes_no() {
     local prompt="$1"
     local response
+
     while true; do
         read -p "$prompt" response
         echo
@@ -47,6 +50,7 @@ query_yes_no() {
                 return 1
             fi
         else
+            echo "Error: '$response' is an invalid response." >&2
             continue
         fi
     done

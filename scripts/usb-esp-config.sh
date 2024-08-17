@@ -148,37 +148,45 @@ update_repo() {
     # lsblk -o KNAME,NAME,TYPE,LABEL,FSTYPE,MOUNTPOINTS | awk '$1 ~ /^sdb/' 
     # capture cols: KNAME,PATH,MOUNTPOINT,UUID,MODEL,MOUNTPOINTS,TRAN,PKNAME,VENDOR
 
+BORDER_STYLE="="
+COLUMN_GAP=2
+
 confirm_disk() {
     local disk="$1"
-    local prompt
+    local prompt="Are you sure you want the ESP on the disk "$disk"? (y/n) "
+
     put_partitions "$disk"
-    prompt="Are you sure you want the ESP on the disk "$disk"? (y/n) "
     echo "$(query_yes_no "$prompt")"
 }
 
 get_disks() {
     local disks='[]'
-    while read -r name vendor size; do
+
+    while IFS=' ' read -r name vendor size; do
+        local disk
         disk=$(
             jq -n --arg name "$name" --arg vendor "$vendor" --arg size "$size" \
                 '{name: $name, vendor: $vendor, size: $size}'
         )
-        disks=$(
-            echo "$disks" | jq -c --argjson disk "$disk" '. += [$disk]'
-        )
-    done < <(lsblk -d --noheadings --output NAME,VENDOR,SIZE | gawk '$1 ~ /^sd/')
+        disks=$(jq -c --argjson disk "$disk" '. += [$disk]' <<< "$disks")
+    done < <(
+        lsblk -d --noheadings --output NAME,VENDOR,SIZE | \
+        gawk '$1 ~ /^sd/'
+    )
+
     echo "$disks"
 }
 
 put_disks() {
     local disks="$1"
     local table_width="${2:-36}"
-    local border_style="="
     local heading_text="CONNECTED DEVICES"
-    local heading_padding="$(( ($table_width - ${#heading_text}) / 2 ))"
+    local heading_padding=$(( ($table_width - ${#heading_text}) / 2 ))
+
     echo
     printf "%*s%s\n" "$heading_padding" "" "$heading_text"
-    printf '%s\n' "$(printf '%*s' $table_width | tr ' ' '=')"
+    printf '%*s\n' "$table_width" | tr ' ' "${BORDER_STYLE:-=}"
+
     echo "$disks" | jq -r '
         (.[0] | keys_unsorted) as $keys |
         ($keys | join("\t")) as $header |
@@ -188,74 +196,72 @@ put_disks() {
             map(join("\t")) |
             join("\n")
         )
-    ' | gawk --assign OFS='\t' --assign tbl_width="$table_width" '
-        BEGIN {
-            content_witdh = 0
-            col_width[1] = 1
-            col_padding = 2
-        }
+    ' | gawk --assign OFS='\t' --assign col_gap=$COLUMN_GAP \
+        --assign tbl_width="$table_width" '
         {
             for (i = 1; i <= NF; i++) {
                 if (NR == 1) data[NR, i] = toupper($i)
                 else data[NR, i] = $i
-                col_width[i] = length($i) > col_width[i] ? length($i) : col_width[i]
+                col_width[i] = length($i) > col_width[i] ? length($i) : \
+                    col_width[i]
             }
         }
         END {
-            for (i=1; i<=length(col_width); i++) {
+            content_witdh = 0
+            for (i = 1; i <= length(col_width); i++) {
                 content_width += col_width[i]
             }
-            tbl_padding = (tbl_width - content_width - col_padding * (NF - 1)) / 2
+            tbl_padding = (tbl_width - content_width - col_gap * (NF - 1)) / 2
             for (i = 1; i <= NR; i++) {
                 printf "%*s", tbl_padding, ""
                 for (j = 1; j <= NF; j++) {
                     if (j == 4) printf "%*s", col_width[j], data[i, j]
-                    else printf "%-*s", col_width[j] + col_padding, data[i, j]
+                    else printf "%-*s", col_width[j] + col_gap, data[i, j]
                 }
                 printf "\n"
             }
         }
     '
-    printf '%s\n' "$(printf '%*s' $table_width | tr ' ' '=')"
+    printf '%*s\n' "$table_width" | tr ' ' "${BORDER_STYLE:-=}"
 }
 
 
 put_partitions() {
-    local disk=$(echo "$disk" | tr -d '"')
-    local border_style="="
+    local disk=$(echo "$1" | tr -d '"')
     local max_width=80
     local heading_text="SELECTED DEVICE"
     local output=$(lsblk --output NAME,TYPE,FSTYPE,LABEL,MOUNTPOINTS | \
         gawk --assign disk="$disk" 'NR==1 || $1 ~ disk')
 
     echo
-    echo "$output" | gawk --assign border="$border_style" \
-        --assign max="$max_width" --assign heading="$heading_text" '
-        BEGIN {
-            content_width = 0
-            col_width[1] = 0
-            col_padding = 2
-        }
+    echo "$output" | gawk --assign col_gap="$COLUMN_GAP" \
+        --assign border="${BORDER_STYLE:-=}" --assign max="$max_width" \
+        --assign heading="$heading_text" '
         {
             for (i = 1; i <= NF; i++) {
                 data[NR, i] = $i
-                col_width[i] = length($i) > col_width[i] ? length($i) : col_width[i]
+                col_width[i] = length($i) > col_width[i] ? length($i) : \
+                    col_width[i]
             }
         }
         END {
+            content_width = 0
             for (i = 1; i <= length(col_width); i++) {
                 content_width += col_width[i]
             }
-            content_width += col_padding * (NF -1)
+            content_width += col_gap * (NF -1)
             if (content_width > max) content_width = max
+
             hdg_padding = int((content_width - length(heading)) / 2)
             printf "%*s%s\n", hdg_padding, "", heading
+
             border_line = sprintf("%*s", content_width, "")
             gsub(/ /, border, border_line)
             print border_line
+
             for (i = 1; i <= NR; i++) {
                 for (j = 1; j <= NF; j++) {
-                    printf "%-*s", col_width[j] + col_padding, data[i, j]
+                    printf "%-*s", col_width[j] + col_gap, data[i, j]
                 }
                 printf "\n"
             }
@@ -265,9 +271,14 @@ put_partitions() {
 }
 
 select_disk() {
-    local disk selection
-    local disks="$(get_disks)"
-    local count="$(echo "$disks" | jq 'length')"
+    local disk disks
+    local -i count selection
+    
+    disks="$(get_disks)" || { echo "Failed to get disks."; return 1; }
+    count="$(echo "$disks" | jq 'length')" || { 
+        echo "Failed to get count of disks."; return 1;
+    }
+
     case $count in
         0)
             echo "Connect a device and press any key to continue..."
@@ -275,17 +286,23 @@ select_disk() {
             select_disk
             ;;
         1)
-            disk="$(echo "$disks" | jq -c '.[0].name')"
+            disk="$(echo "$disks" | jq -r '.[0].name')" || { 
+                echo "Failed to parse only disk name."; return 1;
+            }
             ;;
         *)
-            prompt="The ESP is for which device (1-$count)? "
+            local prompt="The ESP is for which device? (1-$count) "
             put_disks "$disks" "${#prompt}"
             selection="$(query_menu_selection "$prompt" "$count")"
-            echo "selection: n$selection"
-            disk="$(echo "$disks" | jq -c ".[$((selection - 1))].name")"
+            disk="$(echo "$disks" | jq -r ".[$((selection - 1))].name")" || {
+                echo "Failed to parse selected disk name."; return 1;
+            }
             ;;
     esac
+
     confirm_disk "$disk"
+
+
     echo "done"
     echo "$?"
     if [ $? -eq 1 ]; then
@@ -295,7 +312,7 @@ select_disk() {
     fi
 }
 
-# MAIN SCRIPT EXECUTION 
+# MAIN SCRIPT EXECUTION #
 select_disk
 
 # confirm_mounting
