@@ -5,6 +5,8 @@ source functions.sh
 BORDER_STYLE="="
 COLUMN_GAP=2
 
+declare disk
+
 confirm_disk() {
     local disk="$1"
     local prompt="Are you sure you want the ESP on the disk '"$disk"'? (y/n) "
@@ -125,7 +127,7 @@ put_partitions() {
 }
 
 select_disk() {
-    local disk disks menu_prompt unmount_prompt
+    local disks menu_prompt unmount_prompt
     local -i count selection
 
     while true; do
@@ -155,10 +157,7 @@ select_disk() {
                 ;;
         esac
 
-        if confirm_disk "$disk"; then
-            echo "set disk details"
-            break
-        else
+        if ! confirm_disk "$disk"; then
             unmount_prompt="Do you want to unmount '$disk'? (y/n) "
             if query_yes_no "$unmount_prompt"; then
                 unmount_disk "$disk"
@@ -166,6 +165,8 @@ select_disk() {
             echo "Check device and press any key to continue..."
             read -sn 1
             continue
+        else
+            break
         fi
     done
 }
@@ -180,3 +181,4 @@ unmount_disk() {
 
 
 select_disk
+echo "selected: $disk"
