@@ -41,7 +41,7 @@ query_yes_no() {
     local response
 
     while true; do
-        read -p "$prompt" response
+        read -n 1 -p "$prompt" response
         echo
         if [[ "$response" =~ ^[ynYN]$ ]]; then
             if [[ "$response" == "y" ||  "$response" == "Y" ]]; then

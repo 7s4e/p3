@@ -172,18 +172,11 @@ select_disk() {
 
 unmount_disk() {
     local disk="$1"
-    local mounts='[]'
 
-    while IFS=' ' read -r path mountpoints; do
-        local mount
-        mount=$(jq -n --arg path "$path" --arg mountpoints "$mountpoints") \
-            '{path: $path, mountpoints: $mountpoints}'
-        mounts=$(jq -c --argjson mount "$mount" '. += [$mount]' <<< "$mounts")
-    done < <(
-        lsblk --noheadings --output PATH,MOUNTPOINTS | \
-        gawk --assign disk="$disk" '$1 ~ disk && $2 != ""'
-    )
-    echo "unmount $mounts"
+    lsblk --noheadings --output PATH,MOUNTPOINTS | \
+    gawk --assign disk="$disk" '$1 ~ disk && $2 != "" {print $1}' | \
+    xargs -I {} umount --verbose "{}"
 }
+
 
 select_disk
