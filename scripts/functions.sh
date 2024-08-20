@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Function: elevate_privileges
+# Function Name: elevate_privileges
 # Description: Re-run script as superuser if not already running with elevated 
 #   privileges.
 elevate_privileges() {
@@ -10,7 +10,7 @@ elevate_privileges() {
     fi
 }
 
-# Function: query_integer
+# Function Name: query_integer
 # Description: Propmt user for an integer from a given range.
 # Parameters:
 #   $1 - The lower limit of the valid range (optional, default: 1).
