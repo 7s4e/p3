@@ -72,3 +72,11 @@ set_vars_from_obj() {
         '
     )"
 }
+
+unmount_disk() {
+    local disk="$1"
+
+    lsblk --noheadings --output PATH,MOUNTPOINTS | \
+    gawk --assign disk="$disk" '$1 ~ disk && $2 != "" {print $1}' | \
+    xargs -I {} umount --verbose "{}"
+}
