@@ -20,7 +20,7 @@ elevate_privileges() {
 query_integer() {
     local lower_limit="${1:-1}"
     local upper_limit="${2:-100}"
-    local prompt="${1:-"Enter a number: "}"
+    local prompt="${3:-"Enter a number: "}"
     local response
 
     while true; do

@@ -1,1 +1,1 @@
-[shell style guide](https://google.github.io/styleguide/shellguide.html)
+[Google Shell Style Guide](https://google.github.io/styleguide/shellguide.html)
