@@ -55,23 +55,43 @@ def get_disks():
     return disks
 
 def put_disks(disks, display_width=36):
-    right_justify_index = 2
 
     def calculate_column_widths(data):
         return [max(len(row[i]) for row in data) for i in range(len(data[0]))]
     
-    # bookmark
-    def format_row(row, column_widths, right_justify_index):
+    def format_row(row, column_widths, right_justify_indexes):
         formatted_row = []
-        for j, cell in enumerate(row):
-            if j == right_justify_index:
-                formatted_row.append(f"{cell:>{column_widths[j]}}")
+        for i, cell in enumerate(row):
+            if i in right_justify_indexes:
+                formatted_row.append(f"{cell:>{column_widths[i]}}")
             else:
-                formatted_row.append(f"{cell:<{column_widths[j]}}")
+                formatted_row.append(f"{cell:<{column_widths[i]}}")
         return formatted_row
 
+    def print_table(
+        display_width, title, data, column_widths, right_justify_indexes
+    ):
+        title_padding = (display_width - len(title)) // 2
+        table_width = len("#") + sum(column_widths) + COLUMN_GAP * (len(data[0]) - 1)
+        table_padding = max(0, (display_width - table_width) // 2)
 
-    right_justify_index = 2
+        print(f"\n{' ' * title_padding}{title}")
+        print(f"{BORDER_STYLE * display_width}")
+        
+        for i, row in enumerate(data):
+            first_column = "#" if i == 0 else str(i)
+            row_content = " " * table_padding + first_column
+            row_content += f"{' ' * COLUMN_GAP}".join(format_row(row, column_widths, right_justify_index))
+            print(row_content)
+        
+        print(f"{BORDER_STYLE * display_width}")
+
+
+    # Selected block labels from get_disks: NAME[0], VENDOR[1], SIZE[2]
+    name_index = 0
+    vendor_index = 1
+    size_index = 2
+    right_justify_indexes = [size_index]
     table_title = "CONNECTED DEVICES"
     title_padding = (display_width - len(table_title)) // 2
     table_columns = list(disks[0].keys())
@@ -98,24 +118,6 @@ def put_disks(disks, display_width=36):
         print(row_content)
     print(f"{BORDER_STYLE * display_width}")
 
-
-
-#     def print_table(data, column_widths, title, display_width, right_justify_index):
-#         """Print the table with title, border, and formatted rows."""
-#         title_padding = (display_width - len(title)) // 2
-#         table_width = len("#") + sum(column_widths) + COLUMN_GAP * (len(data[0]) - 1)
-#         table_padding = max(0, (display_width - table_width) // 2)
-
-#         print(f"\n{' ' * title_padding}{title}")
-#         print(f"{BORDER_STYLE * display_width}")
-        
-#         for i, row in enumerate(data):
-#             first_column = "#" if i == 0 else str(i)
-#             row_content = " " * table_padding + first_column
-#             row_content += f"{' ' * COLUMN_GAP}".join(format_row(row, column_widths, right_justify_index))
-#             print(row_content)
-        
-#         print(f"{BORDER_STYLE * display_width}")
 
 #     # Main function logic
 #     table_columns = list(disks[0].keys())
