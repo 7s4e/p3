@@ -5,7 +5,7 @@ import subprocess
 
 # Constants
 BORDER_STYLE = "="
-COLUMN_GAP = 2
+COLUMN_GAP = "  "
 
 # Helper functions
 def run_command(command):
@@ -43,13 +43,16 @@ def confirm_disk(disk):
     return query_yes_no(f"Are you sure you want to select the disk '{disk}'? (y/n) ")
 
 def get_disks():
+    NAME_IDX = 0
+    VENDOR_IDX = 1
+    SIZE_IDX = -1
     disks = []
     output = run_command("lsblk -d --noheadings --output NAME,VENDOR,SIZE")
     for line in output.splitlines():
         columns = line.split()
-        name = columns[0]
-        vendor = columns[1] if len(columns) > 2 else ""
-        size = columns[-1]
+        name = columns[NAME_IDX]
+        vendor = columns[VENDOR_IDX] if len(columns) > 2 else ""
+        size = columns[SIZE_IDX]
         if name.startswith("sd"):
             disks.append({"name": name, "vendor": vendor, "size": size})
     return disks
@@ -68,63 +71,46 @@ def put_disks(disks, display_width=36):
                 formatted_row.append(f"{cell:<{column_widths[i]}}")
         return formatted_row
 
-    def print_table(
-        display_width, title, data, column_widths, right_justify_indexes
-    ):
+    def print_table(title, table_data, display_width):
         title_padding = (display_width - len(title)) // 2
-        table_width = len("#") + sum(column_widths) + COLUMN_GAP * (len(data[0]) - 1)
+        column_widths = calculate_column_widths(table_data)
+        column_widths = [len("#")] + column_widths
+        table_width = sum(column_widths) + len("  ") * (len(table_data[0]) - 1)
         table_padding = max(0, (display_width - table_width) // 2)
-
+        display_width = max(display_width, table_width)
+####
         print(f"\n{' ' * title_padding}{title}")
         print(f"{BORDER_STYLE * display_width}")
-        
-        for i, row in enumerate(data):
+        for i, row in enumerate(table_data):
             first_column = "#" if i == 0 else str(i)
-            row_content = " " * table_padding + first_column
-            row_content += f"{' ' * COLUMN_GAP}".join(format_row(row, column_widths, right_justify_index))
+            row_content = " " * table_padding + first_column + " " * COLUMN_GAP
+            row_content += f"{' ' * COLUMN_GAP}".join(
+                format_row(row, column_widths, [])
+            )
             print(row_content)
-        
         print(f"{BORDER_STYLE * display_width}")
 
+    table_headers = list(disks[0].keys())
+    table_data = [[str(disk[key]) for key in table_headers] for disk in disks]
+    disks_table = [table_headers] + table_data
+    print_table("CONNECTED DEVICES", disks_table, display_width)
 
-    # Selected block labels from get_disks: NAME[0], VENDOR[1], SIZE[2]
-    name_index = 0
-    vendor_index = 1
-    size_index = 2
-    right_justify_indexes = [size_index]
-    table_title = "CONNECTED DEVICES"
-    title_padding = (display_width - len(table_title)) // 2
-    table_columns = list(disks[0].keys())
-    table_data = [table_columns] + \
-        [[str(disk[key]) for key in table_columns] for disk in disks]
-    column_widths = [max(
-        len(row[i]) for row in table_data) for i in range(len(table_columns)
-    )]
-    table_width = len("#") + sum(column_widths) + COLUMN_GAP * len(table_columns)
-    table_padding = max(0, (display_width - table_width) // 2)
-    display_width = max(display_width, table_width)
-    print(f"\n{' ' * title_padding}{table_title}")
-    print(f"{BORDER_STYLE * display_width}")
-    for i, row in enumerate(table_data):
-        first_column = "#" if i == 0 else str(i)
-        row_content = " " * table_padding + first_column
-        for j in range(len(table_columns)):
-            column_content = row[j] if i != 0 else row[j].upper()
-            if j != right_justify_index:
-                column_content = f"{column_content:<{column_widths[j]}}"
-            else:
-                column_content = f"{column_content:>{column_widths[j]}}"
-            row_content += f"{' ' * COLUMN_GAP}{column_content}"
-        print(row_content)
-    print(f"{BORDER_STYLE * display_width}")
+    # print(f"\n{' ' * title_padding}{table_title}")
+    # print(f"{BORDER_STYLE * display_width}")
+    # for i, row in enumerate(table_data):
+    #     first_column = "#" if i == 0 else str(i)
+    #     row_content = " " * table_padding + first_column
+    #     for j in range(len(table_columns)):
+    #         column_content = row[j] if i != 0 else row[j].upper()
+    #         if j != right_justify_index:
+    #             column_content = f"{column_content:<{column_widths[j]}}"
+    #         else:
+    #             column_content = f"{column_content:>{column_widths[j]}}"
+    #         row_content += f"{' ' * COLUMN_GAP}{column_content}"
+    #     print(row_content)
+    # print(f"{BORDER_STYLE * display_width}")
 
 
-#     # Main function logic
-#     table_columns = list(disks[0].keys())
-#     table_data = [table_columns] + [[str(disk[key]) for key in table_columns] for disk in disks]
-#     column_widths = calculate_column_widths(table_data)
-    
-#     print_table(table_data, column_widths, "CONNECTED DEVICES", display_width, right_justify_index)
 
 def put_partitions(disk):
     output = run_command(f"lsblk --output NAME,TYPE,FSTYPE,LABEL,MOUNTPOINTS /dev/{disk}")
