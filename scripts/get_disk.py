@@ -14,7 +14,7 @@ SIZE_IDX = -1
 
 
 # Helper functions
-def run_command(command, use_shell):
+def run_command(command, use_shell=True):
     r = subprocess.run(command, shell=use_shell, text=True, capture_output=True)
     if r.returncode != 0:
         raise Exception(f"Command failed: {r.stderr.strip()}")
@@ -49,59 +49,9 @@ def confirm_disk(disk):
     return query_yes_no(f"Are you sure you want to select the disk '{disk}'? (y/n) ")
 
 def get_disks():
-    disks = []
-    output = run_command("lsblk --nodeps --noheadings --output NAME,VENDOR,SIZE", True)
-    for line in output.splitlines():
-        columns = line.split()
-        name = columns[NAME_IDX]
-        vendor = columns[VENDOR_IDX] if len(columns) > 2 else ""
-        size = columns[SIZE_IDX]
-        if name.startswith("sd"):
-            disks.append({"name": name, "vendor": vendor, "size": size})
+    table = read_table(run_command("lsblk --nodeps --output NAME,VENDOR,SIZE"))
+    disks = [entry for entry in table if entry["NAME"].startswith("sd")]
     return disks
-
-def read_table():
-    command = ["lsblk", "--nodeps", "--output", "NAME,VENDOR,SIZE"]
-    output = run_command(command, use_shell=False).splitlines()
-    keys = output[0].split()
-    table = []
-
-    column_start_positions = [0]
-    for i in range(1, len(keys)):
-        column_start_positions.append(output[0].index(keys[i]))
-
-    for line in output[1:]:
-        fields = []
-        for i in range(len(keys)):
-            start = column_start_positions[i]
-            end = column_start_positions[i + 1] if i + 1 < len(keys) else len(line)
-
-            cursor = start
-            if line[cursor].isspace():
-                while cursor < len(line) and line[cursor].isspace():
-                    cursor += 1
-            else:
-                while cursor > 0 and not line[cursor].isspace():
-                    cursor -= 1
-            start = cursor
-            
-            cursor = end
-            if cursor != len(line):
-                while not line[cursor].isspace():
-                    cursor -= 1
-                while cursor > start and line[cursor].isspace():
-                    cursor -= 1
-                cursor = cursor + 1 if cursor != start else cursor
-            end = cursor
-
-            field = line[start:end].strip()
-            fields.append(field)
-
-        entry = {key: fields[i] for i, key in enumerate(keys)}
-        table.append(entry)
-
-    return table
-
 
 def calculate_column_widths(data):
     return [max(len(row[i]) for row in data) for i in range(len(data[0]))]
@@ -138,6 +88,7 @@ def print_table(title, table_data, display_width):
     print(f"{BORDER_STYLE * display_width}")
 
 def put_disks(disks, display_width=DEFAULT_TABLE_WIDTH):
+    ##BOOKMARK
 
     table_headers = list(disks[0].keys())
     table_data = [[str(disk[key]) for key in table_headers] for disk in disks]
@@ -172,8 +123,40 @@ def put_partitions(disk):
         print("  ".join([f"{row[i]:<{col_widths[i]}}" for i in range(len(table_columns))]))
     print(BORDER_STYLE * table_width)
 
+def read_table(input):
+
+    def get_column_positions(header_line, keys):
+        return [header_line.index(key) for key in keys]
+    
+    def find_boundaries(pos_idx, pos_lst, line):
+        start = pos_lst[pos_idx]
+        while start < len(line) and line[start].isspace(): start += 1
+        while start > 0 and not line[start].isspace(): start -= 1
+
+        end = pos_lst[pos_idx + 1] if pos_idx + 1 < len(pos_lst) else len(line)
+        if end != len(line):
+            while not line[end].isspace(): end -= 1
+            while end > start and line[end].isspace(): end -= 1
+            end = end + 1 if end != start else end
+
+        return start, end
+    
+    def get_slice(position_index, positions, line):
+        start, end = find_boundaries(position_index, positions, line)
+        return line[start:end].strip()
+    
+    lines = input.splitlines()
+    keys = lines[0].split()
+    col_pos = get_column_positions(lines[0], keys)
+
+    table = []
+    for line in lines[1:]:
+        entry = {key: get_slice(i, col_pos, line) for i, key in enumerate(keys)}
+        table.append(entry)
+    
+    return table
+
 def main():
-    print(read_table())
     while True:
         disks = get_disks()
         count = len(disks)
@@ -184,12 +167,12 @@ def main():
                 input()
                 continue
             case 1:
-                disk = disks[0]['name']
+                disk = disks[0]["NAME"]
             case _:
                 prompt = f"Enter a number to select a device (1-{count}): "
                 put_disks(disks, len(prompt))
                 selection = query_integer(1, count, prompt)
-                disk = disks[selection - 1]['name']
+                disk = disks[selection - 1]["NAME"]
 
         if confirm_disk(disk):
             break
