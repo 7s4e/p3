@@ -5,7 +5,11 @@ import subprocess
 
 # Constants
 BORDER_STYLE = "="
-COLUMN_GAP = "  "
+COLUMN_GAP_SIZE = 2
+NAME_IDX = 0
+VENDOR_IDX = 1
+SIZE_IDX = -1
+
 
 # Helper functions
 def run_command(command):
@@ -43,9 +47,6 @@ def confirm_disk(disk):
     return query_yes_no(f"Are you sure you want to select the disk '{disk}'? (y/n) ")
 
 def get_disks():
-    NAME_IDX = 0
-    VENDOR_IDX = 1
-    SIZE_IDX = -1
     disks = []
     output = run_command("lsblk -d --noheadings --output NAME,VENDOR,SIZE")
     for line in output.splitlines():
@@ -62,7 +63,10 @@ def put_disks(disks, display_width=36):
     def calculate_column_widths(data):
         return [max(len(row[i]) for row in data) for i in range(len(data[0]))]
     
-    def format_row(row, column_widths, right_justify_indexes):
+    def calculate_padding(content_width, available_width):
+        return " " * max(0, (available_width - content_width) // 2)
+
+    def format_cells(row, column_widths, right_justify_indexes):
         formatted_row = []
         for i, cell in enumerate(row):
             if i in right_justify_indexes:
@@ -72,45 +76,26 @@ def put_disks(disks, display_width=36):
         return formatted_row
 
     def print_table(title, table_data, display_width):
-        title_padding = (display_width - len(title)) // 2
-        column_widths = calculate_column_widths(table_data)
-        column_widths = [len("#")] + column_widths
-        table_width = sum(column_widths) + len("  ") * (len(table_data[0]) - 1)
-        table_padding = max(0, (display_width - table_width) // 2)
+        column_widths = [len(" #")] + calculate_column_widths(table_data)
+        gaps_width = COLUMN_GAP_SIZE * (len(column_widths) - 1)
+        table_width = sum(column_widths) + gaps_width
+        table_padding = calculate_padding(table_width, display_width)
         display_width = max(display_width, table_width)
-####
-        print(f"\n{' ' * title_padding}{title}")
+        title_padding = calculate_padding(len(title), display_width)
+        print(f"\n{title_padding}{title}")
         print(f"{BORDER_STYLE * display_width}")
         for i, row in enumerate(table_data):
-            first_column = "#" if i == 0 else str(i)
-            row_content = " " * table_padding + first_column + " " * COLUMN_GAP
-            row_content += f"{' ' * COLUMN_GAP}".join(
-                format_row(row, column_widths, [])
-            )
-            print(row_content)
+            first_column = " #" if i == 0 else str(i)
+            row = [first_column] + row
+            rght_jstfd_col_idxs = [0, len(row) + SIZE_IDX]
+            formatted_row = format_cells(row, column_widths, rght_jstfd_col_idxs)
+            print(f"{table_padding}{(' ' * COLUMN_GAP_SIZE).join(formatted_row)}")
         print(f"{BORDER_STYLE * display_width}")
 
     table_headers = list(disks[0].keys())
     table_data = [[str(disk[key]) for key in table_headers] for disk in disks]
     disks_table = [table_headers] + table_data
     print_table("CONNECTED DEVICES", disks_table, display_width)
-
-    # print(f"\n{' ' * title_padding}{table_title}")
-    # print(f"{BORDER_STYLE * display_width}")
-    # for i, row in enumerate(table_data):
-    #     first_column = "#" if i == 0 else str(i)
-    #     row_content = " " * table_padding + first_column
-    #     for j in range(len(table_columns)):
-    #         column_content = row[j] if i != 0 else row[j].upper()
-    #         if j != right_justify_index:
-    #             column_content = f"{column_content:<{column_widths[j]}}"
-    #         else:
-    #             column_content = f"{column_content:>{column_widths[j]}}"
-    #         row_content += f"{' ' * COLUMN_GAP}{column_content}"
-    #     print(row_content)
-    # print(f"{BORDER_STYLE * display_width}")
-
-
 
 def put_partitions(disk):
     output = run_command(f"lsblk --output NAME,TYPE,FSTYPE,LABEL,MOUNTPOINTS /dev/{disk}")
@@ -123,7 +108,7 @@ def put_partitions(disk):
     table_title = "SELECTED DEVICE"
 
     col_widths = [max(len(row[i]) for row in [table_columns] + rows) for i in range(len(table_columns))]
-    table_width = sum(col_widths) + COLUMN_GAP * (len(table_columns) - 1)
+    table_width = sum(col_widths) + COLUMN_GAP_SIZE * (len(table_columns) - 1)
     table_width = min(table_width, max_width)
 
     hdg_padding = (table_width - len(table_title)) // 2
