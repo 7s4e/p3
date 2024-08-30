@@ -73,8 +73,8 @@ def put_partitions(disk):
     max_width = 80
     table_title = "SELECTED DEVICE"
 
-    col_wths = [max(len(row[i]) for row in [table_columns] + rows) for i in range(len(table_columns))]
-    table_width = sum(col_wths) + COL_GAP_SIZE * (len(table_columns) - 1)
+    column_widths = [max(len(row[i]) for row in [table_columns] + rows) for i in range(len(table_columns))]
+    table_width = sum(column_widths) + COL_GAP_SIZE * (len(table_columns) - 1)
     table_width = min(table_width, max_width)
 
     hdg_padding = (table_width - len(table_title)) // 2
@@ -82,12 +82,15 @@ def put_partitions(disk):
     print(BORDER_STYLE * table_width)
 
     for row in [table_columns] + rows:
-        print("  ".join([f"{row[i]:<{col_wths[i]}}" for i in range(len(table_columns))]))
+        print("  ".join([f"{row[i]:<{column_widths[i]}}" for i in range(len(table_columns))]))
     print(BORDER_STYLE * table_width)
 
-def put_table(title, dataset, display_width):
+def put_table(title, dataset, display_width, border_style=BORDER_STYLE, \
+              column_gap_size=COL_GAP_SIZE, \
+              right_justified_columns=RIGHT_JUSTIFIED_COLUMNS):
 
-    def make_table(title, dataset, display_width):
+    def make_table(title, dataset, display_width, border_style, \
+                   column_gap_size, right_justified_columns):
         
         def calculate_column_widths(dataset):
             return {
@@ -99,7 +102,7 @@ def put_table(title, dataset, display_width):
         def make_padding(content_width, available_width):
             return " " * max(0, (available_width - content_width) // 2)
 
-        def format_record(record, col_widths):
+        def format_record(record, column_widths, right_justified_columns):
 
             def format_field(field, width, is_right_justified):
                 alignment = ">" if is_right_justified else "<"
@@ -107,25 +110,30 @@ def put_table(title, dataset, display_width):
             
             return {
                 key: format_field(
-                    value, col_widths[key], key in RIGHT_JUSTIFIED_COLUMNS
+                    value, column_widths[key], key in right_justified_columns
                 ) for key, value in record.items()
             }
         
-        col_wths = calculate_column_widths(dataset)
-        table_wth = sum(col_wths.values()) + COL_GAP_SIZE * (len(col_wths) - 1)
-        table_pdg = make_padding(table_wth, display_width)
-        line_length = max(display_width, table_wth)
-        title_pdg = make_padding(len(title), line_length)
-        gap = " " * COL_GAP_SIZE
+        column_widths = calculate_column_widths(dataset)
+        table_width = sum(column_widths.values()) + \
+                      column_gap_size * (len(column_widths) - 1)
+        table_padding = make_padding(table_width, display_width)
+        line_length = max(display_width, table_width)
+        title_padding = make_padding(len(title), line_length)
+        column_spacing = " " * column_gap_size
         headings = {key: key for key in dataset[0].keys()}
 
-        title_row = title_pdg + title
-        border_row = BORDER_STYLE * line_length
-        header_row = table_pdg + \
-                     gap.join(list(format_record(headings, col_wths).values()))
+        title_row = title_padding + title
+        border_row = border_style * line_length
+        header_row = table_padding + \
+                     column_spacing.join(list(format_record(
+                         headings, column_widths, right_justified_columns
+                     ).values()))
         data_rows = [(
-            table_pdg + \
-            gap.join(list(format_record(record, col_wths).values()))
+            table_padding + \
+            column_spacing.join(list(format_record(
+                record, column_widths, right_justified_columns
+            ).values()))
         ) for record in dataset]
 
         return [title_row, border_row, header_row] + data_rows + [border_row]
@@ -134,7 +142,8 @@ def put_table(title, dataset, display_width):
         print()
         print("\n".join(table))
     
-    table = make_table(title, dataset, display_width)
+    table = make_table(title, dataset, display_width, border_style, \
+                       column_gap_size, right_justified_columns)
     print_table(table)
 
 def number_records(table):
