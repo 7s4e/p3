@@ -11,6 +11,7 @@ COL_GAP_SIZE = 2
 NAME_IDX = 0
 VENDOR_IDX = 1
 SIZE_IDX = -1
+RIGHT_JUSTIFIED_COLUMNS = ["#", "SIZE"]
 
 
 # Helper functions
@@ -50,50 +51,11 @@ def confirm_disk(disk):
 
 
 def get_disks():
-    table = read_table(run_command("lsblk --nodeps --output NAME,VENDOR,SIZE"))
-    disks = [entry for entry in table if entry["NAME"].startswith("sd")]
-    return disks
-
-def print_table(title, table, display_width):
-
-    def calculate_column_widths(table):
-        return {
-            key: max(
-                len(key), max(len(str(entry[key])) for entry in table)
-            ) for key in table[0].keys()
-        }
-
-    def calculate_padding(content_width, available_width):
-        return " " * max(0, (available_width - content_width) // 2)
-
-    def format_cells(row, column_widths, right_justify_indexes, is_heading_row):
-        formatted_row = []
-        for i, cell in enumerate(row):
-            cell = cell.upper() if is_heading_row else cell
-            if i in right_justify_indexes:
-                formatted_row.append(f"{cell:>{column_widths[i]}}")
-            else:
-                formatted_row.append(f"{cell:<{column_widths[i]}}")
-        return formatted_row
-
-    col_widths = calculate_column_widths(table)
-    tbl_width = sum(col_widths.values()) + COL_GAP_SIZE * (len(col_widths) - 1)
-    table_padding = calculate_padding(tbl_width, display_width)
-    display_width = max(display_width, tbl_width)
-    title_padding = calculate_padding(len(title), display_width)
-    print(f"\n{title_padding}{title}")
-    print(f"{BORDER_STYLE * display_width}")
-    for i, row in enumerate(table):
-        is_hdg_row = i == 0
-        first_column = " #" if is_hdg_row else str(i)
-        row = [first_column] + row
-        rgt_jst_col_idxs = [0, len(row) + SIZE_IDX]
-        cells = format_cells(row, col_widths, rgt_jst_col_idxs, is_hdg_row)
-        print(f"{table_padding}{(' ' * COL_GAP_SIZE).join(cells)}")
-    print(f"{BORDER_STYLE * display_width}")
+    dataset = read_table(run_command("lsblk --nodeps --output NAME,VENDOR,SIZE"))
+    return [record for record in dataset if record["NAME"].startswith("sd")]
 
 def put_disks(disks, display_width=DEFAULT_TABLE_WIDTH):
-  print_table("CONNECTED DEVICES", number_entries(disks), display_width)
+    put_table("CONNECTED DEVICES", number_records(disks), display_width)
 
 def put_partitions(disk):
     output = run_command(
@@ -111,8 +73,8 @@ def put_partitions(disk):
     max_width = 80
     table_title = "SELECTED DEVICE"
 
-    col_widths = [max(len(row[i]) for row in [table_columns] + rows) for i in range(len(table_columns))]
-    table_width = sum(col_widths) + COL_GAP_SIZE * (len(table_columns) - 1)
+    col_wths = [max(len(row[i]) for row in [table_columns] + rows) for i in range(len(table_columns))]
+    table_width = sum(col_wths) + COL_GAP_SIZE * (len(table_columns) - 1)
     table_width = min(table_width, max_width)
 
     hdg_padding = (table_width - len(table_title)) // 2
@@ -120,11 +82,63 @@ def put_partitions(disk):
     print(BORDER_STYLE * table_width)
 
     for row in [table_columns] + rows:
-        print("  ".join([f"{row[i]:<{col_widths[i]}}" for i in range(len(table_columns))]))
+        print("  ".join([f"{row[i]:<{col_wths[i]}}" for i in range(len(table_columns))]))
     print(BORDER_STYLE * table_width)
 
-def number_entries(table):
-    return [{"#": i + 1, **entry} for i, entry in enumerate(table)]
+def put_table(title, dataset, display_width):
+
+    def make_table(title, dataset, display_width):
+        
+        def calculate_column_widths(dataset):
+            return {
+                key: max(
+                    len(key), max(len(str(record[key])) for record in dataset)
+                ) for key in dataset[0].keys()
+            }
+
+        def make_padding(content_width, available_width):
+            return " " * max(0, (available_width - content_width) // 2)
+
+        def format_record(record, col_widths):
+
+            def format_field(field, width, is_right_justified):
+                alignment = ">" if is_right_justified else "<"
+                return f"{field:{alignment}{width}}"
+            
+            return {
+                key: format_field(
+                    value, col_widths[key], key in RIGHT_JUSTIFIED_COLUMNS
+                ) for key, value in record.items()
+            }
+        
+        col_wths = calculate_column_widths(dataset)
+        table_wth = sum(col_wths.values()) + COL_GAP_SIZE * (len(col_wths) - 1)
+        table_pdg = make_padding(table_wth, display_width)
+        line_length = max(display_width, table_wth)
+        title_pdg = make_padding(len(title), line_length)
+        gap = " " * COL_GAP_SIZE
+        headings = {key: key for key in dataset[0].keys()}
+
+        title_row = title_pdg + title
+        border_row = BORDER_STYLE * line_length
+        header_row = table_pdg + \
+                     gap.join(list(format_record(headings, col_wths).values()))
+        data_rows = [(
+            table_pdg + \
+            gap.join(list(format_record(record, col_wths).values()))
+        ) for record in dataset]
+
+        return [title_row, border_row, header_row] + data_rows + [border_row]
+    
+    def print_table(table):
+        print()
+        print("\n".join(table))
+    
+    table = make_table(title, dataset, display_width)
+    print_table(table)
+
+def number_records(table):
+    return [{"#": i + 1, **record} for i, record in enumerate(table)]
 
 def read_table(input):
 
