@@ -77,9 +77,6 @@ def put_table(title, dataset, display_width, border_style=BORDER_STYLE, \
                 ) for key in dataset[0].keys()
             }
 
-        def make_padding(content_width, available_width):
-            return " " * max(0, (available_width - content_width) // 2)
-
         def format_record(record, column_widths, right_justified_columns):
 
             def format_field(field, width, is_right_justified):
@@ -92,6 +89,9 @@ def put_table(title, dataset, display_width, border_style=BORDER_STYLE, \
                 ) for key, value in record.items()
             }
         
+        def make_padding(content_width, available_width):
+            return " " * max(0, (available_width - content_width) // 2)
+
         column_widths = calculate_column_widths(dataset)
         table_width = sum(column_widths.values()) + \
                       column_gap_size * (len(column_widths) - 1)
@@ -129,9 +129,6 @@ def number_records(table):
 
 def read_table(input):
 
-    def find_column_positions(header_line, keys):
-        return [header_line.index(key) for key in keys]
-    
     def find_boundaries(column_index, positions_list, line):
         cursor = positions_list[column_index]
         start = cursor if cursor < len(line) else len(line) - 1
@@ -146,6 +143,9 @@ def read_table(input):
             end = end + 1 if end != start else end
 
         return start, end
+    
+    def find_column_positions(header_line, keys):
+        return [header_line.index(key) for key in keys]
     
     def get_slice(column_index, positions_list, line):
         start, end = find_boundaries(column_index, positions_list, line)
