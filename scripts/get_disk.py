@@ -46,12 +46,13 @@ def unmount_disk(disk):
 
 # Core functions
 def confirm_disk(disk):
-    put_partitions(disk)
-    return query_yes_no(f"Are you sure you want to select the disk '{disk}'? (y/n) ")
-
+    prompt = f"Are you sure you want to select the disk '{disk}'? (y/n) "
+    put_partitions(disk, len(prompt))
+    return query_yes_no(prompt)
 
 def get_disks():
-    dataset = read_table(run_command("lsblk --nodeps --output NAME,VENDOR,SIZE"))
+    output = run_command("lsblk --nodeps --output NAME,VENDOR,SIZE")
+    dataset = read_table(output)
     return [record for record in dataset if record["NAME"].startswith("sd")]
 
 def put_disks(disks, display_width=DEFAULT_TABLE_WIDTH):
@@ -59,7 +60,7 @@ def put_disks(disks, display_width=DEFAULT_TABLE_WIDTH):
 
 def put_partitions(disk, display_width=DEFAULT_TABLE_WIDTH):
     output = run_command(
-        f"lsblk --output NAME,TYPE,FSTYPE,LABEL,MOUNTPOINTS /dev/{disk}", True
+        f"lsblk --output NAME,TYPE,FSTYPE,LABEL,MOUNTPOINTS /dev/{disk}"
     )
     put_table("SELECTED DEVICE", read_table(output), display_width)
 
