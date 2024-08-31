@@ -7,7 +7,7 @@ import subprocess
 DEFAULT_TABLE_WIDTH = 36
 MAX_TABLE_WIDTH = 80
 BORDER_STYLE = "="
-COL_GAP_SIZE = 2
+COLUMN_GAP_SIZE = 2
 NAME_IDX = 0
 VENDOR_IDX = 1
 SIZE_IDX = -1
@@ -57,36 +57,14 @@ def get_disks():
 def put_disks(disks, display_width=DEFAULT_TABLE_WIDTH):
     put_table("CONNECTED DEVICES", number_records(disks), display_width)
 
-def put_partitions(disk):
+def put_partitions(disk, display_width=DEFAULT_TABLE_WIDTH):
     output = run_command(
         f"lsblk --output NAME,TYPE,FSTYPE,LABEL,MOUNTPOINTS /dev/{disk}", True
     )
-    print(f"output:\n{output}\n")
-    
-    lines = output.splitlines()
-    print(f"lines:\n{lines}\n")
-
-    table_columns = lines[0].split()
-    rows = [line.split() for line in lines[1:]]
-    print(f"rows:\n{rows}\n")
-
-    max_width = 80
-    table_title = "SELECTED DEVICE"
-
-    column_widths = [max(len(row[i]) for row in [table_columns] + rows) for i in range(len(table_columns))]
-    table_width = sum(column_widths) + COL_GAP_SIZE * (len(table_columns) - 1)
-    table_width = min(table_width, max_width)
-
-    hdg_padding = (table_width - len(table_title)) // 2
-    print(f"\n{' ' * hdg_padding}{table_title}")
-    print(BORDER_STYLE * table_width)
-
-    for row in [table_columns] + rows:
-        print("  ".join([f"{row[i]:<{column_widths[i]}}" for i in range(len(table_columns))]))
-    print(BORDER_STYLE * table_width)
+    put_table("SELECTED DEVICE", read_table(output), display_width)
 
 def put_table(title, dataset, display_width, border_style=BORDER_STYLE, \
-              column_gap_size=COL_GAP_SIZE, \
+              column_gap_size=COLUMN_GAP_SIZE, \
               right_justified_columns=RIGHT_JUSTIFIED_COLUMNS):
 
     def make_table(title, dataset, display_width, border_style, \
@@ -154,12 +132,14 @@ def read_table(input):
     def find_column_positions(header_line, keys):
         return [header_line.index(key) for key in keys]
     
-    def find_boundaries(pos_idx, pos_lst, line):
-        start = pos_lst[pos_idx]
-        while start < len(line) and line[start].isspace(): start += 1
+    def find_boundaries(column_index, positions_list, line):
+        cursor = positions_list[column_index]
+        start = cursor if cursor < len(line) else len(line) - 1
+        while start < len(line) -1 and line[start].isspace(): start += 1
         while start > 0 and not line[start].isspace(): start -= 1
 
-        end = pos_lst[pos_idx + 1] if pos_idx + 1 < len(pos_lst) else len(line)
+        next = column_index + 1
+        end = positions_list[next] if next < len(positions_list) else len(line)
         if end != len(line):
             while not line[end].isspace(): end -= 1
             while end > start and line[end].isspace(): end -= 1
@@ -167,16 +147,16 @@ def read_table(input):
 
         return start, end
     
-    def get_slice(position_index, positions, line):
-        start, end = find_boundaries(position_index, positions, line)
+    def get_slice(column_index, positions_list, line):
+        start, end = find_boundaries(column_index, positions_list, line)
         return line[start:end].strip()
     
     lines = input.splitlines()
     keys = lines[0].split()
-    col_pos = find_column_positions(lines[0], keys)
+    positions_list = find_column_positions(lines[0], keys)
 
     return [{
-        key: get_slice(i, col_pos, line) for i, key in enumerate(keys)
+        key: get_slice(i, positions_list, line) for i, key in enumerate(keys)
         } for line in lines[1:]
     ]
 
