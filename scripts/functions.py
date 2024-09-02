@@ -69,17 +69,6 @@ def run_command(command: str, use_shell: bool = True) -> str:
     return result.stdout.strip()
 
 
-def run_script(command: str) -> None:
-    # Run the script with user interaction
-    process = subprocess.Popen(['./get_disk.py'])
-    try:
-        # Wait for the process to complete, allowing user interaction
-        process.wait(timeout=10)
-    except subprocess.TimeoutExpired:
-        process.kill()
-    # Since the user interacted directly, no need to capture stdout/stderr
-
-
 def unmount_disk(disk: str) -> None:
     """Unmount all mount points associated with a specified disk.
 
