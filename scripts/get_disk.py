@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 
-# import copy
-from typing import Dict, List
 from table import Table
 import functions as fm
 
-# Constants
+
 RIGHT_JUSTIFIED_COLUMNS = ["#", "SIZE"]
 
-# Functions
+
 def confirm_disk(disk: str) -> bool:
     """Prompt the user to confirm the selection of a disk.
 
@@ -19,49 +17,28 @@ def confirm_disk(disk: str) -> bool:
         True if the user confirms, False otherwise.
     """
     prompt = f"Are you sure you want to select the disk '{disk}'? (y/n) "
-    put_partitions(disk, len(prompt))
+    output = fm.run_command(
+        f"lsblk --output NAME,TYPE,FSTYPE,LABEL,MOUNTPOINTS /dev/{disk}")
+    partitions = Table(title="selected device", table_string=output)
+    partitions.put_table(display_width=len(prompt))
     return fm.query_yes_no(prompt)
 
-# def get_disks() -> List[Dict[str, str]]:#######################################
+
 def get_disks() -> Table:
     """Retrieve a list of connected disks.
 
     Returns:
         A list of dictionaries containing disk information.
     """
-    output = fm.run_command("lsblk --nodeps --output NAME,VENDOR,SIZE")########
-    dataset = fm.read_table(output)############################################
-    return [record for record in dataset if record["NAME"].startswith("sd")]###
-    # return (Table("connected devices", 
-    #               table_string=fm.run_command(
-    #                   "lsblk --nodeps --output NAME,VENDOR,SIZE"
-    #                   ), 
-    #               right_justified_column_labels="SIZE")
-    #         .filter_startswith("NAME", "sd"))
+    output = fm.run_command("lsblk --nodeps --output NAME,VENDOR,SIZE")
+    disks = Table(title="connected devices", 
+                  table_string=output, 
+                  right_justified_column_labels="SIZE")
+    disks.filter_startswith("NAME", "sd")
+    return disks
 
-def put_disks(disks: List[Dict[str, str]], display_width: int) -> None:########
-    """Display a table of connected disks.
 
-    Args:
-        disks: A list of dictionaries containing disk information.
-        display_width: The width of the table display.
-    """
-    fm.put_table("CONNECTED DEVICES", fm.number_records(disks), display_width,#
-                 right_justified_columns=RIGHT_JUSTIFIED_COLUMNS)##############
-
-def put_partitions(disk: str, display_width: int) -> None:
-    """Display a table of partitions for a selected disk.
-
-    Args:
-        disk: The name of the disk.
-        display_width: The width of the table display.
-    """
-    output = fm.run_command(
-        f"lsblk --output NAME,TYPE,FSTYPE,LABEL,MOUNTPOINTS /dev/{disk}"
-        )
-    fm.put_table("SELECTED DEVICE", fm.read_table(output), display_width)
-
-def select_disk(disks: List[Dict[str, str]], count: int) -> str:
+def select_disk(disks: Table) -> str:
     """Prompt the user to select a disk from a list of disks.
 
     Args:
@@ -71,11 +48,12 @@ def select_disk(disks: List[Dict[str, str]], count: int) -> str:
     Returns:
         The name of the selected disk.
     """
+    count = disks.count_records()
     prompt = f"Enter a number to select a device (1-{count}): "
-    put_disks(disks, len(prompt))##############################################
     disks.put_table(display_width=len(prompt), is_menu=True)
     selection = fm.query_integer(1, count, prompt)
-    return disks[selection - 1]["NAME"]
+    return disks.get_record(selection - 1)["NAME"]
+
 
 def main() -> str:
     """Main function to select and confirm a disk.
@@ -88,15 +66,14 @@ def main() -> str:
     """
     while True:
         disks = get_disks()
-        count = len(disks)#####################################################
-        # count = disks.records_count()
+        count = disks.count_records()
 
         if count == 0:
             print("Connect a device and press any key to continue...")
             input()
             continue
 
-        disk = disks[0]["NAME"] if count == 1 else select_disk(disks, count)
+        disk = disks[0]["NAME"] if count == 1 else select_disk(disks)
 
         if confirm_disk(disk):
             break
@@ -107,6 +84,7 @@ def main() -> str:
             input()
 
     return disk
+
 
 if __name__ == "__main__":
     main()

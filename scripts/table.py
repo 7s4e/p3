@@ -2,9 +2,9 @@
 
 class Table:
     def __init__(self, 
-                 title: str,
                  table_string: str,
-                 right_justified_column_labels: str | list[str] | None
+                 title: str | None = None,
+                 right_justified_column_labels: str | list[str] | None = None
                  ) -> None:
         """Initialize the Table instance.
 
@@ -15,18 +15,12 @@ class Table:
                 representing the labels of columns to be right-
                 justified.
         """
-        self._title = title.upper()
-        self._right_justified_columns = []
         self._read_table(table_string)
+        if title is not None:
+            self._title = title.upper()
+        self._right_justified_columns = []
         if right_justified_column_labels is not None:
             self._add_rjc_label(right_justified_column_labels)
-    
-    @property
-    def records_count(self) -> int:
-        """Return the count of records in the table."""
-        return self._records_count
-
-    @staticmethod
 
     def _add_rjc_label(self, label: str | list[str]) -> None:
         """Add labels to the right-justified columns list.
@@ -35,9 +29,11 @@ class Table:
             label: A string or list of strings representing the label(s)
                 to add.
         """
-        self._right_justified_columns.append(label 
-                                             if isinstance(label, list) 
-                                             else [label])
+        if isinstance(label, list):
+            for each in label:
+                self._right_justified_columns.append(each)
+        else:
+            self._right_justified_columns.append(label)
 
     def _calculate_columns(self) -> dict[str, int]:
         """Calculate the width of each column based on the dataset."""
@@ -49,17 +45,31 @@ class Table:
         self._aggregate_column_width = sum(self._column_widths.values())
         self._column_gaps = len(self._column_widths) - 1
         
+    def count_records(self) -> int:
+        """Return the count of records in the table."""
+        return self._records_count
+
+    def filter_nonempty(self, key: str) -> None:
+        """Filter records based on whether a key's value exists.
+
+        Args:
+            key: The key in the records by which to filter.
+        """
+        self._dataset = [record for record in self._dataset 
+                        if record.get(key, '') != ""]
+        self._records_count = len(self._dataset)
+
     def filter_startswith(self, key: str, prefix: str) -> None:
         """Filter records based on whether a key's value starts with a 
             prefix.
 
         Args:
-            key: The key in the records to filter by.
+            key: The key in the records by which to filter.
             prefix: The prefix to match against.
         """
         self._dataset = [record for record in self._dataset 
                         if record.get(key, '').startswith(prefix)]
-        self._records_count
+        self._records_count = len(self._dataset)
 
     def _find_boundaries(self, 
                          column_index: int, 
@@ -83,13 +93,19 @@ class Table:
 
         # Adjust the start and end positions to align with non-
         #   whitespace content.
-        if line[start].isspace():
-            while start < end and line[start].isspace(): start += 1
+        if start != len(line) - 1:
+            if line[start].isspace():
+                while start < end and line[start].isspace(): start += 1
+            else:
+                while start > 0 and not line[start - 1].isspace(): start -= 1
         else:
-            while start > 0 and not line[start - 1].isspace(): start -= 1
-
-        while end > start and not line[end].isspace(): end -= 1
-        while end > start and line[end - 1].isspace(): end -= 1
+            start = len(line)
+        
+        if end != len(line) - 1:
+            while end > start and not line[end].isspace(): end -= 1
+            while end > start and line[end - 1].isspace(): end -= 1
+        else:
+            end = len(line)
 
         return start, end
 
@@ -137,6 +153,9 @@ class Table:
                                         key in self._right_justified_columns) 
                 for key, value in record.items()}
 
+    def get_record(self, index: int) -> dict[str, str]:
+        return self._dataset[index]
+
     def _get_slice(self, 
                    column_index: int, 
                    positions_list: list[int], 
@@ -158,6 +177,7 @@ class Table:
         """Add a numerical index to each record in the table."""
         self._dataset = [{"#": i + 1, **record} 
                          for i, record in enumerate(self._dataset)]
+        self._add_rjc_label("#")
     
     def _make_padding(self, content_width: int, available_width: int) -> str:
         """Create padding for centering content.
@@ -206,7 +226,6 @@ class Table:
         """
         if is_menu:
             self._number_records()
-            self._add_rjc_label("#")
         self._calculate_columns()
         table_width = (self._aggregate_column_width 
                        + self._column_gaps * column_gap_size)
