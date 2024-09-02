@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
-import functions as fm
+# import copy
 from typing import Dict, List
+from table import Table
+import functions as fm
 
 # Constants
 RIGHT_JUSTIFIED_COLUMNS = ["#", "SIZE"]
@@ -20,25 +22,32 @@ def confirm_disk(disk: str) -> bool:
     put_partitions(disk, len(prompt))
     return fm.query_yes_no(prompt)
 
-def get_disks() -> List[Dict[str, str]]:
+# def get_disks() -> List[Dict[str, str]]:#######################################
+def get_disks() -> Table:
     """Retrieve a list of connected disks.
 
     Returns:
         A list of dictionaries containing disk information.
     """
-    output = fm.run_command("lsblk --nodeps --output NAME,VENDOR,SIZE")
-    dataset = fm.read_table(output)
-    return [record for record in dataset if record["NAME"].startswith("sd")]
+    output = fm.run_command("lsblk --nodeps --output NAME,VENDOR,SIZE")########
+    dataset = fm.read_table(output)############################################
+    return [record for record in dataset if record["NAME"].startswith("sd")]###
+    # return (Table("connected devices", 
+    #               table_string=fm.run_command(
+    #                   "lsblk --nodeps --output NAME,VENDOR,SIZE"
+    #                   ), 
+    #               right_justified_column_labels="SIZE")
+    #         .filter_startswith("NAME", "sd"))
 
-def put_disks(disks: List[Dict[str, str]], display_width: int) -> None:
+def put_disks(disks: List[Dict[str, str]], display_width: int) -> None:########
     """Display a table of connected disks.
 
     Args:
         disks: A list of dictionaries containing disk information.
         display_width: The width of the table display.
     """
-    fm.put_table("CONNECTED DEVICES", fm.number_records(disks), display_width, 
-                 right_justified_columns=RIGHT_JUSTIFIED_COLUMNS)
+    fm.put_table("CONNECTED DEVICES", fm.number_records(disks), display_width,#
+                 right_justified_columns=RIGHT_JUSTIFIED_COLUMNS)##############
 
 def put_partitions(disk: str, display_width: int) -> None:
     """Display a table of partitions for a selected disk.
@@ -63,7 +72,8 @@ def select_disk(disks: List[Dict[str, str]], count: int) -> str:
         The name of the selected disk.
     """
     prompt = f"Enter a number to select a device (1-{count}): "
-    put_disks(disks, len(prompt))
+    put_disks(disks, len(prompt))##############################################
+    disks.put_table(display_width=len(prompt), is_menu=True)
     selection = fm.query_integer(1, count, prompt)
     return disks[selection - 1]["NAME"]
 
@@ -78,7 +88,8 @@ def main() -> str:
     """
     while True:
         disks = get_disks()
-        count = len(disks)
+        count = len(disks)#####################################################
+        # count = disks.records_count()
 
         if count == 0:
             print("Connect a device and press any key to continue...")

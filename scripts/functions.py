@@ -60,8 +60,7 @@ def put_table(title: str,
         Returns:
             The formatted field as a string.
         """
-        alignment = ">" if is_right_justified else "<"
-        return f"{field:{alignment}{width}}"
+        return f"{field:{'>' if is_right_justified else '<'}{width}}"
 
     def format_record(record: Dict[str, str], 
                       column_widths: Dict[str, int], 
@@ -149,21 +148,16 @@ def put_table(title: str,
     column_widths = calculate_column_widths(dataset)
     table_width = (sum(column_widths.values()) 
                    + column_gap_size * (len(column_widths) - 1))
-    table_padding = make_padding(table_width, display_width)
     line_length = max(display_width, table_width)
-    title_padding = make_padding(len(title), line_length)
-    column_spacing = " " * column_gap_size
-    headings = {key: key for key in dataset[0].keys()}
-    table = make_table(title, 
-                       title_padding, 
-                       table_padding, 
-                       headings, 
-                       column_widths, 
-                       right_justified_columns, 
-                       column_spacing, 
-                       line_length, 
-                       border_style)
-    print_table(table)
+    print_table(make_table(title, 
+                           make_padding(len(title), line_length), 
+                           make_padding(table_width, display_width), 
+                           {key: key for key in dataset[0].keys()}, 
+                           column_widths, 
+                           right_justified_columns, 
+                           " " * column_gap_size, 
+                           line_length, 
+                           border_style))
 
 
 def query_integer(min_value: int, max_value: int, prompt: str) -> int:
@@ -278,8 +272,8 @@ def read_table(input: str) -> List[Dict[str, str]]:
     keys = lines[0].split()
     positions_list = find_column_positions(lines[0], keys)
 
-    return [{key: get_slice(i, positions_list, line) 
-             for i, key in enumerate(keys)} 
+    return [{key: get_slice(index, positions_list, line) 
+             for index, key in enumerate(keys)} 
             for line in lines[1:]]
 
 
