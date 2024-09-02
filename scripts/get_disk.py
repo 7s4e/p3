@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+
 from table import Table
 import functions as fm
 
@@ -22,6 +23,37 @@ def confirm_disk(disk: str) -> bool:
     partitions = Table(title="selected device", table_string=output)
     partitions.put_table(display_width=len(prompt))
     return fm.query_yes_no(prompt)
+
+
+def get_disk() -> str:
+    """Main function to select and confirm a disk.
+
+    Continuously prompts the user to connect and select a disk until
+    a disk is confirmed. Offers to unmount the disk if not confirmed.
+
+    Returns:
+        The name of the confirmed disk.
+    """
+    while True:
+        disks = get_disks()
+        count = disks.count_records()
+
+        if count == 0:
+            print("Connect a device and press any key to continue...")
+            input()
+            continue
+
+        disk = disks[0]["NAME"] if count == 1 else select_disk(disks)
+
+        if confirm_disk(disk):
+            break
+        else:
+            if fm.query_yes_no(f"Do you want to unmount '{disk}'? (y/n) "):
+                fm.unmount_disk(disk)
+            print("Check device and press any key to continue...")
+            input()
+
+    return disk
 
 
 def get_disks() -> Table:
@@ -54,37 +86,10 @@ def select_disk(disks: Table) -> str:
     selection = fm.query_integer(1, count, prompt)
     return disks.get_record(selection - 1)["NAME"]
 
-
 def main() -> str:
-    """Main function to select and confirm a disk.
-
-    Continuously prompts the user to connect and select a disk until
-    a disk is confirmed. Offers to unmount the disk if not confirmed.
-
-    Returns:
-        The name of the confirmed disk.
-    """
-    while True:
-        disks = get_disks()
-        count = disks.count_records()
-
-        if count == 0:
-            print("Connect a device and press any key to continue...")
-            input()
-            continue
-
-        disk = disks[0]["NAME"] if count == 1 else select_disk(disks)
-
-        if confirm_disk(disk):
-            break
-        else:
-            if fm.query_yes_no(f"Do you want to unmount '{disk}'? (y/n) "):
-                fm.unmount_disk(disk)
-            print("Check device and press any key to continue...")
-            input()
-
+    disk = get_disk()
     return disk
 
-
 if __name__ == "__main__":
-    main()
+    disk = main()
+    print(disk)
