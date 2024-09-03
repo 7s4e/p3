@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 
+from menu import Menu
 from table import Table
 import functions as fm
 
@@ -22,7 +23,7 @@ def confirm_disk(disk: str) -> bool:
         f"lsblk --output NAME,TYPE,FSTYPE,LABEL,MOUNTPOINTS /dev/{disk}")
     partitions = Table(title="selected device", table_string=output)
     partitions.put_table(display_width=len(prompt))
-    return fm.query_yes_no(prompt)
+    return Menu.query_yes_no(prompt)
 
 
 def get_disks() -> Table:
@@ -49,11 +50,9 @@ def select_disk(disks: Table) -> str:
     Returns:
         The name of the selected disk.
     """
-    count = disks.count_records()
-    prompt = f"Enter a number to select a device (1-{count}): "
-    disks.put_table(display_width=len(prompt), is_menu=True)
-    selection = fm.query_integer(1, count, prompt)
-    return disks.get_record(selection - 1)["NAME"]
+    disk_selection = Menu(disks)
+    disk_selection.run()
+    return disk_selection.get_selection("NAME")
 
 
 def get_disk() -> str:
@@ -80,9 +79,9 @@ def get_disk() -> str:
         if confirm_disk(disk):
             break
         else:
-            if fm.query_yes_no(f"Do you want to unmount '{disk}'? (y/n) "):
+            if Menu.query_yes_no(f"Do you want to unmount '{disk}'? (y/n) "):
                 fm.unmount_disk(disk)
-            print("Check device and press any key to continue...")
+            print("Check device and press Enter...")
             input()
 
     return disk
@@ -91,6 +90,7 @@ def get_disk() -> str:
 def main() -> str:
     disk = get_disk()
     return disk
+
 
 if __name__ == "__main__":
     disk = main()
