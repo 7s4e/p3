@@ -3,8 +3,12 @@
 
 from get_disk import get_disk
 
-MENU = [
-    "Check"
+MAIN_MENU = [
+    "Check disk health"
+]
+
+CHECK_MENU = [
+    
 ]
 
 def make_boot_disk(disk: str | None = None) -> None:

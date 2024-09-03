@@ -2,20 +2,36 @@
 
 class Table:
     def __init__(self, 
-                 table_string: str,
+                 table_data: list[dict[str, str]] | None = None,
+                 table_string: str | None = None,
                  title: str | None = None,
                  right_justified_column_labels: str | list[str] | None = None
                  ) -> None:
         """Initialize the Table instance.
 
         Args:
-            title: The title of the table.
+            table_data: A list of dictionaries representing the table 
+                data. Each dictionary corresponds to a row, with keys as 
+                column labels and values as the corresponding cell data.
             table_string: A string representation of the table.
+            title: The title of the table, which will be converted to 
+                uppercase.
             right_justified_column_labels: A string or list of strings
                 representing the labels of columns to be right-
                 justified.
+
+        Raises:
+            ValueError: If neither or both of 'table_data' and 
+                'table_string' are provided.
         """
-        self._read_table(table_string)
+        if (table_data is None) == (table_string is None):
+            raise ValueError(
+                "Provide exactly one of 'table_data' or 'table_string'."
+                )
+        if table_data is not None:
+            self._dataset = table_data
+        else:
+            self._read_table(table_string)
         if title is not None:
             self._title = title.upper()
         self._right_justified_columns = []

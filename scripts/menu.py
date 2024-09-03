@@ -4,10 +4,14 @@ from typing import Any
 from table import Table
 
 class Menu:
-    def __init__(self, options: Table | list) -> None:
+    def __init__(self, 
+                 options: Table | list, 
+                 title: str | None = None) -> None:
         self._options = (options 
                          if isinstance(options, Table) 
-                         else [{"option": item for item in options}])
+                         else Table(title=title, 
+                                    table_data=[{"option": item 
+                                                 for item in options}]))
         self._count = options.count_records()
         self._prompt = f"Enter number (1-{self._count}) for selection: "
     
