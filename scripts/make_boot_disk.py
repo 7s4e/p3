@@ -3,6 +3,9 @@
 
 from get_disk import get_disk
 
+MENU = [
+    "Check"
+]
 
 def make_boot_disk(disk: str | None = None) -> None:
     if disk is None:

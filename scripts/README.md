@@ -4,5 +4,6 @@
 | [functions](functions.py) | module |
 | [get_disk](get_disk.py) | module<br>script |
 | [make_boot_disk](make_boot_disk.py) | script |
+| [menu](menu.py) | class |
 | [partition_disk](partition_disk.py) | script |
 | [table](table.py) | class |
