@@ -29,7 +29,7 @@ class Table:
                 "Provide exactly one of 'table_data' or 'table_string'."
                 )
         if table_data is not None:
-            self._dataset = table_data
+            self._capitalize_keys(table_data)
         else:
             self._read_table(table_string)
         if title is not None:
@@ -60,7 +60,12 @@ class Table:
                                for key in self._dataset[0].keys()}
         self._aggregate_column_width = sum(self._column_widths.values())
         self._column_gaps = len(self._column_widths) - 1
-        
+
+    def _capitalize_keys(self, data: list[dict[str, str]]) -> None:
+        self._dataset = [{key.upper(): value for key, value in datum.items()}  
+                         for datum in data]
+        self._records_count = len(self._dataset)
+
     def count_records(self) -> int:
         """Return the count of records in the table."""
         return self._records_count
@@ -72,7 +77,7 @@ class Table:
             key: The key in the records by which to filter.
         """
         self._dataset = [record for record in self._dataset 
-                        if record.get(key, '') != ""]
+                        if record.get(key.upper(), '') != ""]
         self._records_count = len(self._dataset)
 
     def filter_startswith(self, key: str, prefix: str) -> None:
@@ -84,7 +89,7 @@ class Table:
             prefix: The prefix to match against.
         """
         self._dataset = [record for record in self._dataset 
-                        if record.get(key, '').startswith(prefix)]
+                        if record.get(key.upper(), '').startswith(prefix)]
         self._records_count = len(self._dataset)
 
     def _find_boundaries(self, 
@@ -264,7 +269,9 @@ class Table:
         lines = input.splitlines()
         keys = lines[0].split()
         positions_list = self._find_column_positions(lines[0], keys)
-        self._dataset = [{key: self._get_slice(index, positions_list, line) 
+        self._dataset = [{key.upper(): self._get_slice(index, 
+                                                       positions_list, 
+                                                       line) 
                           for index, key in enumerate(keys)} 
                          for line in lines[1:]]
         self._records_count = len(self._dataset)

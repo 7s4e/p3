@@ -4,7 +4,7 @@
 from get_disk import get_disk
 
 MAIN_MENU = [
-    "Check disk health"
+    "Check disk"
 ]
 
 CHECK_MENU = [

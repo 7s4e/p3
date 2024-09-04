@@ -7,12 +7,12 @@ class Menu:
     def __init__(self, 
                  options: Table | list, 
                  title: str | None = None) -> None:
-        self._options = (options 
+        self._options = (options
                          if isinstance(options, Table) 
                          else Table(title=title, 
-                                    table_data=[{"option": item 
-                                                 for item in options}]))
-        self._count = options.count_records()
+                                    table_data=[{"OPTION": option} 
+                                                 for option in options]))
+        self._count = self._options.count_records()
         self._prompt = f"Enter number (1-{self._count}) for selection: "
     
     def _prompt_selection(self) -> int:
@@ -25,8 +25,8 @@ class Menu:
             except ValueError:
                 print("Enter a valid number.")
 
-    def get_selection(self, key: str) -> Any:
-        return self._selection[key]
+    def get_selection(self, key: str = "OPTION") -> Any:
+        return self._selection[key.upper()]
 
     def run(self) -> None:
         self._options.put_table(display_width=len(self._prompt), is_menu=True)

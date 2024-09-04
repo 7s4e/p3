@@ -3,7 +3,7 @@
 
 from menu import Menu
 from table import Table
-import functions as fm
+import commands as cmd
 
 
 RIGHT_JUSTIFIED_COLUMNS = ["#", "SIZE"]
@@ -19,7 +19,7 @@ def confirm_disk(disk: str) -> bool:
         True if the user confirms, False otherwise.
     """
     prompt = f"Are you sure you want to select the disk '{disk}'? (y/n) "
-    output = fm.run_command(
+    output = cmd.run_command(
         f"lsblk --output NAME,TYPE,FSTYPE,LABEL,MOUNTPOINTS /dev/{disk}")
     partitions = Table(title="selected device", table_string=output)
     partitions.put_table(display_width=len(prompt))
@@ -32,7 +32,7 @@ def get_disks() -> Table:
     Returns:
         A list of dictionaries containing disk information.
     """
-    output = fm.run_command("lsblk --nodeps --output NAME,VENDOR,SIZE")
+    output = cmd.run_command("lsblk --nodeps --output NAME,VENDOR,SIZE")
     disks = Table(title="connected devices", 
                   table_string=output, 
                   right_justified_column_labels="SIZE")
@@ -80,7 +80,7 @@ def get_disk() -> str:
             break
         else:
             if Menu.query_yes_no(f"Do you want to unmount '{disk}'? (y/n) "):
-                fm.unmount_disk(disk)
+                cmd.unmount_disk(disk)
             print("Check device and press Enter...")
             input()
 
