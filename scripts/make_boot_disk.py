@@ -3,12 +3,14 @@
 
 from get_disk import get_disk
 import commands as cmd
+import disk_utilities as du
 
 
 def make_boot_disk(disk: str | None = None) -> None:
     if disk is None:
         disk = get_disk()
     cmd.unmount_disk(disk)
+    du.run_badblocks(disk)
 
 
 def main() -> None:
