@@ -2,19 +2,13 @@
 
 
 from get_disk import get_disk
+import commands as cmd
 
-MAIN_MENU = [
-    "Check disk"
-]
-
-CHECK_MENU = [
-    
-]
 
 def make_boot_disk(disk: str | None = None) -> None:
     if disk is None:
         disk = get_disk()
-    print(f"MBD>mbd-disk: {disk}")
+    cmd.unmount_disk(disk)
 
 
 def main() -> None:
