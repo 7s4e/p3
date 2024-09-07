@@ -11,3 +11,5 @@
 # Links
 [Curses Programming in Python](https://www.devdungeon.com/content/curses-programming-python)
 [Curses Programming with Python](https://docs.python.org/3/howto/curses.html)
+[blessed Home](https://github.com/jquast/blessed)
+[blessed Documentation](https://blessed.readthedocs.io/en/latest/)
