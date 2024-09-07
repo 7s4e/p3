@@ -61,8 +61,7 @@ def list_block_devices(disk: str | None = None,
     deps = "" if show_dependendents else "--nodeps"
     output = "" if len(columns) == 0 else f"--output {','.join(columns)}"
     path = "" if disk is None else f"/dev/{disk}"
-    command = f"lsblk {deps} {output} {path}"
-    return run_command(command)
+    return run_command(f"lsblk {deps} {output} {path}")
 
 
 def run_badblocks(disk: str, 
