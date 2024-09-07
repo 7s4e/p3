@@ -6,9 +6,6 @@ from table import Table
 import commands as cmd
 
 
-RIGHT_JUSTIFIED_COLUMNS = ["#", "SIZE"]
-
-
 def confirm_disk(disk: str) -> bool:
     """Prompt the user to confirm the selection of a disk.
 
@@ -19,8 +16,9 @@ def confirm_disk(disk: str) -> bool:
         True if the user confirms, False otherwise.
     """
     prompt = f"Are you sure you want to select the disk '{disk}'? (y/n) "
-    output = cmd.run_command(
-        f"lsblk --output NAME,TYPE,FSTYPE,LABEL,MOUNTPOINTS /dev/{disk}")
+    output = cmd.list_block_devices(disk, 
+                                    columns=["NAME", "TYPE", "FSTYPE", "LABEL", 
+                                             "MOUNTPOINTS"])
     partitions = Table(title="selected device", table_string=output)
     partitions.put_table(display_width=len(prompt))
     return Menu.query_yes_no(prompt)
@@ -32,7 +30,8 @@ def get_disks() -> Table:
     Returns:
         A list of dictionaries containing disk information.
     """
-    output = cmd.run_command("lsblk --nodeps --output NAME,VENDOR,SIZE")
+    output = cmd.list_block_devices(columns=["NAME", "VENDOR", "SIZE"], 
+                                    show_dependendents=False)
     disks = Table(title="connected devices", 
                   table_string=output, 
                   right_justified_column_labels="SIZE")

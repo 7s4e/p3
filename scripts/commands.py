@@ -42,6 +42,29 @@ def run_command(command: str,
     return result.stdout.strip() if capture_output else None
 
 
+def list_block_devices(disk: str | None = None, 
+                       columns: list[str] = list(),
+                       show_dependendents: bool = True) -> str:
+    """Generate and run the 'lsblk' command to list block devices with 
+        optional filters.
+
+    Args:
+        disk: The specific disk to query (e.g., 'sda'). If None, all 
+            disks are listed.
+        columns: A list of columns to include in the output.
+        show_dependents: If True, include dependent devices (e.g., 
+            partitions). If False, append '--nodeps' to exclude them.
+
+    Returns:
+        str: The output of the 'lsblk' command.
+    """
+    deps = "" if show_dependendents else "--nodeps"
+    output = "" if len(columns) == 0 else f"--output {','.join(columns)}"
+    path = "" if disk is None else f"/dev/{disk}"
+    command = f"lsblk {deps} {output} {path}"
+    return run_command(command)
+
+
 def run_badblocks(disk: str, 
                   non_destructive: bool = True, 
                   capture_output: bool = False) -> str | None:
