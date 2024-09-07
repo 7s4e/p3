@@ -45,3 +45,7 @@ def run_fsck(disk: str) -> None:
     options = ["Preview file system check" # --no-action
                ]
     pass # -v
+
+
+def run_parted(disk: str) -> None:
+    print("parting")

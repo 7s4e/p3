@@ -7,3 +7,7 @@
 | [menu](menu.py) | class |
 | [partition_disk](partition_disk.py) | script |
 | [table](table.py) | class |
+
+# Links
+[Curses Programming in Python](https://www.devdungeon.com/content/curses-programming-python)
+[Curses Programming with Python](https://docs.python.org/3/howto/curses.html)

@@ -11,6 +11,7 @@ def make_boot_disk(disk: str | None = None) -> None:
         disk = get_disk()
     cmd.unmount_disk(disk)
     itf.run_badblocks(disk)
+    itf.run_parted(disk)
 
 
 def main() -> None:
@@ -23,12 +24,6 @@ if __name__ == "__main__":
 # print(f"MBD>mbd-disk: {disk}")
 
 # ## Generic Preparation
-# * `$ lsblk` to identify storage devices
-# * `# umount /dev/sdXn` to unmount
-# * `# badblocks -sv /dev/sdX` to check health status
-#     * `-sv` read-only test
-#     * `-nsv` non-destructive read-write test
-#     * `-wsv` destructive read-write test
 # * `# parted /dev/sdX`
 #     * `mklabel gpt` to create partition table
 #     * `mkpart primary 0% 100%` to create partition
