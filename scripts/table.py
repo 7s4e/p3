@@ -217,7 +217,7 @@ class Table:
 
     def _make_table(self, terminal: Terminal) -> None:
         """Construct the table from the given components."""
-        
+
         ##
         title_row = self._title_padding + self._title
         border_row = self._border
@@ -264,7 +264,7 @@ class Table:
                                                  max_line_length) 
         self._table_padding = self._make_padding(table_width, display_width)
         self._table_headings = {key: key for key in self._dataset[0].keys()}
-        self._make_table()
+        self._make_table(terminal)
         self._print_table()
 
     def _read_table(self, input: str) -> None:

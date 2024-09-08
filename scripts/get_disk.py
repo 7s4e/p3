@@ -12,7 +12,7 @@ import commands as cmd
 import terminal as trm
 
 
-def confirm_disk(disk: str) -> bool:
+def confirm_disk(terminal: Terminal, disk: str) -> bool:
     """Prompt the user to confirm the selection of a disk.
 
     Args:
@@ -26,7 +26,7 @@ def confirm_disk(disk: str) -> bool:
                                     columns=["NAME", "TYPE", "FSTYPE", "LABEL", 
                                              "MOUNTPOINTS"])
     partitions = Table(title="selected device", table_string=output)
-    partitions.put_table(display_width=len(prompt))
+    partitions.put_table(terminal)
     return Menu.query_yes_no(prompt)
 
 
@@ -60,7 +60,7 @@ def select_disk(term: Terminal, disks: Table) -> str:
     return disk_selection.get_selection("NAME")
 
 
-def get_disk(term: Terminal) -> str:
+def get_disk(terminal: Terminal) -> str:
     """Main function to select and confirm a disk.
 
     Continuously prompts the user to connect and select a disk until
@@ -69,21 +69,21 @@ def get_disk(term: Terminal) -> str:
     Returns:
         The name of the confirmed disk.
     """
-    trm.put_script_banner(term, inspect.currentframe().f_code.co_name)
+    trm.put_script_banner(terminal, inspect.currentframe().f_code.co_name)
 
     while True:
         disks = get_disks()
         count = disks.count_records()
 
         if count == 0:
-            trm.prompt_key(term, 
+            trm.prompt_key(terminal, 
                            "Connect a device and press any key to continue...")
             continue
 
         disk = (disks.get_record(0)["NAME"] 
-                if count == 1 else select_disk(term, disks))
+                if count == 1 else select_disk(terminal, disks))
 
-        if confirm_disk(disk):
+        if confirm_disk(terminal, disk):
             break
         else:
             if Menu.query_yes_no(f"Do you want to unmount '{disk}'? (y/n) "):
@@ -94,13 +94,13 @@ def get_disk(term: Terminal) -> str:
     return disk
 
 
-def main(term: Terminal) -> str:
-    trm.clear_stdscr(term)
-    disk = get_disk(term)
+def main(terminal: Terminal) -> str:
+    trm.clear_stdscr(terminal)
+    disk = get_disk(terminal)
     return disk
 
 
 if __name__ == "__main__":
-    term = Terminal()
-    disk = main(term)
+    terminal = Terminal()
+    disk = main(terminal)
     print(disk)
