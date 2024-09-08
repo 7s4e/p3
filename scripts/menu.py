@@ -1,12 +1,16 @@
 """"""
 
 from typing import Any
+from blessed import Terminal
 from table import Table
+import terminal as trm
 
 class Menu:
     def __init__(self, 
+                 terminal: Terminal,
                  options: Table | list, 
                  title: str | None = None) -> None:
+        self._term = terminal
         self._options = (options
                          if isinstance(options, Table) 
                          else Table(title=title, 

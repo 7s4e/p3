@@ -45,7 +45,7 @@ def get_disks() -> Table:
     return disks
 
 
-def select_disk(disks: Table) -> str:
+def select_disk(term: Terminal, disks: Table) -> str:
     """Prompt the user to select a disk from a list of disks.
 
     Args:
@@ -55,7 +55,7 @@ def select_disk(disks: Table) -> str:
     Returns:
         The name of the selected disk.
     """
-    disk_selection = Menu(disks)
+    disk_selection = Menu(term, disks)
     disk_selection.run()
     return disk_selection.get_selection("NAME")
 
@@ -81,7 +81,7 @@ def get_disk(term: Terminal) -> str:
             continue
 
         disk = (disks.get_record(0)["NAME"] 
-                if count == 1 else select_disk(disks))
+                if count == 1 else select_disk(term, disks))
 
         if confirm_disk(disk):
             break

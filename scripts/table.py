@@ -1,7 +1,11 @@
 """Module for handling table formatting and display."""
 
+from blessed import Terminal
+import terminal as trm
+
 class Table:
     def __init__(self, 
+                 terminal: Terminal | None = None,
                  table_data: list[dict[str, str]] | None = None,
                  table_string: str | None = None,
                  title: str | None = None,
