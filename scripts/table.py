@@ -254,9 +254,13 @@ class Table:
         if is_menu:
             self._number_records()
         self._calculate_columns()
+        ##
+        trm.draw_box(terminal, 
+                     self._records_count, 
+                     list(self._column_widths.values()))
+        ##
         table_width = (self._aggregate_column_width 
                        + self._column_gaps * column_gap_size)
-        ##
         max_line_length = max(display_width, table_width)
         self._border = border_style * max_line_length
         self._column_spacing = " " * column_gap_size

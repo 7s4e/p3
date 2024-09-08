@@ -3,10 +3,30 @@
 from blessed import Terminal
 
 
-PROMPT_COLOR = "bright_yellow"
+def resize_columns(columns: list[int], box_width: int) -> list[int]:
+    pass
+
 
 def clear_stdscr(term: Terminal) -> None:
     print(term.home + term.clear)
+
+
+def draw_box(term: Terminal, rows: int, columns: list[int]) -> None:
+    box_width = min(term.width, 79)
+    table_width = sum(columns) + 2 * (len(columns) - 1)
+    if table_width > box_width - 4:
+        columns = resize_columns(columns, box_width)
+    top_row = f"╔{'═' * (box_width - 2)}╗"
+    title_row = heading_row = data_row = blank_row = f"║{' ' * (box_width - 2)}║"
+    border_row = f"╟{'─' * (box_width - 2)}╢"
+    bottom_row = f"╚{'═' * (box_width - 2)}╝"
+    print(term.blue(term.center(top_row)))
+    print(term.blue(term.center(title_row)))
+    print(term.blue(term.center(border_row)))
+    print(term.blue(term.center(heading_row)))
+    for _ in range(rows):
+        print(term.blue(term.center(data_row)))
+    print(term.blue(term.center(bottom_row)))
 
 
 def get_padding(term: Terminal) -> str:
