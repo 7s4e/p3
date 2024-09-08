@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
+# Standard library imports
+import inspect
 
+# Third-party imports
+from blessed import Terminal
 
+# Local module imports
 from menu import Menu
 from table import Table
 import commands as cmd
+import terminal as trm
 
 
 def confirm_disk(disk: str) -> bool:
@@ -54,7 +60,7 @@ def select_disk(disks: Table) -> str:
     return disk_selection.get_selection("NAME")
 
 
-def get_disk() -> str:
+def get_disk(term: Terminal) -> str:
     """Main function to select and confirm a disk.
 
     Continuously prompts the user to connect and select a disk until
@@ -63,12 +69,15 @@ def get_disk() -> str:
     Returns:
         The name of the confirmed disk.
     """
+    trm.put_script_banner(term, inspect.currentframe().f_code.co_name)
+
     while True:
         disks = get_disks()
         count = disks.count_records()
 
         if count == 0:
-            print("Connect a device and press any key to continue...")
+            trm.put_prompt(term, 
+                           "Connect a device and press any key to continue...")
             input()
             continue
 
@@ -86,11 +95,13 @@ def get_disk() -> str:
     return disk
 
 
-def main() -> str:
-    disk = get_disk()
+def main(term: Terminal) -> str:
+    trm.clear_stdscr(term)
+    disk = get_disk(term)
     return disk
 
 
 if __name__ == "__main__":
-    disk = main()
+    term = Terminal()
+    disk = main(term)
     print(disk)
