@@ -55,8 +55,8 @@ def select_disk(term: Terminal, disks: Table) -> str:
     Returns:
         The name of the selected disk.
     """
-    disk_selection = Menu(term, disks)
-    disk_selection.run()
+    disk_selection = Menu(disks)
+    disk_selection.run(term)
     return disk_selection.get_selection("NAME")
 
 

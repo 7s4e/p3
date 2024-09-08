@@ -5,7 +5,6 @@ import terminal as trm
 
 class Table:
     def __init__(self, 
-                 terminal: Terminal | None = None,
                  table_data: list[dict[str, str]] | None = None,
                  table_string: str | None = None,
                  title: str | None = None,
@@ -216,8 +215,10 @@ class Table:
         """
         return " " * max(0, (available_width - content_width) // 2)
 
-    def _make_table(self) -> None:
+    def _make_table(self, terminal: Terminal) -> None:
         """Construct the table from the given components."""
+        
+        ##
         title_row = self._title_padding + self._title
         border_row = self._border
         header_row = (self._table_padding 
@@ -237,6 +238,7 @@ class Table:
         print("\n".join(self._table))
 
     def put_table(self, 
+                  terminal: Terminal,
                   border_style: str = "=", 
                   column_gap_size: int = 2, 
                   display_width: int = 36, 
@@ -254,6 +256,7 @@ class Table:
         self._calculate_columns()
         table_width = (self._aggregate_column_width 
                        + self._column_gaps * column_gap_size)
+        ##
         max_line_length = max(display_width, table_width)
         self._border = border_style * max_line_length
         self._column_spacing = " " * column_gap_size

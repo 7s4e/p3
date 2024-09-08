@@ -3,6 +3,8 @@
 from blessed import Terminal
 
 
+PROMPT_COLOR = "bright_yellow"
+
 def clear_stdscr(term: Terminal) -> None:
     print(term.home + term.clear)
 

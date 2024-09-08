@@ -3,14 +3,11 @@
 from typing import Any
 from blessed import Terminal
 from table import Table
-import terminal as trm
 
 class Menu:
     def __init__(self, 
-                 terminal: Terminal,
                  options: Table | list, 
                  title: str | None = None) -> None:
-        self._term = terminal
         self._options = (options
                          if isinstance(options, Table) 
                          else Table(title=title, 
@@ -32,8 +29,9 @@ class Menu:
     def get_selection(self, key: str = "OPTION") -> Any:
         return self._selection[key.upper()]
 
-    def run(self) -> None:
-        self._options.put_table(display_width=len(self._prompt), is_menu=True)
+    def run(self, terminal: Terminal) -> None:
+        # self._options.put_table(display_width=len(self._prompt), is_menu=True)
+        self._options.put_table(terminal=terminal, is_menu=True)
         index = self._prompt_selection() - 1
         self._selection = self._options.get_record(index)
 
