@@ -76,9 +76,8 @@ def get_disk(term: Terminal) -> str:
         count = disks.count_records()
 
         if count == 0:
-            trm.put_prompt(term, 
-                           "Connect a device and press any key to continue...")
-            input()
+            chr = trm.prompt_key(
+                term, "Connect a device and press any key to continue...")
             continue
 
         disk = (disks.get_record(0)["NAME"] 

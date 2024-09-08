@@ -8,12 +8,20 @@ def clear_stdscr(term: Terminal) -> None:
 
 
 def get_padding(term: Terminal) -> str:
-    return " " * max(0, term.width - 79) // 2
+    return " " * (max(0, term.width - 79) // 2)
 
 
-def prompt(term: Terminal, prompt: str) -> None:
+def prompt_key(term: Terminal, prompt: str) -> str:
     padding = get_padding(term)
-    print(term.yellow(f"{padding}{prompt}"))
+    print(term.bright_yellow(f"{padding}{prompt}"))
+    with term.cbreak(), term.hidden_cursor():
+        key = term.inkey()
+    return repr(key)
+
+
+def prompt_str(term: Terminal, prompt: str) -> str:
+    padding = get_padding(term)
+    print(term.bright_yellow(f"{padding}{prompt}"))
 
 
 def put_script_banner(term: Terminal, script_name: str) -> None:
