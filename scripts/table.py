@@ -55,6 +55,7 @@ class Table:
             self._right_justified_columns.append(label)
 
     def _calculate_columns(self) -> dict[str, int]:
+        ##############################################################
         """Calculate the width of each column based on the dataset."""
         self._column_widths = {key: max(len(key), 
                                         max(len(str(record[key])) 
@@ -151,6 +152,7 @@ class Table:
                       field: str, 
                       width: int, 
                       is_right_justified: bool) -> str:
+        ######################################
         """Format a field within a table cell.
 
         Args:
@@ -164,6 +166,7 @@ class Table:
         return f"{field:{'>' if is_right_justified else '<'}{width}}"
 
     def _format_record(self, record: dict[str, str]) -> dict[str, str]:
+        ####################################################
         """Format an entire record for display in the table.
 
         Args:
@@ -204,6 +207,7 @@ class Table:
         self._add_rjc_label("#")
     
     def _make_padding(self, content_width: int, available_width: int) -> str:
+        ########################################
         """Create padding for centering content.
 
         Args:
@@ -216,6 +220,7 @@ class Table:
         return " " * max(0, (available_width - content_width) // 2)
 
     def _make_table(self, terminal: Terminal) -> None:
+        ####################################################
         """Construct the table from the given components."""
 
         ##
@@ -233,6 +238,7 @@ class Table:
                        + [border_row])
 
     def _print_table(self) -> None:
+        #################################################
         """Print the constructed table to the console."""
         print()
         print("\n".join(self._table))
@@ -243,6 +249,7 @@ class Table:
                   column_gap_size: int = 2, 
                   display_width: int = 36, 
                   is_menu: bool = False) -> None:
+        #####################################################
         """Format and display a table with the given dataset.
 
         Args:
@@ -253,12 +260,15 @@ class Table:
         """
         if is_menu:
             self._number_records()
+        ##
+        display_table = trm.Table(self)
+        ##
         self._calculate_columns()
-        ##
-        trm.draw_box(terminal, 
-                     self._records_count, 
-                     list(self._column_widths.values()))
-        ##
+        # ##
+        # trm.draw_box(terminal, 
+        #              self._records_count, 
+        #              list(self._column_widths.values()))
+        # ##
         table_width = (self._aggregate_column_width 
                        + self._column_gaps * column_gap_size)
         max_line_length = max(display_width, table_width)

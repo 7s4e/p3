@@ -1,6 +1,7 @@
 """"""
 
 from blessed import Terminal
+from table import Table as Data
 
 
 def resize_columns(columns: list[int], box_width: int) -> list[int]:
@@ -48,3 +49,8 @@ def prompt_str(term: Terminal, prompt: str) -> str:
 
 def put_script_banner(term: Terminal, script_name: str) -> None:
     print(term.reverse(f"Running {script_name}...".ljust(term.width)))
+
+
+class Table:
+    def __init__(self, data: Data) -> None:
+        self._data = data
