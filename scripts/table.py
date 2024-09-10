@@ -54,16 +54,15 @@ class Table:
         else:
             self._right_justified_columns.append(label)
 
-    def _calculate_columns(self) -> dict[str, int]:
-        ##############################################################
+    def _calculate_widths(self) -> None:
         """Calculate the width of each column based on the dataset."""
         self._column_widths = {key: max(len(key), 
                                         max(len(str(record[key])) 
                                             for record 
                                             in self._dataset)) 
                                for key in self._dataset[0].keys()}
-        self._aggregate_column_width = sum(self._column_widths.values())
-        self._column_gaps = len(self._column_widths) - 1
+        self._table_width = (sum(self._column_widths.values()) 
+                             + 2 * (len(self._column_widths) - 1))
 
     def _capitalize_keys(self, data: list[dict[str, str]]) -> None:
         self._dataset = [{key.upper(): value for key, value in datum.items()}  
@@ -200,6 +199,9 @@ class Table:
         start, end = self._find_boundaries(column_index, positions_list, line)
         return line[start:end].strip()
 
+    def get_table_width(self) -> int:
+        return self._table_width
+
     def _number_records(self) -> list[dict[str, str]]:
         """Add a numerical index to each record in the table."""
         self._dataset = [{"#": i + 1, **record} 
@@ -245,11 +247,7 @@ class Table:
 
     def put_table(self, 
                   terminal: Terminal,
-                  border_style: str = "=", 
-                  column_gap_size: int = 2, 
-                  display_width: int = 36, 
                   is_menu: bool = False) -> None:
-        #####################################################
         """Format and display a table with the given dataset.
 
         Args:
@@ -260,23 +258,10 @@ class Table:
         """
         if is_menu:
             self._number_records()
-        ##
-        display_table = trm.Table(self)
-        ##
-        self._calculate_columns()
+        self._calculate_widths()
+        table = trm.Table(self)
+        table.display(terminal)
         # ##
-        # trm.draw_box(terminal, 
-        #              self._records_count, 
-        #              list(self._column_widths.values()))
-        # ##
-        table_width = (self._aggregate_column_width 
-                       + self._column_gaps * column_gap_size)
-        max_line_length = max(display_width, table_width)
-        self._border = border_style * max_line_length
-        self._column_spacing = " " * column_gap_size
-        self._title_padding = self._make_padding(len(self._title), 
-                                                 max_line_length) 
-        self._table_padding = self._make_padding(table_width, display_width)
         self._table_headings = {key: key for key in self._dataset[0].keys()}
         self._make_table(terminal)
         self._print_table()
@@ -296,3 +281,6 @@ class Table:
                           for index, key in enumerate(keys)} 
                          for line in lines[1:]]
         self._records_count = len(self._dataset)
+
+    def resize_columns(width_limit: int) -> None:
+        pass
