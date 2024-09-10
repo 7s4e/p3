@@ -30,13 +30,6 @@ def put_script_banner(term: Terminal, script_name: str) -> None:
 
 
 class Table:
-    BORDERS = {
-        "top": {"left_end": "╔", "fill": "═", "right_end": "╗"},
-        "inner": {"left_end": "╟", "fill": "─", "right_end": "╢"},
-        "bottom": {"left_end": "╚", "fill": "═", "right_end": "╝"},
-        "side": "║"
-    }
-
     def __init__(self, data: Data) -> None:
         self._data = data
     
