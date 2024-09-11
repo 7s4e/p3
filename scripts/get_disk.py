@@ -40,7 +40,7 @@ def get_disks() -> Table:
                                     show_dependendents=False)
     disks = Table(title="connected devices", 
                   table_string=output, 
-                  right_justified_column_labels="SIZE")
+                  rjust_columns="SIZE")
     disks.filter_startswith("NAME", "sd")
     return disks
 

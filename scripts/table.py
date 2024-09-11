@@ -1,15 +1,14 @@
 """Module for handling table formatting and display."""
 
 from blessed import Terminal
-import terminal as trm
+from terminal import Box
 
 class Table:
     def __init__(self, 
                  table_data: list[dict[str, str]] | None = None,
                  table_string: str | None = None,
                  title: str | None = None,
-                 right_justified_column_labels: str | list[str] | None = None
-                 ) -> None:
+                 rjust_columns: str | list[str] | None = None) -> None:
         """Initialize the Table instance.
 
         Args:
@@ -19,9 +18,8 @@ class Table:
             table_string: A string representation of the table.
             title: The title of the table, which will be converted to 
                 uppercase.
-            right_justified_column_labels: A string or list of strings
-                representing the labels of columns to be right-
-                justified.
+            rjust_columns: A string or list of strings representing the 
+                columns to be right-justified.
 
         Raises:
             ValueError: If neither or both of 'table_data' and 
@@ -38,10 +36,10 @@ class Table:
         if title is not None:
             self._title = title.upper()
         self._right_justified_columns = []
-        if right_justified_column_labels is not None:
-            self._add_rjc_label(right_justified_column_labels)
+        if rjust_columns is not None:
+            self._add_rjust_col_label(rjust_columns)
 
-    def _add_rjc_label(self, label: str | list[str]) -> None:
+    def _add_rjust_col_label(self, label: str | list[str]) -> None:
         """Add labels to the right-justified columns list.
 
         Args:
@@ -55,7 +53,9 @@ class Table:
             self._right_justified_columns.append(label)
 
     def _calculate_widths(self) -> None:
-        """Calculate the width of each column based on the dataset."""
+        """Calculate the width of each column and of a table made up of
+            the dataset.
+        """
         self._column_widths = {key: max(len(key), 
                                         max(len(str(record[key])) 
                                             for record 
@@ -146,41 +146,18 @@ class Table:
             A list of positions for each column.
         """
         return [header_line.index(key) for key in keys]
-    
-    def _format_field(self, 
-                      field: str, 
-                      width: int, 
-                      is_right_justified: bool) -> str:
-        ######################################
-        """Format a field within a table cell.
 
-        Args:
-            field: The field value to format.
-            width: The width of the field.
-            is_right_justified: Whether the field should be right-justified.
+    def get_headings(self) -> dict[str, str]:
+        return {key: key for key in self._dataset[0].keys()}
 
-        Returns:
-            The formatted field as a string.
-        """
-        return f"{field:{'>' if is_right_justified else '<'}{width}}"
-
-    def _format_record(self, record: dict[str, str]) -> dict[str, str]:
-        ####################################################
-        """Format an entire record for display in the table.
-
-        Args:
-            record: A dictionary representing a single record.
-
-        Returns:
-            A dictionary with formatted fields.
-        """
-        return {key: self._format_field(value, 
-                                        self._column_widths[key], 
-                                        key in self._right_justified_columns) 
-                for key, value in record.items()}
+    def get_column_widths(self) -> dict[str, int]:
+        return self._column_widths
 
     def get_record(self, index: int) -> dict[str, str]:
         return self._dataset[index]
+
+    def get_rjust_columns(self) -> list[str]:
+        return self._right_justified_columns
 
     def _get_slice(self, 
                    column_index: int, 
@@ -202,48 +179,14 @@ class Table:
     def get_table_width(self) -> int:
         return self._table_width
 
+    def get_title(self) -> str:
+        return self._title
+
     def _number_records(self) -> list[dict[str, str]]:
         """Add a numerical index to each record in the table."""
         self._dataset = [{"#": i + 1, **record} 
                          for i, record in enumerate(self._dataset)]
-        self._add_rjc_label("#")
-    
-    def _make_padding(self, content_width: int, available_width: int) -> str:
-        ########################################
-        """Create padding for centering content.
-
-        Args:
-            content_width: The width of the content to center.
-            available_width: The total available width.
-
-        Returns:
-            A string of spaces to be used as padding.
-        """
-        return " " * max(0, (available_width - content_width) // 2)
-
-    def _make_table(self, terminal: Terminal) -> None:
-        ####################################################
-        """Construct the table from the given components."""
-
-        ##
-        title_row = self._title_padding + self._title
-        border_row = self._border
-        header_row = (self._table_padding 
-                      + self._column_spacing.join(list(
-                          self._format_record(self._table_headings).values())))
-        data_rows = [(self._table_padding 
-                      + self._column_spacing.join(list(
-                          self._format_record(record).values()))) 
-                     for record in self._dataset]
-        self._table = ([title_row, border_row, header_row] 
-                       + data_rows 
-                       + [border_row])
-
-    def _print_table(self) -> None:
-        #################################################
-        """Print the constructed table to the console."""
-        print()
-        print("\n".join(self._table))
+        self._add_rjust_col_label("#")
 
     def put_table(self, 
                   terminal: Terminal,
@@ -251,20 +194,14 @@ class Table:
         """Format and display a table with the given dataset.
 
         Args:
-            border_style: The character used for the border.
-            column_gap_size: The size of the gap between columns.
-            display_width: The width of the table display.
+            terminal: 
             is_menu: Whether the table is being displayed as a menu.
         """
         if is_menu:
             self._number_records()
         self._calculate_widths()
-        table = trm.Table(self)
+        table = Box(self)
         table.display(terminal)
-        # ##
-        self._table_headings = {key: key for key in self._dataset[0].keys()}
-        self._make_table(terminal)
-        self._print_table()
 
     def _read_table(self, input: str) -> None:
         """Parse a table from a string input.

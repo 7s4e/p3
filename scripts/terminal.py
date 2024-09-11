@@ -1,7 +1,7 @@
-""""""
+"""terminal.py"""
 
 from blessed import Terminal
-from table import Table as Data
+# from table import Table
 
 
 def clear_stdscr(term: Terminal) -> None:
@@ -29,41 +29,75 @@ def put_script_banner(term: Terminal, script_name: str) -> None:
     print(term.reverse(f"Running {script_name}...".ljust(term.width)))
 
 
-class Table:
-    def __init__(self, data: Data) -> None:
+class Box:
+    # def __init__(self, data: Table) -> None:
+    def __init__(self, data) -> None:
         self._data = data
-    
-    def display(self, term: Terminal) -> None:
-        display_width = max(term.width, 79)
-        table_width = self._data.get_table_width()
-        if table_width > display_width - 4:
-            self._data.resize_columns(display_width - 4)
-            table_width = self._data.get_table_width()
-        self._draw_line_row(term, "top", display_width)
-        self._draw_text_row(term, "title", table_width)
-        self._draw_line_row(term, "inner", display_width)
-        self._draw_text_row(term, "headings", table_width)
-        for _ in range(self._data.count_records()):
-            self._draw_text_row(term, "data", table_width)
-        self._draw_line_row(term, "bottom", display_width)
-    
-    def _draw_line_row(self, 
-                       term: Terminal, 
-                       row: str, 
-                       display_width: int) -> None:
-        BORDERS = {"top": {"left_end": "╔", "fill": "═", "right_end": "╗"},
-                   "inner": {"left_end": "╟", "fill": "─", "right_end": "╢"},
-                   "bottom": {"left_end": "╚", 
-                              "fill": "═", 
-                              "right_end": "╝"}}
-        left_end = BORDERS[row]["left_end"]
-        line_fill = BORDERS[row]["fill"] * (display_width - 2)
-        right_end = BORDERS[row]["right_end"]
-        line_row = left_end + line_fill + right_end
-        print(term.blue(term.center(line_row)))
+        self._borders = {"top": {"left": "╔", "fill": "═", "right": "╗"}, 
+                         "inner": {"left": "╟", "fill": "─", "right": "╢"}, 
+                         "bottom": {"left": "╚", "fill": "═", "right": "╝"},
+                         "side": "║"}
 
-    def _draw_text_row(self, 
-                       term: Terminal, 
-                       type: str, 
-                       table_width: int) -> None:
-        BORDER = "║"
+    def display(self, term: Terminal) -> None:
+        self._term = term
+        self._display_width = max(term.width, 79)
+        self._table_width = self._data.get_table_width()
+        table_space = self._display_width - 4
+        if self._table_width > table_space:
+            self._data.resize_columns(table_space)
+            self._table_width = self._data.get_table_width()
+        self._column_widths = self._data.get_column_widths()
+        self._draw_row("top")
+        self._draw_row("title")
+        self._draw_row("inner")
+        self._draw_row("heading")
+        for i in range(self._data.count_records()):
+            self._draw_row("record", i)
+        self._draw_row("bottom")
+    
+    def _draw_row(self, row_type: str, index: int | None = None) -> None:
+        line_types = ["top", "inner", "bottom"]
+        text_types = ["title", "heading", "record"]
+        row_cells = rjust_columns = []
+        if row_type in line_types:
+            l_end = self._borders[row_type]["left"]
+            r_end = self._borders[row_type]["right"]
+        else:
+            l_end = r_end = f"{self._term.blue(self._borders['side'])}"
+        if row_type in text_types:
+            match row_type:
+                case "title":
+                    content_source = self._data.get_title()
+                case "heading":
+                    content_source = self._data.get_headings()
+                case "record":
+                    content_source = self._data.get_record(index)
+                    rjust_columns = self._data.get_rjust_columns()
+        else:
+            content_source = self._borders[row_type]["fill"]
+        if row_type in line_types:
+            cell = f"{content_source * (self._table_width + 2)}"
+            row_cells.append(cell)
+            gap = ""
+        else:
+            if row_type == "title":
+                cell = f"{content_source.center(self._table_width)}"
+                cell = f"{self._term.reverse(cell)}"
+                row_cells.append(cell)
+            else:
+                for key, cell_value in content_source.items():
+                    cell_width = self._column_widths[key]
+                    if row_type == "heading":
+                        cell = f"{cell_value.center(cell_width)}"
+                        cell = f"{self._term.underline(cell)}"
+                    else:
+                        if key in rjust_columns:
+                            cell = f"{cell_value.rjust(cell_width)}"
+                        else:
+                            cell = f"{cell_value.ljust(cell_width)}"
+                    row_cells.append(cell)
+            gap = " "
+        row_content = f"{l_end}{gap}{'  '.join(row_cells)}{gap}{r_end}"
+        if row_type in line_types:
+            row_content = f"{self._term.blue(row_content)}"
+        print(self._term.center(row_content))
