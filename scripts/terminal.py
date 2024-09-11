@@ -56,14 +56,20 @@ class Box:
         self._draw_row("bottom")
     
     def _draw_row(self, row_type: str, index: int | None = None) -> None:
+
+        # Define row types and initialize row elements
         line_types = ["top", "inner", "bottom"]
         text_types = ["title", "heading", "record"]
         row_cells = rjust_columns = []
+
+        # Determine left and right borders
         if row_type in line_types:
             l_end = self._borders[row_type]["left"]
             r_end = self._borders[row_type]["right"]
         else:
             l_end = r_end = f"{self._term.blue(self._borders['side'])}"
+        
+        # Get content source based on row type
         if row_type in text_types:
             match row_type:
                 case "title":
@@ -101,3 +107,68 @@ class Box:
         if row_type in line_types:
             row_content = f"{self._term.blue(row_content)}"
         print(self._term.center(row_content))
+
+"""
+def _draw_row(self, row_type: str, index: int | None = None) -> None:
+    # Define row categories
+    line_types = {"top", "inner", "bottom"}
+    text_types = {"title", "heading", "record"}
+    # Initialize row elements
+    row_cells = []
+    rjust_columns = []
+    # Determine left and right borders
+    if row_type in line_types:
+        l_end = self._borders[row_type]["left"]
+        r_end = self._borders[row_type]["right"]
+    else:
+        border_side = self._term.blue(self._borders["side"])
+        l_end = r_end = f"{border_side}"
+    # Get content source based on row type
+    if row_type in text_types:
+        content_source = self._get_content_source(row_type, index)
+        if row_type == "record":
+            rjust_columns = self._data.get_rjust_columns()
+    else:
+        content_source = self._borders[row_type]["fill"]
+    # Process the row content
+    if row_type in line_types:
+        row_cells.append(content_source * (self._table_width + 2))
+        gap = ""
+    else:
+        row_cells = self._get_text_row_cells(row_type, content_source, rjust_columns)
+        gap = " "
+    # Construct the final row content
+    row_content = f"{l_end}{gap}{'  '.join(row_cells)}{gap}{r_end}"
+    if row_type in line_types:
+        row_content = self._term.blue(row_content)
+    # Print the centered row
+    print(self._term.center(row_content))
+
+def _get_content_source(self, row_type: str, index: int | None = None):
+    match row_type:
+        case "title":
+            return self._data.get_title()
+        case "heading":
+            return self._data.get_headings()
+        case "record":
+            return self._data.get_record(index)
+
+def _get_text_row_cells(self, row_type: str, content_source: dict, rjust_columns: list) -> list:
+    row_cells = []
+    if row_type == "title":
+        cell = content_source.center(self._table_width)
+        row_cells.append(self._term.reverse(cell))
+    else:
+        for key, cell_value in content_source.items():
+            cell_width = self._column_widths[key]
+            if row_type == "heading":
+                cell = self._term.underline(cell_value.center(cell_width))
+            else:
+                cell = (
+                    cell_value.rjust(cell_width)
+                    if key in rjust_columns
+                    else cell_value.ljust(cell_width)
+                )
+            row_cells.append(cell)
+    return row_cells
+"""
