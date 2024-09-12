@@ -58,7 +58,7 @@ class Terminal_Table:
                    else self._borders[row_type]["fill"])
         cells = (self._process_text_content(row_type, content, rjust_col)
                  if row_type in text_types
-                 else [f"{self._term.blue(content * self._table_width + 2)}"]
+                 else [f"{self._term.blue(content * (self._table_width + 2))}"])
         print(self._term.center(f"{l_end}{gap}{'  '.join(cells)}{gap}{r_end}"))
 
     def _draw_table(self, record_count: int) -> None:
@@ -74,12 +74,13 @@ class Terminal_Table:
                       row_type: str, 
                       is_line_type: bool) -> tuple[str, str, str]:
         if is_line_type:
-            l_end = f"{self._term.blue(self._borders[row_type]["left"])}"
-            r_end = f"{self._term.blue(self._borders[row_type]["right"])}"
+            l_end = f"{self._term.blue(self._borders[row_type]['left'])}"
+            r_end = f"{self._term.blue(self._borders[row_type]['right'])}"
             gap = ""
         else:
             l_end = r_end = f"{self._term.blue(self._borders['side'])}"
             gap = " "
+        return l_end, r_end, gap
 
     def _get_text_content(self, 
                           row_type: str, 
@@ -103,11 +104,11 @@ class Terminal_Table:
         else:
             for key, value in content.items():
                 width = self._column_widths[key]
-                cell = (f"{self._term.underline(value.center(width)}"
-                        if row_type == "headings"
-                        else (f"{value.rjust(width)}"
-                              if key in rjust_col
-                              else f"{value.ljust(width)}")
+                cell = (f"{self._term.underline(value.center(width))}" 
+                        if row_type == "headings" 
+                        else (f"{value.rjust(width)}" 
+                              if key in rjust_col 
+                              else f"{value.ljust(width)}"))
                 cells.append(cell)
         return cells
 

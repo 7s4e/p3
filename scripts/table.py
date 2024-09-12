@@ -35,7 +35,7 @@ class Table:
             self._read_table(table_string)
         if title is not None:
             self._title = title.upper()
-        self._right_justified_columns = {}
+        self._right_justified_columns = set()
         if rjust_columns is not None:
             self._add_rjust_col_label(rjust_columns)
 
@@ -219,7 +219,7 @@ class Table:
                          for line in lines[1:]]
         self._records_count = len(self._dataset)
 
-    def resize_columns(width_limit: int) -> None:
+    def resize_columns(self, width_limit: int) -> None:
         trim_length = width_limit - self._table_width
         while trim_length > 0:
             max_length = 0
