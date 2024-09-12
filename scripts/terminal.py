@@ -85,17 +85,6 @@ class Terminal_Table:
     def _get_text_content(self, 
                           row_type: str, 
                           index: int | None = None) -> str | dict[str, str]:
-        match row_type:
-            case "title":
-                return self._data.get_title()
-            case "headings":
-                return self._data.get_headings()
-            case "record":
-                return self._data.get_record(index)
-
-    def _get_text_content(self, 
-                          row_type: str, 
-                          index: int | None = None) -> str | dict[str, str]:
         """Retrieve the text content for a specific type of table row.
 
         This method returns the text content for the specified 
