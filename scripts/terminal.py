@@ -93,30 +93,118 @@ class Terminal_Table:
             case "record":
                 return self._data.get_record(index)
 
+    def _get_text_content(self, 
+                          row_type: str, 
+                          index: int | None = None) -> str | dict[str, str]:
+        """Retrieve the text content for a specific type of table row.
+
+        This method returns the text content for the specified 
+        `row_type`, which can be the table's title, headings, or a 
+        specific data record. For "record" rows, an `index` must be 
+        provided to retrieve the appropriate row data.
+
+        Args:
+            row_type: The type of row to retrieve. Can be "title", 
+                "headings", or "record".
+            index: The index of the record to retrieve, required if 
+                `row_type` is "record".
+        
+        Returns:
+            The content of the row, either as:
+                - A string for "title" row.
+                - A dictionary of column headers for "headings" row.
+                - A dictionary representing a specific data record for 
+                    "record" row.
+        
+        Raises:
+            ValueError: If `row_type` is "record" and no `index` is 
+                provided.
+        """
+        match row_type:
+            case "title":
+                return self._data.get_title()
+            case "headings":
+                return self._data.get_headings()
+            case "record":
+                if index is None:
+                    raise ValueError(
+                        "Index must be provided for 'record' row_type")
+                return self._data.get_record(index)
+
     def _process_text_content(self, 
                               row_type: str, 
                               content: str | dict[str, str], 
                               rjust_col: set) -> list[str]:
+        """Process the content of a table row into formatted text cells.
+
+        Depending on the `row_type`, this method processes and formats 
+        text content for each cell of the row. For the title row, it 
+        centers the text and applies a terminal reverse effect. For 
+        headings, it centers the text and underlines it. For other rows 
+        [records], it adjusts the text alignment based on the column 
+        width, right-justifying the columns in `rjust_col`.
+
+        Args:
+            row_type: The type of row being processed. Can be "title", 
+                "headings", or other string representing a regular data 
+                row ["records"].
+            content: Either a string (for title row) or a dictionary 
+                where keys are column names and values are the cell 
+                content.
+            rjust_col: A set of keys representing columns that should be 
+                right-justified.
+
+        Returns:
+            A list of formatted strings, each representing a cell in the 
+            row.
+        """
         cells = []
+
         if row_type == "title":
+            # Format the title row by centering the content and applying 
+            # reverse style.
             cell = f"{self._term.reverse(content.center(self._table_width))}"
             cells.append(cell)
         else:
+            # Iterate over content dictionary and format each cell.
             for key, value in content.items():
                 width = self._column_widths[key]
-                cell = (f"{self._term.underline(value.center(width))}" 
-                        if row_type == "headings" 
-                        else (f"{value.rjust(width)}" 
-                              if key in rjust_col 
-                              else f"{value.ljust(width)}"))
-                cells.append(cell)
+                if row_type == "headings":
+                    # Center and underline heading text.
+                    cell = f"{self._term.underline(value.center(width))}"
+                else:
+                    # Right-justify or left-justify based on column key.
+                    cell = (f"{value.rjust(width)}" if key in rjust_col 
+                            else f"{value.ljust(width)}")
+                    cells.append(cell)
+        
         return cells
 
+
     def _set_dimensions(self) -> None:
+        """Set display and table dimensions based on terminal width.
+
+        This method calculates the display width and table width by 
+        considering the terminal width and the total width of the table. 
+        If the table width exceeds the available display space, it 
+        resizes the columns to fit. Finally, it updates the column 
+        widths for rendering the table.
+
+        Side effects:
+            - Updates self._display_width with the terminal width 
+                (capped at 79).
+            - Updates self._table_width based on the table data.
+            - Resizes table columns if the table exceeds the available 
+                space.
+            - Updates self._column_widths to reflect the current table 
+                layout.
+        """
         self._display_width = min(self._term.width, 79)
         self._table_width = self._data.get_table_width()
-        table_space = self._display_width - 4
+
+        table_space = self._display_width - 4  # For borders and padding
         if self._table_width > table_space:
             self._data.resize_columns(table_space)
             self._table_width = self._data.get_table_width()
+
         self._column_widths = self._data.get_column_widths()
