@@ -1,7 +1,7 @@
 """Module for handling table formatting and display."""
 
 from blessed import Terminal
-from terminal import Box
+from terminal import Terminal_Table
 
 class Table:
     def __init__(self, 
@@ -18,7 +18,7 @@ class Table:
             table_string: A string representation of the table.
             title: The title of the table, which will be converted to 
                 uppercase.
-            rjust_columns: A string or list of strings representing the 
+            rjust_columns: A string or set of strings representing the 
                 columns to be right-justified.
 
         Raises:
@@ -35,7 +35,7 @@ class Table:
             self._read_table(table_string)
         if title is not None:
             self._title = title.upper()
-        self._right_justified_columns = []
+        self._right_justified_columns = {}
         if rjust_columns is not None:
             self._add_rjust_col_label(rjust_columns)
 
@@ -48,9 +48,9 @@ class Table:
         """
         if isinstance(label, list):
             for each in label:
-                self._right_justified_columns.append(each)
+                self._right_justified_columns.add(each)
         else:
-            self._right_justified_columns.append(label)
+            self._right_justified_columns.add(label)
 
     def _calculate_widths(self) -> None:
         """Calculate the width of each column and of a table made up of
@@ -156,7 +156,7 @@ class Table:
     def get_record(self, index: int) -> dict[str, str]:
         return self._dataset[index]
 
-    def get_rjust_columns(self) -> list[str]:
+    def get_rjust_columns(self) -> set[str]:
         return self._right_justified_columns
 
     def _get_slice(self, 
@@ -200,7 +200,7 @@ class Table:
         if is_menu:
             self._number_records()
         self._calculate_widths()
-        table = Box(self)
+        table = Terminal_Table(self)
         table.display(terminal)
 
     def _read_table(self, input: str) -> None:
@@ -220,4 +220,11 @@ class Table:
         self._records_count = len(self._dataset)
 
     def resize_columns(width_limit: int) -> None:
-        pass
+        trim_length = width_limit - self._table_width
+        while trim_length > 0:
+            max_length = 0
+            for key, value in self._column_widths.items():
+                if value >= max_length:
+                    widest_column = key
+            self._column_widths[widest_column] -= 1
+            trim_length -= 1
