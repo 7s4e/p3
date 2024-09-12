@@ -13,8 +13,9 @@ def get_padding(term: Terminal) -> str:
 
 
 def prompt_key(term: Terminal, prompt: str) -> str:
-    padding = get_padding(term)
-    print(term.bright_yellow(f"{padding}{prompt}"))
+#    padding = get_padding(term)
+#    print(term.bright_yellow(f"{padding}{prompt}"))
+    put_prompt(term, prompt)
     with term.cbreak(), term.hidden_cursor():
         key = term.inkey()
     return repr(key)
@@ -23,6 +24,10 @@ def prompt_key(term: Terminal, prompt: str) -> str:
 def prompt_str(term: Terminal, prompt: str) -> str:
     padding = get_padding(term)
     print(term.bright_yellow(f"{padding}{prompt}"))
+
+
+def put_prompt(term: Terminal, prompt: str) -> None:
+    print(term.center(term.bright_yellow(prompt.ljust(min(term.width, 79)))))
 
 
 def put_script_banner(term: Terminal, script_name: str) -> None:
@@ -54,7 +59,7 @@ class Terminal_Table:
         cells = (self._process_text_content(row_type, content, rjust_col)
                  if row_type in text_types
                  else [f"{self._term.blue(content * self._table_width + 2)}"]
-        print(f"{l_end}{gap}{'  '.join(cells)}{gap}{r_end}")
+        print(self._term.center(f"{l_end}{gap}{'  '.join(cells)}{gap}{r_end}"))
 
     def _draw_table(self, record_count: int) -> None:
         self._draw_row("top")
@@ -107,7 +112,7 @@ class Terminal_Table:
         return cells
 
     def _set_dimensions(self) -> None:
-        self._display_width = max(self._term.width, 79)
+        self._display_width = min(self._term.width, 79)
         self._table_width = self._data.get_table_width()
         table_space = self._display_width - 4
         if self._table_width > table_space:
