@@ -29,7 +29,7 @@ def put_script_banner(term: Terminal, script_name: str) -> None:
     print(term.reverse(f"Running {script_name}...".ljust(term.width)))
 
 
-class Box:
+class Terminal_Table:
     # def __init__(self, data: Table) -> None:
     def __init__(self, data) -> None:
         self._data = data
@@ -40,135 +40,77 @@ class Box:
 
     def display(self, term: Terminal) -> None:
         self._term = term
-        self._display_width = max(term.width, 79)
+        self._set_dimensions()
+        self._draw_table(self._data.count_records())
+
+    def _draw_row(self, row_type: str, index: int | None = None) -> None:
+        line_types = ["top", "inner", "bottom"]
+        text_types = ["title", "headings", "record"]
+        rjust_col = self._data.get_rjust_columns() if row_type == "record" else {}
+        l_end, r_end, gap = self._get_row_ends(row_type, row_type in line_types)
+        content = (self._get_text_content(row_type, index)
+                   if row_type in text_types
+                   else self._borders[row_type]["fill"])
+        cells = (self._process_text_content(row_type, content, rjust_col)
+                 if row_type in text_types
+                 else [f"{self._term.blue(content * self._table_width + 2)}"]
+        print(f"{l_end}{gap}{'  '.join(cells)}{gap}{r_end}")
+
+    def _draw_table(self, record_count: int) -> None:
+        self._draw_row("top")
+        self._draw_row("title")
+        self._draw_row("inner")
+        self._draw_row("headings")
+        for i in range(record_count):
+            self._draw_row("record", i)
+        self._draw_row("bottom")
+
+    def _get_row_ends(self, 
+                      row_type: str, 
+                      is_line_type: bool) -> tuple[str, str, str]:
+        if is_line_type:
+            l_end = f"{self._term.blue(self._borders[row_type]["left"])}"
+            r_end = f"{self._term.blue(self._borders[row_type]["right"])}"
+            gap = ""
+        else:
+            l_end = r_end = f"{self._term.blue(self._borders['side'])}"
+            gap = " "
+
+    def _get_text_content(self, 
+                          row_type: str, 
+                          index: int | None = None) -> str | dict[str, str]:
+        match row_type:
+            case "title":
+                return self._data.get_title()
+            case "headings":
+                return self._data.get_headings()
+            case "record":
+                return self._data.get_record(index)
+
+    def _process_text_content(self, 
+                              row_type: str, 
+                              content: str | dict[str, str], 
+                              rjust_col: set) -> list[str]:
+        cells = []
+        if row_type == "title":
+            cell = f"{self._term.reverse(content.center(self._table_width))}"
+            cells.append(cell)
+        else:
+            for key, value in content.items():
+                width = self._column_widths[key]
+                cell = (f"{self._term.underline(value.center(width)}"
+                        if row_type == "headings"
+                        else (f"{value.rjust(width)}"
+                              if key in rjust_col
+                              else f"{value.ljust(width)}")
+                cells.append(cell)
+        return cells
+
+    def _set_dimensions(self) -> None:
+        self._display_width = max(self._term.width, 79)
         self._table_width = self._data.get_table_width()
         table_space = self._display_width - 4
         if self._table_width > table_space:
             self._data.resize_columns(table_space)
             self._table_width = self._data.get_table_width()
         self._column_widths = self._data.get_column_widths()
-        self._draw_row("top")
-        self._draw_row("title")
-        self._draw_row("inner")
-        self._draw_row("heading")
-        for i in range(self._data.count_records()):
-            self._draw_row("record", i)
-        self._draw_row("bottom")
-    
-    def _draw_row(self, row_type: str, index: int | None = None) -> None:
-
-        # Define row types and initialize row elements
-        line_types = ["top", "inner", "bottom"]
-        text_types = ["title", "heading", "record"]
-        row_cells = rjust_columns = []
-
-        # Determine left and right borders
-        if row_type in line_types:
-            l_end = self._borders[row_type]["left"]
-            r_end = self._borders[row_type]["right"]
-        else:
-            l_end = r_end = f"{self._term.blue(self._borders['side'])}"
-        
-        # Get content source based on row type
-        if row_type in text_types:
-            match row_type:
-                case "title":
-                    content_source = self._data.get_title()
-                case "heading":
-                    content_source = self._data.get_headings()
-                case "record":
-                    content_source = self._data.get_record(index)
-                    rjust_columns = self._data.get_rjust_columns()
-        else:
-            content_source = self._borders[row_type]["fill"]
-        if row_type in line_types:
-            cell = f"{content_source * (self._table_width + 2)}"
-            row_cells.append(cell)
-            gap = ""
-        else:
-            if row_type == "title":
-                cell = f"{content_source.center(self._table_width)}"
-                cell = f"{self._term.reverse(cell)}"
-                row_cells.append(cell)
-            else:
-                for key, cell_value in content_source.items():
-                    cell_width = self._column_widths[key]
-                    if row_type == "heading":
-                        cell = f"{cell_value.center(cell_width)}"
-                        cell = f"{self._term.underline(cell)}"
-                    else:
-                        if key in rjust_columns:
-                            cell = f"{cell_value.rjust(cell_width)}"
-                        else:
-                            cell = f"{cell_value.ljust(cell_width)}"
-                    row_cells.append(cell)
-            gap = " "
-        row_content = f"{l_end}{gap}{'  '.join(row_cells)}{gap}{r_end}"
-        if row_type in line_types:
-            row_content = f"{self._term.blue(row_content)}"
-        print(self._term.center(row_content))
-
-"""
-def _draw_row(self, row_type: str, index: int | None = None) -> None:
-    # Define row categories
-    line_types = {"top", "inner", "bottom"}
-    text_types = {"title", "heading", "record"}
-    # Initialize row elements
-    row_cells = []
-    rjust_columns = []
-    # Determine left and right borders
-    if row_type in line_types:
-        l_end = self._borders[row_type]["left"]
-        r_end = self._borders[row_type]["right"]
-    else:
-        border_side = self._term.blue(self._borders["side"])
-        l_end = r_end = f"{border_side}"
-    # Get content source based on row type
-    if row_type in text_types:
-        content_source = self._get_content_source(row_type, index)
-        if row_type == "record":
-            rjust_columns = self._data.get_rjust_columns()
-    else:
-        content_source = self._borders[row_type]["fill"]
-    # Process the row content
-    if row_type in line_types:
-        row_cells.append(content_source * (self._table_width + 2))
-        gap = ""
-    else:
-        row_cells = self._get_text_row_cells(row_type, content_source, rjust_columns)
-        gap = " "
-    # Construct the final row content
-    row_content = f"{l_end}{gap}{'  '.join(row_cells)}{gap}{r_end}"
-    if row_type in line_types:
-        row_content = self._term.blue(row_content)
-    # Print the centered row
-    print(self._term.center(row_content))
-
-def _get_content_source(self, row_type: str, index: int | None = None):
-    match row_type:
-        case "title":
-            return self._data.get_title()
-        case "heading":
-            return self._data.get_headings()
-        case "record":
-            return self._data.get_record(index)
-
-def _get_text_row_cells(self, row_type: str, content_source: dict, rjust_columns: list) -> list:
-    row_cells = []
-    if row_type == "title":
-        cell = content_source.center(self._table_width)
-        row_cells.append(self._term.reverse(cell))
-    else:
-        for key, cell_value in content_source.items():
-            cell_width = self._column_widths[key]
-            if row_type == "heading":
-                cell = self._term.underline(cell_value.center(cell_width))
-            else:
-                cell = (
-                    cell_value.rjust(cell_width)
-                    if key in rjust_columns
-                    else cell_value.ljust(cell_width)
-                )
-            row_cells.append(cell)
-    return row_cells
-"""
