@@ -1,7 +1,7 @@
 """Module for handling table formatting and display."""
 
 from blessed import Terminal
-from terminal import Terminal_Table
+from console import Console_Table
 
 class Table:
     def __init__(self, 
@@ -200,7 +200,7 @@ class Table:
         if is_menu:
             self._number_records()
         self._calculate_widths()
-        table = Terminal_Table(self)
+        table = Console_Table(self)
         table.display(terminal)
 
     def _read_table(self, input: str) -> None:

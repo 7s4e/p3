@@ -1,49 +1,78 @@
-"""terminal.py"""
+"""console.py"""
+# Standard library imports
+from __future__ import annotations
+from typing import TYPE_CHECKING
 
+# Third-party imports
 from blessed import Terminal
-# from table import Table
+
+# Local module import
+if TYPE_CHECKING:
+    from table import Table
 
 
-def clear_stdscr(term: Terminal) -> None:
-    print(term.home + term.clear)
+def clear_stdscr(con: Terminal) -> None:
+    """Clear terminal screen and reset cursor to the home position.
+
+    Args:
+        con (Terminal): The terminal object used to control screen 
+            operations.
+    """
+    print(con.home + con.clear)
 
 
-def get_padding(term: Terminal) -> str:
-    return " " * (max(0, term.width - 79) // 2)
+def put_script_banner(con: Terminal, script_name: str) -> None:
+    """Display reverse-video banner in terminal with the script name.
+
+    Args:
+        con (Terminal): The terminal object used for formatting and 
+            display.
+        script_name (str): The name of the script to be displayed in the 
+            banner.
+    """
+    print(con.reverse(f"Running {script_name}...".ljust(con.width)))
 
 
-def prompt_key(term: Terminal, prompt: str) -> str:
-#    padding = get_padding(term)
-#    print(term.bright_yellow(f"{padding}{prompt}"))
-    put_prompt(term, prompt)
-    with term.cbreak(), term.hidden_cursor():
-        key = term.inkey()
+'''
+def get_padding(console: Terminal) -> str:
+    return " " * (max(0, console.width - 79) // 2)
+def prompt_key(console: Terminal, prompt: str) -> str:
+#    padding = get_padding(console)
+#    print(console.bright_yellow(f"{padding}{prompt}"))
+    put_prompt(console, prompt)
+    with console.cbreak(), console.hidden_cursor():
+        key = console.inkey()
     return repr(key)
+def prompt_str(console: Terminal, prompt: str) -> str:
+    padding = get_padding(console)
+    print(console.bright_yellow(f"{padding}{prompt}"))
+def put_prompt(console: Terminal, prompt: str) -> None:
+    print(console.center(console.bright_yellow(prompt.ljust(min(console.width, 79)))))
+'''
 
 
-def prompt_str(term: Terminal, prompt: str) -> str:
-    padding = get_padding(term)
-    print(term.bright_yellow(f"{padding}{prompt}"))
+class Console_Table:
+    """A class to represent a terminal-based table.
 
+    Args:
+        data (Table): An instance of the `Table` class containing the 
+            data to be displayed in the terminal.
 
-def put_prompt(term: Terminal, prompt: str) -> None:
-    print(term.center(term.bright_yellow(prompt.ljust(min(term.width, 79)))))
+    Attributes:
+        _data (Table): The table data provided at initialization.
+        _borders (dict): A dictionary defining the table's border 
+            characters.
+    """
 
-
-def put_script_banner(term: Terminal, script_name: str) -> None:
-    print(term.reverse(f"Running {script_name}...".ljust(term.width)))
-
-
-class Terminal_Table:
-    # def __init__(self, data: Table) -> None:
-    def __init__(self, data) -> None:
+    def __init__(self, data: Table) -> None:
+        """Initialize the TerminalTable with data and default borders."""
         self._data = data
         self._borders = {"top": {"left": "╔", "fill": "═", "right": "╗"}, 
                          "inner": {"left": "╟", "fill": "─", "right": "╢"}, 
                          "bottom": {"left": "╚", "fill": "═", "right": "╝"},
                          "side": "║"}
 
-    def display(self, term: Terminal) -> None:
+    def display(self, console: Terminal) -> None:
         """Display the table on the terminal.
 
         This method initializes the terminal settings, adjusts the table 
@@ -51,10 +80,10 @@ class Terminal_Table:
         borders, title, headings, and records.
 
         Args:
-            term: An instance of the `Terminal` class, used to handle 
+            con: An instance of the `Terminal` class, used to handle 
                 terminal display settings and styling.
         """
-        self._term = term
+        self._con = console
         self._set_dimensions()
         self._draw_table(self._data.count_records())
 
@@ -90,9 +119,9 @@ class Terminal_Table:
         cells = (self._process_text_content(row_type, content, rjust_col)
                  if row_type in text_types
                  else [
-                     f"{self._term.blue(content * (self._table_width + 2))}"])
+                     f"{self._con.blue(content * (self._table_width + 2))}"])
     
-        print(self._term.center(f"{left}{gap}{'  '.join(cells)}{gap}{right}"))
+        print(self._con.center(f"{left}{gap}{'  '.join(cells)}{gap}{right}"))
 
 
     def _draw_table(self, record_count: int) -> None:
@@ -139,11 +168,11 @@ class Terminal_Table:
                     string).
         """
         if is_line_type:
-            left_end = f"{self._term.blue(self._borders[row_type]['left'])}"
-            right_end = f"{self._term.blue(self._borders[row_type]['right'])}"
+            left_end = f"{self._con.blue(self._borders[row_type]['left'])}"
+            right_end = f"{self._con.blue(self._borders[row_type]['right'])}"
             padding = ""
         else:
-            left_end = right_end = f"{self._term.blue(self._borders['side'])}"
+            left_end = right_end = f"{self._con.blue(self._borders['side'])}"
             padding = " "
 
         return left_end, right_end, padding
@@ -219,7 +248,7 @@ class Terminal_Table:
         if row_type == "title":
             # Format the title row by centering the content and applying 
             # reverse style.
-            cell = f"{self._term.reverse(content.center(self._table_width))}"
+            cell = f"{self._con.reverse(content.center(self._table_width))}"
             cells.append(cell)
         else:
             # Iterate over content dictionary and format each cell.
@@ -227,7 +256,7 @@ class Terminal_Table:
                 width = self._column_widths[key]
                 if row_type == "headings":
                     # Center and underline heading text.
-                    cell = f"{self._term.underline(value.center(width))}"
+                    cell = f"{self._con.underline(value.center(width))}"
                 else:
                     # Right-justify or left-justify based on column key.
                     cell = (f"{value.rjust(width)}" if key in rjust_col 
@@ -255,7 +284,7 @@ class Terminal_Table:
             - Updates self._column_widths to reflect the current table 
                 layout.
         """
-        self._display_width = min(self._term.width, 79)
+        self._display_width = min(self._con.width, 79)
         self._table_width = self._data.get_table_width()
 
         table_space = self._display_width - 4  # For borders and padding

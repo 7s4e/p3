@@ -9,7 +9,7 @@ from blessed import Terminal
 from menu import Menu
 from table import Table
 import commands as cmd
-import terminal as trm
+import console as trm
 
 
 def confirm_disk(terminal: Terminal, disk: str) -> bool:
