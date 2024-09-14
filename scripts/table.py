@@ -45,7 +45,7 @@ class Table:
         put_table: Format and display the table using a terminal.
         resize_columns: Resize column widths to fit within a specified 
             width limit.
-"""
+    """
     def __init__(self, 
                  table_data: list[dict[str, str]] | None = None,
                  table_string: str | None = None,

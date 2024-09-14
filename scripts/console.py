@@ -62,6 +62,9 @@ class Console_Table:
         _data (Table): The table data provided at initialization.
         _borders (dict): A dictionary defining the table's border 
             characters.
+
+    Methods:
+        display: Put table to terminal console.
     """
 
     def __init__(self, data: Table) -> None:
@@ -72,6 +75,7 @@ class Console_Table:
                          "bottom": {"left": "╚", "fill": "═", "right": "╝"},
                          "side": "║"}
 
+    # Public Method
     def display(self, console: Terminal) -> None:
         """Display the table on the terminal.
 
@@ -87,6 +91,7 @@ class Console_Table:
         self._set_dimensions()
         self._draw_table(self._data.count_records())
 
+    # Private Methods
     def _draw_row(self, row_type: str, index: int | None = None) -> None:
         """Draw a specific row in the table based on the row type.
 
@@ -122,7 +127,6 @@ class Console_Table:
                      f"{self._con.blue(content * (self._table_width + 2))}"])
     
         print(self._con.center(f"{left}{gap}{'  '.join(cells)}{gap}{right}"))
-
 
     def _draw_table(self, record_count: int) -> None:
         """Draw full table with borders, title, headings, and records.
@@ -176,7 +180,6 @@ class Console_Table:
             padding = " "
 
         return left_end, right_end, padding
-
 
     def _get_text_content(self, 
                           row_type: str, 
