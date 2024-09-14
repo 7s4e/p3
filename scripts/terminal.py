@@ -44,24 +44,68 @@ class Terminal_Table:
                          "side": "║"}
 
     def display(self, term: Terminal) -> None:
+        """Display the table on the terminal.
+
+        This method initializes the terminal settings, adjusts the table 
+        dimensions, and draws the table on the screen by rendering its 
+        borders, title, headings, and records.
+
+        Args:
+            term: An instance of the `Terminal` class, used to handle 
+                terminal display settings and styling.
+        """
         self._term = term
         self._set_dimensions()
         self._draw_table(self._data.count_records())
 
     def _draw_row(self, row_type: str, index: int | None = None) -> None:
+        """Draw a specific row in the table based on the row type.
+
+        This method draws different types of rows such as borders (top, 
+        inner, bottom), and text rows (title, headings, or a record). 
+        The row content is dynamically generated based on the 
+        `row_type`. For "record" rows, the content can be right-
+        justified based on column definitions.
+
+        Args:
+            row_type: A string indicating the type of row to draw. Valid 
+                types include "top", "inner", "bottom" (for line types) 
+                and "title", "headings", "record" (for text types).
+            index: An integer index is required when drawing a "record" 
+                row to specify which record to draw. Defaults to None.
+        """
         line_types = ["top", "inner", "bottom"]
         text_types = ["title", "headings", "record"]
-        rjust_col = self._data.get_rjust_columns() if row_type == "record" else {}
-        l_end, r_end, gap = self._get_row_ends(row_type, row_type in line_types)
+    
+        rjust_col = (self._data.get_rjust_columns() 
+                     if row_type == "record" else {})
+    
+        left, right, gap = self._get_row_ends(row_type, 
+                                              row_type in line_types)
+    
         content = (self._get_text_content(row_type, index)
                    if row_type in text_types
                    else self._borders[row_type]["fill"])
+    
         cells = (self._process_text_content(row_type, content, rjust_col)
                  if row_type in text_types
-                 else [f"{self._term.blue(content * (self._table_width + 2))}"])
-        print(self._term.center(f"{l_end}{gap}{'  '.join(cells)}{gap}{r_end}"))
+                 else [
+                     f"{self._term.blue(content * (self._table_width + 2))}"])
+    
+        print(self._term.center(f"{left}{gap}{'  '.join(cells)}{gap}{right}"))
+
 
     def _draw_table(self, record_count: int) -> None:
+        """Draw full table with borders, title, headings, and records.
+
+        This method draws the table structure by sequentially rendering 
+        the top border, title row, inner border, headings, and a 
+        specified number of records. It finishes by rendering the bottom 
+        border of the table.
+
+        Args:
+            record_count: The number of record rows to draw.
+        """
         self._draw_row("top")
         self._draw_row("title")
         self._draw_row("inner")
@@ -73,14 +117,37 @@ class Terminal_Table:
     def _get_row_ends(self, 
                       row_type: str, 
                       is_line_type: bool) -> tuple[str, str, str]:
+        """Generate a row's left and right ends  and the inner padding.
+
+        This function returns the left and right end characters for a 
+        row based on whether the `row_type` is a line type or not. If 
+        the row is a line type, the left and right ends are styled as 
+        borders from the `self._borders` dictionary, otherwise, both 
+        left and right are a default 'side' border. Non-line, text-type 
+        rows have a single space as padding.
+
+        Args:
+            row_type: The type of the row, used to determine the border style.
+            is_line_type: A boolean flag indicating if the row is a line type
+                (used for borders) or a content row.
+
+        Returns:
+            A tuple of three strings:
+                - The left border (styled).
+                - The right border (styled).
+                - The padding between cells (either a space or an empty 
+                    string).
+        """
         if is_line_type:
-            l_end = f"{self._term.blue(self._borders[row_type]['left'])}"
-            r_end = f"{self._term.blue(self._borders[row_type]['right'])}"
-            gap = ""
+            left_end = f"{self._term.blue(self._borders[row_type]['left'])}"
+            right_end = f"{self._term.blue(self._borders[row_type]['right'])}"
+            padding = ""
         else:
-            l_end = r_end = f"{self._term.blue(self._borders['side'])}"
-            gap = " "
-        return l_end, r_end, gap
+            left_end = right_end = f"{self._term.blue(self._borders['side'])}"
+            padding = " "
+
+        return left_end, right_end, padding
+
 
     def _get_text_content(self, 
                           row_type: str, 
@@ -165,7 +232,7 @@ class Terminal_Table:
                     # Right-justify or left-justify based on column key.
                     cell = (f"{value.rjust(width)}" if key in rjust_col 
                             else f"{value.ljust(width)}")
-                    cells.append(cell)
+                cells.append(cell)
         
         return cells
 
