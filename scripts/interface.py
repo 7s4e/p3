@@ -1,5 +1,6 @@
-#!/usr/bin/env python3
+"""Interface modules."""
 
+# Local module imports
 from menu import Menu
 import commands as cmd
 

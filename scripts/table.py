@@ -1,14 +1,57 @@
 """Module for handling table formatting and display."""
 
+# Third-party imports
 from blessed import Terminal
+
+# Local module imports
 from console import Console_Table
 
 class Table:
+    """
+    A class to represent and manipulate a table of data.
+
+    The `Table` class allows for the creation of tables either from a 
+    list of dictionaries (where each dictionary represents a row of 
+    data) or from a string representation of a table. The class provides 
+    various methods for filtering, formatting, and retrieving table 
+    data. It also handles right-justification of specified columns and 
+    can display the table in a console-friendly format.
+
+    Attributes:
+        _dataset (list[dict[str, str]]): The table data as a list of 
+            dictionaries.
+        _column_widths (dict[str, int]): The width of each column in the 
+            table.
+        _table_width (int): The total width of the table including 
+            column separators.
+        _right_justified_columns (set[str]): A set of columns that 
+            should be right-justified when displayed.
+        _title (str | None): The title of the table, stored in 
+            uppercase.
+        _records_count (int): The number of records (rows) in the table.
+
+    Methods:
+        count_records: Return the number of records in the dataset.
+        filter_nonempty: Filter records based on non-empty values for a 
+            specified key.
+        filter_startswith: Filter records based on values that start with a 
+            specified prefix for a key.
+        get _column_widths: Return the width of each column.
+        get_headings: Return a dictionary of column headings.
+        get_record: Retrieve a specific record by its index.
+        get_rjust_columns: Return the set of right-justified columns.
+        get_table_width: Return the total width of the table.
+        get_title: Return the title of the table.
+        put_table: Format and display the table using a terminal.
+        resize_columns: Resize column widths to fit within a specified 
+            width limit.
+"""
     def __init__(self, 
                  table_data: list[dict[str, str]] | None = None,
                  table_string: str | None = None,
                  title: str | None = None,
-                 rjust_columns: str | list[str] | None = None) -> None:
+                 rjust_columns: str | list[str] | set[str] | None = None
+                 ) -> None:
         """Initialize the Table instance.
 
         Args:
@@ -18,116 +61,268 @@ class Table:
             table_string: A string representation of the table.
             title: The title of the table, which will be converted to 
                 uppercase.
-            rjust_columns: A string or set of strings representing the 
-                columns to be right-justified.
+            rjust_columns: A string, list, or set of strings representing
+                the columns to be right-justified.
 
         Raises:
-            ValueError: If neither or both of 'table_data' and 
+            ValueError: If neither or both 'table_data' and 
                 'table_string' are provided.
         """
         if (table_data is None) == (table_string is None):
             raise ValueError(
                 "Provide exactly one of 'table_data' or 'table_string'."
-                )
-        if table_data is not None:
-            self._capitalize_keys(table_data)
-        else:
+            )
+        
+        if table_data is None:
             self._read_table(table_string)
-        if title is not None:
-            self._title = title.upper()
+        else:
+            self._capitalize_keys(table_data)
+        
+        self._title = title.upper() if title else None
         self._right_justified_columns = set()
-        if rjust_columns is not None:
+        
+        if rjust_columns:
             self._add_rjust_col_label(rjust_columns)
 
-    def _add_rjust_col_label(self, label: str | list[str]) -> None:
-        """Add labels to the right-justified columns list.
+    # Public Methods
+    def count_records(self) -> int:
+        """Return the number of records in the dataset.
+
+        Returns:
+            int: The count of records.
+        """
+        return self._records_count
+
+    def filter_nonempty(self, key: str) -> None:
+        """Filter records to include only those where the value for the 
+            specified key is non-empty.
 
         Args:
-            label: A string or list of strings representing the label(s)
-                to add.
+            key (str): The key in the records to check for non-empty 
+                values.
+
+        Updates:
+            Filters self._dataset in place to include only records where 
+            the value for the specified key is non-empty. Updates 
+            self._records_count to reflect the new number of records.
         """
-        if isinstance(label, list):
-            for each in label:
-                self._right_justified_columns.add(each)
+        self._dataset = [record for record in self._dataset 
+                         if record.get(key.upper(), '').strip()]
+        self._records_count = len(self._dataset)
+
+    def filter_startswith(self, key: str, prefix: str) -> None:
+        """Filter records to include only those where the value for the 
+            specified key starts with the given prefix.
+
+        Args:
+            key (str): The key in the records to check.
+            prefix (str): The prefix to match against.
+
+        Updates:
+            Filters self._dataset in place to include only records where 
+            the value for the specified key starts with the given 
+            prefix. Updates self._records_count to reflect the new 
+            number of records.
+        """
+        self._dataset = [
+            record for record in self._dataset
+            if record.get(key.upper(), '').startswith(prefix)
+        ]
+        self._records_count = len(self._dataset)
+
+    def get_headings(self) -> dict[str, str]:
+        """Return a dictionary of column headings where each key is 
+            mapped to itself.
+
+        Returns:
+            dict[str, str]: A dictionary with column names as both keys 
+                and values.
+        """
+        return {key: key for key in self._dataset[0].keys()}
+
+    def get_column_widths(self) -> dict[str, int]:
+        """Return a dictionary of column widths.
+
+        Returns:
+            dict[str, int]: A dictionary with column names as keys and 
+                their widths as values.
+        """
+        return self._column_widths
+
+    def get_record(self, index: int) -> dict[str, str]:
+        """Retrieve a specific record from the dataset.
+
+        Args:
+            index (int): The index of the record to retrieve.
+
+        Returns:
+            dict[str, str]: The record at the specified index.
+    
+        Raises:
+            IndexError: If the index is out of range of the dataset.
+        """
+        if index < 0 or index >= len(self._dataset):
+            raise IndexError("Index out of range.")
+        return self._dataset[index]
+
+    def get_rjust_columns(self) -> set[str]:
+        """Return a set of column names that are right-justified.
+
+        Returns:
+            set[str]: A set of column names that are right-justified.
+        """
+        return self._right_justified_columns
+
+    def get_table_width(self) -> int:
+        """Return the width of the table.
+
+        Returns:
+            int: The width of the table.
+        """
+        return self._table_width
+
+    def get_title(self) -> str:
+        """Return the title of the table.
+
+        Returns:
+            str: The title of the table.
+        """
+        return self._title
+
+    def put_table(self, 
+                  console: Terminal,
+                  is_menu: bool = False) -> None:
+        """Format and display a table with the given dataset.
+
+        Args:
+            console (Terminal): The Terminal object used for displaying 
+                the table.
+            is_menu (bool, optional): Whether the table is being 
+                displayed as a menu. Defaults to False.
+        """
+        if is_menu:
+            self._number_records()
+
+        self._calculate_widths()
+
+        # Create an instance of Console_Table with the current 
+        # instance's data
+        table = Console_Table(self)
+
+        # Display the table using the provided Terminal object
+        table.display(console)
+
+    def resize_columns(self, width_limit: int) -> None:
+        """Resize column widths to fit within the specified width limit.
+
+        Args:
+            width_limit (int): The maximum allowable width for the 
+                table.
+        """
+        # Calculate the total width to trim
+        trim_length = self._table_width - width_limit
+
+        # Continue trimming column widths until the trim length is 
+        # satisfied
+        while trim_length > 0:
+            # Find the column with the maximum width
+            widest_column = max(self._column_widths, 
+                                key=self._column_widths.get)
+
+            # Reduce the width of the widest column
+            self._column_widths[widest_column] -= 1
+        
+            # Update the total width to be trimmed
+            trim_length -= 1
+
+            # Update the current table width
+            self._table_width -= 1
+
+    # Private Methods
+    def _add_rjust_col_label(self, label: str | list[str] | set[str]) -> None:
+        """Add one or more labels to the set of right-justified columns.
+
+        Args:
+            label: A string, list, or set of labels to add.
+        """
+        if isinstance(label, (list, set)):
+            self._right_justified_columns.update(label)
         else:
             self._right_justified_columns.add(label)
 
     def _calculate_widths(self) -> None:
-        """Calculate the width of each column and of a table made up of
-            the dataset.
+        """Calculate the width of each column and the total table width 
+            based on the dataset.
+
+        Updates:
+            Updates self._column_widths with the width of each column.
+            Updates self._table_width with the total width of the table 
+                including column separators.
         """
-        self._column_widths = {key: max(len(key), 
-                                        max(len(str(record[key])) 
-                                            for record 
-                                            in self._dataset)) 
-                               for key in self._dataset[0].keys()}
+        self._column_widths = {
+            key: max(len(key), 
+                     max(len(str(record[key])) for record in self._dataset))
+            for key in self._dataset[0].keys()
+        }
         self._table_width = (sum(self._column_widths.values()) 
                              + 2 * (len(self._column_widths) - 1))
 
     def _capitalize_keys(self, data: list[dict[str, str]]) -> None:
-        self._dataset = [{key.upper(): value for key, value in datum.items()}  
-                         for datum in data]
-        self._records_count = len(self._dataset)
-
-    def count_records(self) -> int:
-        """Return the count of records in the table."""
-        return self._records_count
-
-    def filter_nonempty(self, key: str) -> None:
-        """Filter records based on whether a key's value exists.
+        """Convert all dictionary keys in the dataset to uppercase.
 
         Args:
-            key: The key in the records by which to filter.
-        """
-        self._dataset = [record for record in self._dataset 
-                        if record.get(key.upper(), '') != ""]
-        self._records_count = len(self._dataset)
+            data (list[dict[str, str]]): The list of dictionaries to process.
 
-    def filter_startswith(self, key: str, prefix: str) -> None:
-        """Filter records based on whether a key's value starts with a 
-            prefix.
-
-        Args:
-            key: The key in the records by which to filter.
-            prefix: The prefix to match against.
+        Updates:
+            Updates self._dataset with keys converted to uppercase and updates
+            self._records_count with the new count of records.
         """
-        self._dataset = [record for record in self._dataset 
-                        if record.get(key.upper(), '').startswith(prefix)]
+        self._dataset = [
+            {key.upper(): value for key, value in datum.items()}
+            for datum in data
+        ]
         self._records_count = len(self._dataset)
 
     def _find_boundaries(self, 
                          column_index: int, 
                          positions_list: list[int], 
                          line: str) -> tuple[int, int]:
-        """Find the start and end positions of a column in a line.
+        """Find the start and end positions of a column in a line, 
+            adjusting for whitespace.
 
         Args:
-            column_index: The index of the column.
-            positions_list: A list of positions for each column.
-            line: The line of text to analyze.
+            column_index (int): The index of the column in the positions 
+                list.
+            positions_list (list[int]): A list of starting positions for 
+                each column.
+            line (str): The line of text to analyze.
 
         Returns:
-            A tuple containing the start and end positions.
+            tuple[int, int]: A tuple containing the start and end 
+                positions of the column.
         """
-        start = min(positions_list[column_index], len(line) - 1)
-        end = min((positions_list[column_index + 1] 
-                   if column_index + 1 < len(positions_list) 
-                   else len(line) - 1), 
-                  len(line) - 1)
+        # Determine the initial start and end positions
+        start = positions_list[column_index]
+        end = (positions_list[column_index + 1] 
+               if column_index + 1 < len(positions_list) else len(line))
 
-        # Adjust the start and end positions to align with non-
-        #   whitespace content.
-        if start != len(line) - 1:
+        # Adjust the start position to align with non-whitespace content
+        if start < len(line):
             if line[start].isspace():
-                while start < end and line[start].isspace(): start += 1
+                while start < end and line[start].isspace():
+                    start += 1
             else:
-                while start > 0 and not line[start - 1].isspace(): start -= 1
+                while start > 0 and not line[start - 1].isspace():
+                    start -= 1
         else:
             start = len(line)
-        
-        if end != len(line) - 1:
-            while end > start and not line[end].isspace(): end -= 1
-            while end > start and line[end - 1].isspace(): end -= 1
+
+        # Adjust the end position to align with non-whitespace content
+        if end < len(line):
+            while end > start and not line[end].isspace():
+                end -= 1
+            while end > start and line[end - 1].isspace():
+                end -= 1
         else:
             end = len(line)
 
@@ -136,28 +331,31 @@ class Table:
     def _find_column_positions(self, 
                                header_line: str, 
                                keys: list[str]) -> list[int]:
-        """Find the positions of each column in the header line.
+        """Find the starting positions of each column in the header 
+            line.
 
         Args:
-            header_line: The header line of the table.
-            keys: A list of keys representing the columns.
+            header_line (str): The header line of the table containing 
+                column names.
+            keys (list[str]): A list of column names to locate in the 
+                header line.
 
         Returns:
-            A list of positions for each column.
+            list[int]: A list of starting positions for each column in 
+                the header line.
+
+        Raises:
+            ValueError: If any key is not found in the header line.
         """
-        return [header_line.index(key) for key in keys]
-
-    def get_headings(self) -> dict[str, str]:
-        return {key: key for key in self._dataset[0].keys()}
-
-    def get_column_widths(self) -> dict[str, int]:
-        return self._column_widths
-
-    def get_record(self, index: int) -> dict[str, str]:
-        return self._dataset[index]
-
-    def get_rjust_columns(self) -> set[str]:
-        return self._right_justified_columns
+        positions = []
+        for key in keys:
+            try:
+                positions.append(header_line.index(key))
+            except ValueError as e:
+                raise ValueError(
+                    f"Column '{key}' not found in header line."
+                ) from e
+        return positions
 
     def _get_slice(self, 
                    column_index: int, 
@@ -166,65 +364,57 @@ class Table:
         """Extract a slice of text representing a column from a line.
 
         Args:
-            column_index: The index of the column.
-            positions_list: A list of positions for each column.
-            line: The line of text to slice.
+            column_index (int): The index of the column to extract.
+            positions_list (list[int]): A list of column positions in 
+                the line.
+            line (str): The line of text from which to extract the 
+                column slice.
 
         Returns:
-            A string representing the extracted slice for the column.
+            str: The extracted slice of text for the specified column, 
+                with leading and trailing whitespace removed.
         """
         start, end = self._find_boundaries(column_index, positions_list, line)
         return line[start:end].strip()
 
-    def get_table_width(self) -> int:
-        return self._table_width
+    def _number_records(self) -> None:
+        """Add a numerical index to each record in the dataset and 
+            update column labels.
 
-    def get_title(self) -> str:
-        return self._title
-
-    def _number_records(self) -> list[dict[str, str]]:
-        """Add a numerical index to each record in the table."""
+        This method adds a numerical index to each record in the 
+        dataset, with the index starting at 1. It also updates the 
+        column labels to ensure proper right-justification for the index 
+        column.
+        """
+        # Add a numerical index to each record, starting from 1
         self._dataset = [{"#": i + 1, **record} 
                          for i, record in enumerate(self._dataset)]
+
+        # Update the column label for the index to ensure right-
+        # justification
         self._add_rjust_col_label("#")
 
-    def put_table(self, 
-                  terminal: Terminal,
-                  is_menu: bool = False) -> None:
-        """Format and display a table with the given dataset.
+    def _read_table(self, table_string: str) -> None:
+        """Parse a table from a string input and store it as a dataset.
 
         Args:
-            terminal: 
-            is_menu: Whether the table is being displayed as a menu.
+            table_string (str): The string input representing the table.
         """
-        if is_menu:
-            self._number_records()
-        self._calculate_widths()
-        table = Console_Table(self)
-        table.display(terminal)
-
-    def _read_table(self, input: str) -> None:
-        """Parse a table from a string input.
-
-        Args:
-            table_string: The string input representing the table.
-        """
-        lines = input.splitlines()
-        keys = lines[0].split()
-        positions_list = self._find_column_positions(lines[0], keys)
-        self._dataset = [{key.upper(): self._get_slice(index, 
-                                                       positions_list, 
-                                                       line) 
-                          for index, key in enumerate(keys)} 
+        # Split the input string into lines
+        lines = table_string.splitlines()
+    
+        # Extract column headers from the first line
+        headers = lines[0].split()
+    
+        # Find the positions of each column in the header line
+        column_positions = self._find_column_positions(lines[0], headers)
+    
+        # Parse each subsequent line into a dictionary with header keys
+        self._dataset = [{header.upper(): self._get_slice(index, 
+                                                          column_positions, 
+                                                          line) 
+                          for index, header in enumerate(headers)} 
                          for line in lines[1:]]
+    
+        # Update the count of records in the dataset
         self._records_count = len(self._dataset)
-
-    def resize_columns(self, width_limit: int) -> None:
-        trim_length = width_limit - self._table_width
-        while trim_length > 0:
-            max_length = 0
-            for key, value in self._column_widths.items():
-                if value >= max_length:
-                    widest_column = key
-            self._column_widths[widest_column] -= 1
-            trim_length -= 1

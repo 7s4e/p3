@@ -9,7 +9,7 @@ from blessed import Terminal
 from menu import Menu
 from table import Table
 import commands as cmd
-import console as trm
+import console as con
 
 
 def confirm_disk(terminal: Terminal, disk: str) -> bool:
@@ -69,14 +69,14 @@ def get_disk(terminal: Terminal) -> str:
     Returns:
         The name of the confirmed disk.
     """
-    trm.put_script_banner(terminal, inspect.currentframe().f_code.co_name)
+    con.put_script_banner(terminal, inspect.currentframe().f_code.co_name)
 
     while True:
         disks = get_disks()
         count = disks.count_records()
 
         if count == 0:
-            trm.prompt_key(terminal, 
+            con.prompt_key(terminal, 
                            "Connect a device and press any key to continue...")
             continue
 
@@ -95,7 +95,7 @@ def get_disk(terminal: Terminal) -> str:
 
 
 def main(terminal: Terminal) -> str:
-    trm.clear_stdscr(terminal)
+    con.clear_stdscr(terminal)
     disk = get_disk(terminal)
     return disk
 
