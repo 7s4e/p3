@@ -33,22 +33,53 @@ def put_script_banner(con: Terminal, script_name: str) -> None:
     print(con.reverse(f"Running {script_name}...".ljust(con.width)))
 
 
-'''
-def get_padding(console: Terminal) -> str:
+class Console_Prompt:
+    '''
+    def get_padding(console: Terminal) -> str:
     return " " * (max(0, console.width - 79) // 2)
-def prompt_key(console: Terminal, prompt: str) -> str:
-#    padding = get_padding(console)
-#    print(console.bright_yellow(f"{padding}{prompt}"))
+    def prompt_key(console: Terminal, prompt: str) -> str:
+    #    padding = get_padding(console)
+    #    print(console.bright_yellow(f"{padding}{prompt}"))
     put_prompt(console, prompt)
     with console.cbreak(), console.hidden_cursor():
         key = console.inkey()
     return repr(key)
-def prompt_str(console: Terminal, prompt: str) -> str:
+    def prompt_str(console: Terminal, prompt: str) -> str:
     padding = get_padding(console)
     print(console.bright_yellow(f"{padding}{prompt}"))
-def put_prompt(console: Terminal, prompt: str) -> None:
+    def put_prompt(console: Terminal, prompt: str) -> None:
     print(console.center(console.bright_yellow(prompt.ljust(min(console.width, 79)))))
-'''
+    '''
+    def __init__(self, 
+                 prompt: str, 
+                 expect_keystroke: bool = False, 
+                 validate_integer: bool = False, 
+                 validate_float: bool = False, 
+                 validate_bool: bool = False) -> None:
+        self._prompt = prompt
+        self._expect_keystroke = expect_keystroke
+        self._int_check = validate_integer
+        self._bool_check = validate_bool
+    
+    def call(self, console: Terminal) -> str:
+        self._con = console
+        if self._expect_keystroke:
+            self._put_prompt(leave_cursor_inline=False)
+            response = self._read_keystroke()
+        else:
+            self._put_prompt(leave_cursor_inline=True)
+            response = self._read_string()
+    
+    def _put_prompt(self, leave_cursor_inline: bool) -> None:
+        end = " " if leave_cursor_inline else "\n"
+        prompt = self._prompt.ljust(min(self._con.width, 79))
+        print(self._con.center(self._con.bright_yellow(prompt)), end=end)
+
+    def _read_keystroke(self):
+        pass
+
+    def _read_string(self):
+        pass
 
 
 class Console_Table:

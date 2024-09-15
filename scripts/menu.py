@@ -1,7 +1,11 @@
-""""""
-
+"""Menu module"""
+# Standard library imports
 from typing import Any
+
+# Third-party imports
 from blessed import Terminal
+
+# Local module import
 from table import Table
 
 class Menu:

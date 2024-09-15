@@ -12,7 +12,7 @@ import commands as cmd
 import console as con
 
 
-def confirm_disk(terminal: Terminal, disk: str) -> bool:
+def confirm_disk(console: Terminal, disk: str) -> bool:
     """Prompt the user to confirm the selection of a disk.
 
     Args:
@@ -26,7 +26,7 @@ def confirm_disk(terminal: Terminal, disk: str) -> bool:
                                     columns=["NAME", "TYPE", "FSTYPE", "LABEL", 
                                              "MOUNTPOINTS"])
     partitions = Table(title="selected device", table_string=output)
-    partitions.put_table(terminal)
+    partitions.put_table(console)
     return Menu.query_yes_no(prompt)
 
 
@@ -37,7 +37,7 @@ def get_disks() -> Table:
         A list of dictionaries containing disk information.
     """
     output = cmd.list_block_devices(columns=["NAME", "VENDOR", "SIZE"], 
-                                    show_dependendents=False)
+                                    show_dependents=False)
     disks = Table(title="connected devices", 
                   table_string=output, 
                   rjust_columns="SIZE")
@@ -45,7 +45,7 @@ def get_disks() -> Table:
     return disks
 
 
-def select_disk(term: Terminal, disks: Table) -> str:
+def select_disk(console: Terminal, disks: Table) -> str:
     """Prompt the user to select a disk from a list of disks.
 
     Args:
@@ -56,11 +56,11 @@ def select_disk(term: Terminal, disks: Table) -> str:
         The name of the selected disk.
     """
     disk_selection = Menu(disks)
-    disk_selection.run(term)
+    disk_selection.run(console)
     return disk_selection.get_selection("NAME")
 
 
-def get_disk(terminal: Terminal) -> str:
+def get_disk(console: Terminal) -> str:
     """Main function to select and confirm a disk.
 
     Continuously prompts the user to connect and select a disk until
@@ -69,21 +69,23 @@ def get_disk(terminal: Terminal) -> str:
     Returns:
         The name of the confirmed disk.
     """
-    con.put_script_banner(terminal, inspect.currentframe().f_code.co_name)
+    con.put_script_banner(console, inspect.currentframe().f_code.co_name)
 
     while True:
         disks = get_disks()
         count = disks.count_records()
 
         if count == 0:
-            con.prompt_key(terminal, 
-                           "Connect a device and press any key to continue...")
+            no_disk_msg = "Connect a device and press any key to continue..."
+            no_disk_alert = con.Console_Prompt(no_disk_msg, 
+                                               expect_keystroke=True)
+            no_disk_alert.call(console)
             continue
 
         disk = (disks.get_record(0)["NAME"] 
-                if count == 1 else select_disk(terminal, disks))
+                if count == 1 else select_disk(console, disks))
 
-        if confirm_disk(terminal, disk):
+        if confirm_disk(console, disk):
             break
         else:
             if Menu.query_yes_no(f"Do you want to unmount '{disk}'? (y/n) "):
@@ -94,13 +96,13 @@ def get_disk(terminal: Terminal) -> str:
     return disk
 
 
-def main(terminal: Terminal) -> str:
-    con.clear_stdscr(terminal)
-    disk = get_disk(terminal)
+def main(console: Terminal) -> str:
+    con.clear_stdscr(console)
+    disk = get_disk(console)
     return disk
 
 
 if __name__ == "__main__":
-    terminal = Terminal()
-    disk = main(terminal)
+    console = Terminal()
+    disk = main(console)
     print(disk)
