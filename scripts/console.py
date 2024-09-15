@@ -69,6 +69,7 @@ class Console_Prompt:
         else:
             self._put_prompt(leave_cursor_inline=True)
             response = self._read_string()
+        return response
     
     def _put_prompt(self, leave_cursor_inline: bool) -> None:
         end = " " if leave_cursor_inline else "\n"
@@ -76,10 +77,12 @@ class Console_Prompt:
         print(self._con.center(self._con.bright_yellow(prompt)), end=end)
 
     def _read_keystroke(self):
-        pass
+        with self._con.cbreak(), self._con.hidden_cursor():
+            key = self._con.inkey()
+        return repr(key)
 
     def _read_string(self):
-        pass
+        return input()
 
 
 class Console_Table:
