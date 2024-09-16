@@ -24,11 +24,19 @@ class Menu:
     def get_selection(self, key: str = "OPTION") -> Any:
         return self._selection[key.upper()]
 
-    def run(self, terminal: Terminal) -> None:
-        # self._options.put_table(display_width=len(self._prompt), is_menu=True)
-        self._options.put_table(terminal=terminal, is_menu=True)
-        index = self._prompt_selection() - 1
+    def run(self, console: Terminal) -> None:
+        self._options.put_table(console, is_menu=True)
+        index = self._prompt.call(console) - 1
         self._selection = self._options.get_record(index)
+
+    def set_prompt(self, prompt: str | None = None) -> None:
+        count = self._count
+        prompt = (f"Enter number (1-{self._count}) for selection:" 
+                  if prompt is None else prompt)
+        self._prompt = Console_Prompt(prompt, 
+                                      expect_keystroke=count < 10, 
+                                      validate_integer=True, 
+                                      integer_validation=(1, count))
 
     def _prompt_selection(self) -> int:
         while True:
@@ -39,13 +47,7 @@ class Menu:
                 print(f"Enter a number between 1 and {self._count}.")
             except ValueError:
                 print("Enter a valid number.")
-    
-    def set_prompt(self, prompt: str | None = None) -> None:
-        default = f"Enter number (1-{self._count}) for selection:"
-        self._prompt = (Console_Prompt(default) 
-                        if prompt is None 
-                        else Console_Prompt(prompt))
-
+####DELETE
     @staticmethod
     def query_yes_no(prompt: str) -> bool:
         while True:

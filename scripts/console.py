@@ -1,7 +1,7 @@
 """Console module."""
 # Standard library imports
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 
 # Third-party imports
 from blessed import Terminal
@@ -34,56 +34,104 @@ def put_script_banner(con: Terminal, script_name: str) -> None:
 
 
 class Console_Prompt:
-    '''
-    def get_padding(console: Terminal) -> str:
-    return " " * (max(0, console.width - 79) // 2)
-    def prompt_key(console: Terminal, prompt: str) -> str:
-    #    padding = get_padding(console)
-    #    print(console.bright_yellow(f"{padding}{prompt}"))
-    put_prompt(console, prompt)
-    with console.cbreak(), console.hidden_cursor():
-        key = console.inkey()
-    return repr(key)
-    def prompt_str(console: Terminal, prompt: str) -> str:
-    padding = get_padding(console)
-    print(console.bright_yellow(f"{padding}{prompt}"))
-    def put_prompt(console: Terminal, prompt: str) -> None:
-    print(console.center(console.bright_yellow(prompt.ljust(min(console.width, 79)))))
-    '''
     def __init__(self, 
                  prompt: str, 
                  expect_keystroke: bool = False, 
+                 validate_bool: bool = False,
                  validate_integer: bool = False, 
-                 validate_float: bool = False, 
-                 validate_bool: bool = False) -> None:
+                 integer_validation: int | tuple[int, int] | None = None
+                 ) -> None:
         self._prompt = prompt
         self._expect_keystroke = expect_keystroke
-        self._int_check = validate_integer
-        self._bool_check = validate_bool
+        self._validate_bool = validate_bool
+        self._validate_integer = validate_integer
+        self._integer_validation = integer_validation
     
-    def call(self, console: Terminal) -> str:
+    def call(self, console: Terminal) -> Any:
         self._con = console
+        valid = False
+        while not valid:
+            self._get_response()
+            valid = self._validate_response()
+        return self._response
+
+    def _align_message(self, message: str) -> str:
+        return message.ljust(min(self._con.width, 79))
+
+    def _check_bool_validation(self) -> bool:
+        if self._response.lower in {"y", "n"}:
+            self._response = self._response.lower == "y"
+            return True
+        self._put_alert("Respond with 'y' or 'n'.")
+        return False
+
+    def _check_integer_validation(self) -> bool:
+        if self._integer_validation is None:
+            if isinstance(int(self._response), int):
+                return True
+            self._put_alert("Enter valid number.")
+            return False
+        elif isinstance(self._integer_validation, int):
+            if 0 <= int(self._response) < self._integer_validation:
+                return True
+            self._put_alert("Response is out of range.")
+            return False
+        else:
+            lo, hi = self._integer_validation
+            if lo <= int(self._response) <= hi:
+                return True
+            self._put_alert(f"Enter number between {lo} and {hi}.")
+            return False
+
+    def _get_response(self) -> None:
         if self._expect_keystroke:
             self._put_prompt(leave_cursor_inline=False)
-            response = self._read_keystroke()
+            self._response = self._read_keystroke()
         else:
             self._put_prompt(leave_cursor_inline=True)
-            response = self._read_string()
-        return response
-    
+            self._response = self._read_string()
+
+    def _put_alert(self, alert: str) -> None:
+        alert = self._align_message(alert)
+        print(self._con.center(self._con.red(alert)))
+
     def _put_prompt(self, leave_cursor_inline: bool) -> None:
         end = " " if leave_cursor_inline else "\n"
-        prompt = self._prompt.ljust(min(self._con.width, 79))
-        print(self._con.center(self._con.bright_yellow(prompt)), end=end)
+        prompt = self._align_message(self._prompt)
+        print(self._con.center(self._con.bright_yellow(prompt)), 
+              end=end, 
+              flush=True)
 
-    def _read_keystroke(self):
+    def _read_keystroke(self) -> str:
         with self._con.cbreak(), self._con.hidden_cursor():
             key = self._con.inkey()
         return repr(key)
 
-    def _read_string(self):
-        return input()
+    def _read_string(self) -> str:
+        user_input = []
+        with self._con.cbreak():
+            while True:
+                key = self._con.inkey()
+                if key.is_sequence and key.name == 'KEY_ENTER':
+                    break
+                elif key.is_sequence and key.name == 'KEY_BACKSPACE':
+                    if user_input:
+                        user_input.pop()
+                        self._put_prompt(leave_cursor_inline=True)
+                        print(self._con.move_left(), end='', flush=True)
+                else:
+                    user_input.append(key)
+                    print(self._con.green(key), end='', flush=True)
+        print()
+        return ''.join(user_input)
 
+    def _validate_response(self) -> bool:
+        if self._validate_bool:
+            return self._check_bool_validation()
+        elif self._validate_integer:
+            return self._check_integer_validation()
+        else:
+            return True
 
 class Console_Table:
     """A class to represent a terminal-based table.
