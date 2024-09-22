@@ -6,7 +6,7 @@ from typing import Any
 from blessed import Terminal
 
 # Local module import
-from console import Console_Prompt
+from console import ConsolePrompt
 from table import Table
 
 class Menu:
@@ -33,10 +33,10 @@ class Menu:
         count = self._count
         prompt = (f"Enter number (1-{self._count}) for selection:" 
                   if prompt is None else prompt)
-        self._prompt = Console_Prompt(prompt, 
-                                      expect_keystroke=count < 10, 
-                                      validate_integer=True, 
-                                      integer_validation=(1, count))
+        self._prompt = ConsolePrompt(prompt, 
+                                     expect_keystroke=count < 10, 
+                                     validate_integer=True, 
+                                     integer_validation=(1, count))
 
     def _prompt_selection(self) -> int:
         while True:
@@ -47,11 +47,3 @@ class Menu:
                 print(f"Enter a number between 1 and {self._count}.")
             except ValueError:
                 print("Enter a valid number.")
-####DELETE
-    @staticmethod
-    def query_yes_no(prompt: str) -> bool:
-        while True:
-            response = input(prompt).strip().lower()
-            if response in {'y', 'n'}:
-                return response == 'y'
-            print("Respond with 'y' or 'n'.")

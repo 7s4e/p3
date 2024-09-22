@@ -27,9 +27,9 @@ def confirm_disk(console: Terminal, disk: str) -> bool:
                                              "MOUNTPOINTS"])
     partitions = Table(title="selected device", table_string=output)
     partitions.put_table(console)
-    disk_confirmation = con.Console_Prompt(prompt,
-                                           expect_keystroke=True, 
-                                           validate_bool=True)
+    disk_confirmation = con.ConsolePrompt(prompt,
+                                          expect_keystroke=True, 
+                                          validate_bool=True)
     return disk_confirmation.call(console)
 
 

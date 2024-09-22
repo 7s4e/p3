@@ -2,6 +2,7 @@
 # Standard library imports
 from __future__ import annotations
 from typing import Any, TYPE_CHECKING
+import textwrap
 
 # Third-party imports
 from blessed import Terminal
@@ -15,8 +16,7 @@ def clear_stdscr(con: Terminal) -> None:
     """Clear terminal screen and reset cursor to the home position.
 
     Args:
-        con (Terminal): The terminal object used to control screen 
-            operations.
+        con: The terminal object used to control screen operations.
     """
     print(con.home + con.clear)
 
@@ -25,9 +25,8 @@ def put_script_banner(con: Terminal, script_name: str) -> None:
     """Display reverse-video banner in terminal with the script name.
 
     Args:
-        con (Terminal): The terminal object used for formatting and 
-            display.
-        script_name (str): The name of the script to be displayed in the 
+        con: The terminal object used for formatting and display.
+        script_name: The name of the script to be displayed in the 
             banner.
     """
     print(con.reverse(f"Running {script_name}...".ljust(con.width)))
@@ -42,27 +41,22 @@ class ConsolePrompt:
     input validation accordingly.
 
     Args:
-        prompt (str): The message to display to the user.
-        expect_keystroke (bool): If True, expect a single keystroke 
-            input.
-        validate_bool (bool): If True, validate the input as a boolean 
+        prompt: The message to display to the user.
+        expect_keystroke: If True, expect a single keystroke input.
+        validate_bool: If True, validate the input as a boolean 
             ('y' or 'n').
-        validate_integer (bool): If True, validate the input as an 
-            integer.
-        integer_validation (int | tuple[int, int] | None): Defines 
-            integer validation criteria. Can be an upper limit (int) or 
-            a range (tuple of two ints).
+        validate_integer: If True, validate the input as an integer.
+        integer_validation: Defines integer validation criteria. Can be 
+            an upper limit (int) or a range (tuple of two ints).
 
     Attributes:
-        _prompt (str): The prompt message to display to the user.
-        _expect_keystroke (bool): Flag indicating if a keystroke is 
-            expected.
-        _validate_bool (bool): Flag indicating if boolean validation is 
+        _prompt: The prompt message to display to the user.
+        _expect_keystroke: Flag indicating if a keystroke is expected.
+        _validate_bool: Flag indicating if boolean validation is 
             enabled.
-        _validate_integer (bool): Flag indicating if integer validation 
-            is enabled.
-        _integer_validation (int | tuple[int, int] | None): Validation 
-            criteria for integers.
+        _validate_integer: Flag indicating if integer validation is 
+            enabled.
+        _integer_validation: Validation criteria for integers.
 
     Methods:
         call(console): Prompt the user and return the validated 
@@ -107,8 +101,8 @@ class ConsolePrompt:
         Once the input is valid, it returns the validated response.
 
         Args:
-            console (Terminal): The console or terminal instance for 
-                user interaction.
+            console: The console or terminal instance for user 
+                interaction.
 
         Returns:
             Any: The validated response from the user, which could be a 
@@ -123,23 +117,6 @@ class ConsolePrompt:
         return self._response
 
     # Private Methods
-    def _align_message(self, message: str) -> str:
-        """Align the message to the left, padded to fit the console 
-            width or 79 characters.
-
-        This method left-justifies the message, padding it with spaces 
-        to fit either the width of the console or a maximum of 79 
-        characters, whichever is smaller.
-
-        Args:
-            message (str): The message to be aligned.
-
-        Returns:
-            str: The left-justified message, padded to the appropriate 
-                width.
-        """
-        return message.ljust(min(self._con.width, 79))
-
     def _check_bool_validation(self) -> bool:
         """Validate the user's boolean response based on 'y' or 'n' 
             input.
@@ -216,36 +193,56 @@ class ConsolePrompt:
             self._put_prompt(leave_cursor_inline=True)
             self._response = self._read_string()
 
+    def _print_message(self, message: str, leave_cursor_inline: bool) -> None:
+        """Print a centered, wrapped message to the console.
+
+        This method displays a message centered within the console 
+        width. If the message is longer than the display width, it is 
+        wrapped. The cursor can either remain inline with the message or 
+        move to the next line based on the `leave_cursor_inline` 
+        argument.
+
+        Args:
+            message: The message to be printed.
+            leave_cursor_inline: If True, the cursor remains inline with 
+                a trailing space after the message. If False, the cursor 
+                moves to the next line after printing.
+        """
+        display_width = min(self._con.width, 79)
+        padding = " " * ((self._con.width - display_width) // 2)
+        print(textwrap.fill(message, 
+                            width=display_width, 
+                            initial_indent=padding, 
+                            subsequent_indent=padding), 
+              end=" " if leave_cursor_inline else "\n", 
+              flush=True)
+
     def _put_alert(self, alert: str) -> None:
         """Display an alert message to the user in red.
 
-        This method prints a centered alert message in red to the console. 
-        The message is aligned and formatted before being displayed.
+        This method prints the provided alert message to the console in 
+        red. The cursor moves to the next line after being displayed.
 
         Args:
-            alert (str): The alert message to be displayed.
+            alert: The alert message to be displayed.
         """
-        alert = self._align_message(alert)
-        print(self._con.center(self._con.red(alert)))
+        self._print_message(self._con.red(alert), leave_cursor_inline=False)
 
     def _put_prompt(self, leave_cursor_inline: bool) -> None:
         """Display the prompt message to the user.
 
-        This method prints the prompt, centered and in bright yellow, to 
-        the console. It optionally keeps the cursor inline or moves it 
-        to the next line based on the `leave_cursor_inline` argument.
+        This method prints the prompt message to the console in bright 
+        yellow. The cursor's position after displaying the prompt is 
+        determined by the `leave_cursor_inline` argument.
 
         Args:
-            leave_cursor_inline (bool): If True, the cursor remains 
-                inline with a trailing space; if False, it moves to the 
-                next line after the prompt.
+            leave_cursor_inline: If True, the cursor remains inline with 
+                a trailing space; if False, it moves to the next line 
+                after the prompt.
         """
-        end = " " if leave_cursor_inline else "\n"
-        prompt = self._align_message(self._prompt)
-        print(self._con.center(self._con.bright_yellow(prompt)), 
-              end=end, 
-              flush=True)
-
+        self._print_message(self._con.bright_yellow(self._prompt), 
+                            leave_cursor_inline=leave_cursor_inline)
+        
     def _read_keystroke(self) -> str:
         """Read and return a single keystroke from the user.
 
@@ -309,17 +306,16 @@ class ConsolePrompt:
         return True
 
 
-class Console_Table:
+class ConsoleTable:
     """A class to represent a terminal-based table.
 
     Args:
-        data (Table): An instance of the `Table` class containing the 
-            data to be displayed in the terminal.
+        data: An instance of the `Table` class containing the data to be 
+            displayed in the terminal.
 
     Attributes:
-        _data (Table): The table data provided at initialization.
-        _borders (dict): A dictionary defining the table's border 
-            characters.
+        _data: The table data provided at initialization.
+        _borders: A dictionary defining the table's border characters.
 
     Methods:
         display(console): Display the table on the terminal.
@@ -380,22 +376,22 @@ class Console_Table:
     
         rjust_col = (self._data.get_rjust_columns() 
                      if row_type == "record" else {})
-    
+
+        margin = " " * self._margin_size
+
         left, right, gap = self._get_row_ends(row_type, 
                                               row_type in line_types)
-    
+
         content = (self._get_text_content(row_type, index)
                    if row_type in text_types
                    else self._borders[row_type]["fill"])
-    
+
         cells = (self._process_text_content(row_type, content, rjust_col)
                  if row_type in text_types
                  else [
                      f"{self._con.blue(content * (self._table_width + 2))}"])
-        
-        row = f"{left}{gap}{'  '.join(cells)}{gap}{right}"
 
-        print(self._con.center(row.ljust(self._display_width)))
+        print(f"{margin}{left}{gap}{'  '.join(cells)}{gap}{right}")
 
     def _draw_table(self, record_count: int) -> None:
         """Draw full table with borders, title, headings, and records.
@@ -537,26 +533,29 @@ class Console_Table:
         
         return cells
 
-
     def _set_dimensions(self) -> None:
-        """Set display and table dimensions based on terminal width.
+        """Set display and table dimensions based on the terminal width.
 
-        This method calculates the display width and table width by 
-        considering the terminal width and the total width of the table. 
-        If the table width exceeds the available display space, it 
-        resizes the columns to fit. Finally, it updates the column 
-        widths for rendering the table.
+        This method determines the display width and table width 
+        relative to the terminal's current width. If the table width 
+        exceeds the available display space, it resizes the columns to 
+        fit within the display. The column widths are then updated for 
+        rendering the table.
 
         Side effects:
-            - Updates self._display_width with the terminal width 
-                (capped at 79).
-            - Updates self._table_width based on the table data.
-            - Resizes table columns if the table exceeds the available 
+            - Updates `self._display_width` to the terminal width, 
+                capped at 79.
+            - Updates `self._margin_size` to center the content if 
+                necessary.
+            - Updates `self._table_width` based on the current table 
+                data.
+            - Resizes table columns if the table width exceeds available 
                 space.
-            - Updates self._column_widths to reflect the current table 
+            - Updates `self._column_widths` to reflect the resized table 
                 layout.
         """
         self._display_width = min(self._con.width, 79)
+        self._margin_size = (self._con.width - self._display_width) // 2
         self._table_width = self._data.get_table_width()
 
         table_space = self._display_width - 4  # For borders and padding

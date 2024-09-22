@@ -4,7 +4,7 @@
 from blessed import Terminal
 
 # Local module imports
-from console import Console_Table
+from console import ConsoleTable
 
 class Table:
     """
@@ -207,7 +207,7 @@ class Table:
 
         # Create an instance of Console_Table with the current 
         # instance's data
-        table = Console_Table(self)
+        table = ConsoleTable(self)
 
         # Display the table using the provided Terminal object
         table.display(console)
