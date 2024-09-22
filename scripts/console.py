@@ -33,7 +33,55 @@ def put_script_banner(con: Terminal, script_name: str) -> None:
     print(con.reverse(f"Running {script_name}...".ljust(con.width)))
 
 
-class Console_Prompt:
+class ConsolePrompt:
+    """A class to manage console prompts and user input validation.
+
+    This class facilitates prompting the user for input via the console, 
+    with options for validating boolean and integer responses. It can 
+    expect either a single keystroke or a full string input, and handle 
+    input validation accordingly.
+
+    Args:
+        prompt (str): The message to display to the user.
+        expect_keystroke (bool): If True, expect a single keystroke 
+            input.
+        validate_bool (bool): If True, validate the input as a boolean 
+            ('y' or 'n').
+        validate_integer (bool): If True, validate the input as an 
+            integer.
+        integer_validation (int | tuple[int, int] | None): Defines 
+            integer validation criteria. Can be an upper limit (int) or 
+            a range (tuple of two ints).
+
+    Attributes:
+        _prompt (str): The prompt message to display to the user.
+        _expect_keystroke (bool): Flag indicating if a keystroke is 
+            expected.
+        _validate_bool (bool): Flag indicating if boolean validation is 
+            enabled.
+        _validate_integer (bool): Flag indicating if integer validation 
+            is enabled.
+        _integer_validation (int | tuple[int, int] | None): Validation 
+            criteria for integers.
+
+    Methods:
+        call(console): Prompt the user and return the validated 
+            response.
+        _get_response(): Get the user's response based on expected input 
+            type.
+        _validate_response(): Validate the user's input based on the 
+            specified criteria.
+        _read_string(): Capture a string input from the user.
+        _read_keystroke(): Capture a single keystroke from the user.
+        _check_integer_validation(): Validate the user's integer 
+            response.
+        _check_bool_validation(): Validate the user's boolean response.
+        _put_prompt(leave_cursor_inline): Display the prompt message.
+        _put_alert(alert): Display an alert message.
+        _align_message(message): Align the message to the left for 
+            display.
+    """
+
     def __init__(self, 
                  prompt: str, 
                  expect_keystroke: bool = False, 
@@ -41,13 +89,32 @@ class Console_Prompt:
                  validate_integer: bool = False, 
                  integer_validation: int | tuple[int, int] | None = None
                  ) -> None:
+        """Initialize the console prompt with specified parameters."""
         self._prompt = prompt
         self._expect_keystroke = expect_keystroke
         self._validate_bool = validate_bool
         self._validate_integer = validate_integer
         self._integer_validation = integer_validation
-    
+
+    # Public Method
     def call(self, console: Terminal) -> Any:
+        """Prompt the user, validate the response, and return the valid 
+            input.
+
+        This method sets the console for user interaction and repeatedly 
+        prompts the user for input until a valid response is received. 
+        The validation is handled by the `_validate_response` method. 
+        Once the input is valid, it returns the validated response.
+
+        Args:
+            console (Terminal): The console or terminal instance for 
+                user interaction.
+
+        Returns:
+            Any: The validated response from the user, which could be a 
+                string, integer, or boolean, depending on the validation 
+                type.
+        """
         self._con = console
         valid = False
         while not valid:
@@ -55,35 +122,93 @@ class Console_Prompt:
             valid = self._validate_response()
         return self._response
 
+    # Private Methods
     def _align_message(self, message: str) -> str:
+        """Align the message to the left, padded to fit the console 
+            width or 79 characters.
+
+        This method left-justifies the message, padding it with spaces 
+        to fit either the width of the console or a maximum of 79 
+        characters, whichever is smaller.
+
+        Args:
+            message (str): The message to be aligned.
+
+        Returns:
+            str: The left-justified message, padded to the appropriate 
+                width.
+        """
         return message.ljust(min(self._con.width, 79))
 
     def _check_bool_validation(self) -> bool:
-        if self._response.lower in {"y", "n"}:
-            self._response = self._response.lower == "y"
+        """Validate the user's boolean response based on 'y' or 'n' 
+            input.
+
+        This method checks whether the user's response is a valid 'y' or 
+        'n'. If the input is valid, it converts 'y' to `True` and 'n' to 
+        `False`, storing the result in `_response`. If the input is 
+        invalid, an alert is displayed prompting the user to respond 
+        with 'y' or 'n'.
+
+        Returns:
+            bool: True if the response is valid ('y' or 'n'), False 
+                otherwise.
+        """
+        if self._response.lower() in {"y", "n"}:
+            self._response = self._response.lower() == "y"
             return True
+
         self._put_alert("Respond with 'y' or 'n'.")
         return False
 
     def _check_integer_validation(self) -> bool:
+        """Validate the user's integer response based on the expected 
+            criteria.
+
+        This method validates the user's response, ensuring it is a 
+        valid integer and meets the conditions specified by 
+        `_integer_validation`. The validation can either check for any 
+        integer, a maximum bound, or a range of values.
+
+        If the validation fails, an alert is displayed with the 
+        appropriate message.
+
+        Returns:
+            bool: True if the response is valid, False otherwise.
+        """
         if self._integer_validation is None:
-            if isinstance(int(self._response), int):
-                return True
-            self._put_alert("Enter valid number.")
+            try:
+                if isinstance(int(self._response), int):
+                    return True
+            except ValueError:
+                pass
+            self._put_alert("Enter a valid number.")
             return False
-        elif isinstance(self._integer_validation, int):
+
+        if isinstance(self._integer_validation, int):
             if 0 <= int(self._response) < self._integer_validation:
                 return True
             self._put_alert("Response is out of range.")
             return False
-        else:
-            lo, hi = self._integer_validation
-            if lo <= int(self._response) <= hi:
-                return True
-            self._put_alert(f"Enter number between {lo} and {hi}.")
-            return False
+
+        lo, hi = self._integer_validation
+        if lo <= int(self._response) <= hi:
+            return True
+
+        self._put_alert(f"Enter a number between {lo} and {hi}.")
+        return False
 
     def _get_response(self) -> None:
+        """Prompt the user and capture their response.
+
+        This method displays a prompt to the user and captures either a 
+        single keystroke or a full string input, depending on the 
+        `_expect_keystroke` flag. The response is stored in the 
+        `_response` attribute.
+
+        If `_expect_keystroke` is True, a keystroke is read and stored; 
+        otherwise, a string input is captured.
+        """
         if self._expect_keystroke:
             self._put_prompt(leave_cursor_inline=False)
             self._response = self._read_keystroke()
@@ -92,10 +217,29 @@ class Console_Prompt:
             self._response = self._read_string()
 
     def _put_alert(self, alert: str) -> None:
+        """Display an alert message to the user in red.
+
+        This method prints a centered alert message in red to the console. 
+        The message is aligned and formatted before being displayed.
+
+        Args:
+            alert (str): The alert message to be displayed.
+        """
         alert = self._align_message(alert)
         print(self._con.center(self._con.red(alert)))
 
     def _put_prompt(self, leave_cursor_inline: bool) -> None:
+        """Display the prompt message to the user.
+
+        This method prints the prompt, centered and in bright yellow, to 
+        the console. It optionally keeps the cursor inline or moves it 
+        to the next line based on the `leave_cursor_inline` argument.
+
+        Args:
+            leave_cursor_inline (bool): If True, the cursor remains 
+                inline with a trailing space; if False, it moves to the 
+                next line after the prompt.
+        """
         end = " " if leave_cursor_inline else "\n"
         prompt = self._align_message(self._prompt)
         print(self._con.center(self._con.bright_yellow(prompt)), 
@@ -103,18 +247,39 @@ class Console_Prompt:
               flush=True)
 
     def _read_keystroke(self) -> str:
+        """Read and return a single keystroke from the user.
+
+        This method captures a single keypress from the user, operating in 
+        'cbreak' mode, where input is read one character at a time without 
+        waiting for a newline. The cursor is hidden during the input.
+
+        Returns:
+            str: A string representation of the key pressed.
+        """
         with self._con.cbreak(), self._con.hidden_cursor():
             key = self._con.inkey()
         return repr(key)
 
     def _read_string(self) -> str:
+        """Capture a string input from the user, handling enter and 
+            backspace keys.
+
+        This method reads characters from the user input in a terminal 
+        session, with special handling for 'Enter' (which ends the 
+        input) and 'Backspace' (which removes the last entered 
+        character). The input is captured one character at a time until 
+        'Enter' is pressed.
+
+        Returns:
+            str: The string input provided by the user.
+        """
         user_input = []
         with self._con.cbreak():
             while True:
                 key = self._con.inkey()
                 if key.is_sequence and key.name == 'KEY_ENTER':
                     break
-                elif key.is_sequence and key.name == 'KEY_BACKSPACE':
+                if key.is_sequence and key.name == 'KEY_BACKSPACE':
                     if user_input:
                         user_input.pop()
                         self._put_prompt(leave_cursor_inline=True)
@@ -126,12 +291,23 @@ class Console_Prompt:
         return ''.join(user_input)
 
     def _validate_response(self) -> bool:
+        """Validate the response based on the defined validation type.
+
+        This method checks the response using either a boolean or 
+        integer validation, depending on the internal flags 
+        `_validate_bool` or `_validate_integer`. If neither flag is set, 
+        it defaults to returning `True`.
+
+        Returns:
+            bool: The result of the validation check, or True if no 
+            validation is required.
+        """
         if self._validate_bool:
             return self._check_bool_validation()
-        elif self._validate_integer:
+        if self._validate_integer:
             return self._check_integer_validation()
-        else:
-            return True
+        return True
+
 
 class Console_Table:
     """A class to represent a terminal-based table.
@@ -146,7 +322,16 @@ class Console_Table:
             characters.
 
     Methods:
-        display: Put table to terminal console.
+        display(console): Display the table on the terminal.
+        _draw_row(row_type, index): Draw a specific row in the table.
+        _draw_table(record_count): Draw the full table structure.
+        _get_row_ends(row_type, is_line_type): Get row ends and padding.
+        _get_text_content(row_type, index): Retrieve text content for a 
+            row.
+        _process_text_content(row_type, content, rjust_col): Process row 
+            content into formatted text cells.
+        _set_dimensions(): Set display and table dimensions based on 
+            terminal width.
     """
 
     def __init__(self, data: Table) -> None:
@@ -207,8 +392,10 @@ class Console_Table:
                  if row_type in text_types
                  else [
                      f"{self._con.blue(content * (self._table_width + 2))}"])
-    
-        print(self._con.center(f"{left}{gap}{'  '.join(cells)}{gap}{right}"))
+        
+        row = f"{left}{gap}{'  '.join(cells)}{gap}{right}"
+
+        print(self._con.center(row.ljust(self._display_width)))
 
     def _draw_table(self, record_count: int) -> None:
         """Draw full table with borders, title, headings, and records.
