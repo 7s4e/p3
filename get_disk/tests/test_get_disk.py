@@ -1,1 +1,1 @@
-import src.get_disk as gd
+# import src.get_disk as gd
