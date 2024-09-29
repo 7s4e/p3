@@ -1,8 +1,8 @@
 """Interface modules."""
 
 # Local module imports
-from menu import Menu
-import commands as cmd
+# from menu import Menu
+import get_disk.src.commands as cmd
 
 def delete_disk(disk: str) -> None:
     options = ["dd", "shred", "wipefs", "blkdiscard"]
@@ -30,16 +30,16 @@ def run_badblocks(disk: str) -> None:
     options = ["Non-destructive read-write mode",
                "Destructive write mode",
                "Skip `badblocks`"]
-    menu = Menu(options, "badblocks")
-    menu.run()
+    # menu = Menu(options, "badblocks")
+    # menu.run()
     
-    match menu.get_selection():
-        case "Non-destructive read-write mode":
-            cmd.run_badblocks(disk, non_destructive=True)
-        case "Destructive write mode":
-            cmd.run_badblocks(disk, non_destructive=False)
-        case "Skip `badblocks`":
-            pass
+    # match menu.get_selection():
+        # case "Non-destructive read-write mode":
+        #     cmd.run_badblocks(disk, non_destructive=True)
+        # case "Destructive write mode":
+        #     cmd.run_badblocks(disk, non_destructive=False)
+        # case "Skip `badblocks`":
+        #     pass
 
 
 def run_fsck(disk: str) -> None:

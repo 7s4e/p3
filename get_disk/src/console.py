@@ -9,7 +9,7 @@ from blessed import Terminal
 
 # Local module import
 if TYPE_CHECKING:
-    from table import Table
+    from get_disk.src.table import Table
 
 
 def clear_stdscr(con: Terminal) -> None:

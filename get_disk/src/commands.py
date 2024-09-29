@@ -5,7 +5,7 @@ import subprocess
 import sys
 
 # Local module imports
-from table import Table
+from get_disk.src.table import Table
 
 
 def run_command(command: str, 
