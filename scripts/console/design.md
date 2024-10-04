@@ -29,16 +29,16 @@ END
 ```
 ## `ConsolePrompt`
 ```mermaid
-graph TD
-    CLS([ConsolePrompt]) 
+graph TB
+    MAIN([ConsolePrompt]) 
         -- prompt <br> expectKeystroke <br> validateBool <br> validateInteger <br> integerValidation 
         --> INIT
-    CLS -- console --> CALL
+    MAIN -- console --> CALL
 
     CALL(call <br> SET_console <br> GET_response)
     CALL --> GR
     CALL --> VR
-    CALL -- response --> CLS
+    CALL -- response --> MAIN
 
     CBV(_checkBoolValitation <br> GET_response)
     CBV -- alert --> PA
@@ -74,8 +74,5 @@ graph TD
     VR --> CBV
     VR --> CIV
     VR -- valid --> CALL
-
-
-
 ```
 ## `ConsoleTable`
