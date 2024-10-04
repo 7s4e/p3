@@ -30,47 +30,52 @@ END
 ## `ConsolePrompt`
 ```mermaid
 graph TD
-    %% Class Initialization
     CLS([ConsolePrompt]) 
         -- prompt <br> expectKeystroke <br> validateBool <br> validateInteger <br> integerValidation 
-        --> INIT(init)
-    INIT 
-        -. _prompt <br> _expectKeystroke <br> _validateBool <br> _validateInteger <br> _integerValidation 
-        .-> INST[instance]
-    
-    %% Public method call()
-    CLS -- console --> CALL(call)
-    CALL -. _console .-> INST
-    INST -. _response .-> CALL
+        --> INIT
+    CLS -- console --> CALL
+
+    CALL(call <br> SET_console <br> GET_response)
+    CALL --> GR
+    CALL --> VR
     CALL -- response --> CLS
 
-        %% Calls getResonse() and validateResponse()
-        CALL --> GR(_getResponse)
+    CBV(_checkBoolValitation <br> GET_response)
+    CBV -- alert --> PA
+    CBV -- valid --> VR
 
-            %% Private method getResponse()
-            INST -. _expectKeystroke .-> GR
-            GR -. _response .-> INST
-            
-                %% Calls putPrompt(), readKeystroke(), and readString()
-                GR -- leaveCursorInline --> PP(_putPrompt)
+    CIV(_checkIntegerValitation <br> GET_response)
+    CIV -- alert --> PA
+    CIV -- valid --> VR
 
-                    %% Private method putPrompt()
+    GR(_getResponse <br> GET_expectKeystroke <br> SET_response)
+    GR -- leaveCursorInline --> PP
+    GR --> RK
+    GR --> RS
 
+    INIT(init <br> SET_prompt <br> SET_expectKeystroke <br> SET_validateBool <br> SET_validateInteger <br> SET_integerValidation)
 
-                GR --> RK(_readKeystroke)
-                GR --> RS(_readString)
-                
-        CALL --> VR(_validateResponse)
-        VR -- valid --> CALL
+    PA(_putAlert <br> GET_console)
+    PA -- formattedAlert <br> leaveCursorInline--> PM
 
+    PM(_printMessage)
 
-    INST -. _console <br> _prompt .-> PP
-    PP -- formattedPrompt <br> leaveCursorInline--> PM(_printMessage)
+    PP(_putPrompt <br> GET_console<br> GET_prompt)
+    PP -- formattedPrompt <br> leaveCursorInline--> PM
 
-    INST -. _console .-> RK
+    RK(_readKeystroke <br> GET_console)
     RK -- key --> GR
 
-    INST -. _console .-> RS
+    RS(_readString <br> GET_console)
+    RS -- leaveCursorInline --> PP
     RS -- string --> GR
+
+    VR(_validateResponse <br> GET_validateBool <br> GET_validateInteger)
+    VR --> CBV
+    VR --> CIV
+    VR -- valid --> CALL
+
+
+
 ```
 ## `ConsoleTable`
