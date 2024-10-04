@@ -83,7 +83,43 @@ class ConsolePrompt:
                  validate_integer: bool = False, 
                  integer_validation: int | tuple[int, int] | None = None
                  ) -> None:
-        """Initialize the console prompt with specified parameters."""
+
+        # Type validation
+        if not isinstance(prompt, str):
+            raise TypeError("Expected `str` for 'prompt'.")
+        if not isinstance(expect_keystroke, bool):
+            raise TypeError("Expected `bool` for 'expect_keystroke'.")
+        if not isinstance(validate_bool, bool):
+            raise TypeError("Expected `bool` for 'validate_bool'.")
+        if not isinstance(validate_integer, bool):
+            raise TypeError("Expected `bool` for 'validate_integer'.")
+        if (integer_validation is not None 
+            and not (isinstance(integer_validation, int) 
+                     or isinstance(integer_validation, tuple))):
+            raise TypeError(
+                "Expected `int`, `tuple[int, int]`, or `None` for 'integer_validation'.")
+
+        # Value validation
+        if validate_bool and validate_integer:
+            raise ValueError(
+                "Both 'validate_bool' and 'validate_integer' cannot be `True`.")
+        if integer_validation is not None:
+            if not validate_integer:
+                raise ValueError(
+                    "With 'integer_validation', 'validate_integer' must be `True`.")
+            if isinstance(integer_validation, int):
+                if integer_validation < 0:
+                    raise ValueError(
+                        "Range for 'integer_validation' must be positive.")
+            else:
+                if len(integer_validation) != 2:
+                    raise ValueError(
+                        "The 'integer_validation' `tuple` must have two elements.")
+                if integer_validation[0] >= integer_validation[1]:
+                    raise ValueError(
+                        "The second value of the 'integer_validation' `tuple` cannot be less than the first.")
+
+        # Assign validated attributes
         self._prompt = prompt
         self._expect_keystroke = expect_keystroke
         self._validate_bool = validate_bool
