@@ -95,6 +95,7 @@ class ConsolePrompt:
             raise TypeError("Expected `bool` for 'validate_integer'.")
         if (integer_validation is not None 
             and not (isinstance(integer_validation, int) 
+                     and not isinstance(integer_validation, bool)
                      or isinstance(integer_validation, tuple))):
             raise TypeError(
                 "Expected `int`, `tuple[int, int]`, or `None` for 'integer_validation'.")
@@ -115,7 +116,7 @@ class ConsolePrompt:
                 if len(integer_validation) != 2:
                     raise ValueError(
                         "The 'integer_validation' `tuple` must have two elements.")
-                if integer_validation[0] >= integer_validation[1]:
+                if integer_validation[0] > integer_validation[1]:
                     raise ValueError(
                         "The second value of the 'integer_validation' `tuple` cannot be less than the first.")
 
