@@ -6,8 +6,9 @@
 ### `clearStdscr`
 ```mermaid
 flowchart LR
-    A([start]) --> B[/print/]
-    B --> C([end])
+    S([start]) --> P
+    P[/print/] --> E
+    E([end])
 ```
 ```
 void clearStdscr(Terminal console)
@@ -17,8 +18,9 @@ END
 ### `putScriptBanner`
 ```mermaid
 flowchart LR
-    A([start]) --> B[/print/]
-    B --> C([end])
+    S([start]) --> P
+    P[/print/] --> E
+    E([end])
 ```
 ```
 void putScriptBanner(Terminal console, string scriptName)
@@ -28,6 +30,7 @@ void putScriptBanner(Terminal console, string scriptName)
 END
 ```
 ## `ConsolePrompt`
+* [_printMessage](#_printmessage)
 ```mermaid
 graph TB
     MAIN([ConsolePrompt]) 
@@ -74,5 +77,21 @@ graph TB
     VR --> CBV
     VR --> CIV
     VR -- valid --> CALL
+```
+### `_printMessage`
+```mermaid
+flowchart LR
+    A([start]) --> C
+    C[compute displayWidth, padding, lineEnd] --> P
+    P[/print/] --> E
+    E([end])
+```
+```
+void _printMessage(self, string message, bool leaveCursorInline)
+    SET displayWidth
+    SET padding
+    SET lineEnd
+    PUT message
+END
 ```
 ## `ConsoleTable`
