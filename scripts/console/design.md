@@ -118,7 +118,18 @@ flowchart TB
 ```
 ```
 _readString()
-    ...
+    SET userInput <- []
+    WHILE True
+        SET key = input()
+        IF key == Enter
+            BREAK
+        IF key == Backspace
+            POP userInput
+            PUT prompt + userInput
+        ELSE
+            APPEND userInput + key
+            PUT key
+    RETURN userInput
 END
 ```
 ### `_putPrompt`
