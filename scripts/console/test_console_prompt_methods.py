@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import MagicMock
 from blessed import Terminal
 from console import ConsolePrompt
 
@@ -76,6 +77,27 @@ def test_put_alert(mock_console, capfd):
 
 
 # Test _read_keystroke
+@pytest.mark.parametrize("key", ['a', 'A', '1', '!', '\n', '\x08'])
+
+def test_read_keystroke(mock_console, key):
+    # Setup
+    mock_console.cbreak = MagicMock()
+    mock_console.cbreak.return_value.__enter__ = MagicMock()
+    mock_console.cbreak.return_value.__exit__ = MagicMock()
+    mock_console.hidden_cursor = MagicMock()
+    mock_console.hidden_cursor.return_value.__enter__ = MagicMock()
+    mock_console.hidden_cursor.return_value.__exit__ = MagicMock()
+    mock_console.inkey = lambda: key
+    cp = ConsolePrompt("Test prompt")
+    cp._con = mock_console
+
+    # Execute
+    result = cp._read_keystroke()
+
+    # Verify
+    assert result == str(key)
+
+
 # Test _read_string
 # Test _check_bool_validation
 # Test _check_int_validation

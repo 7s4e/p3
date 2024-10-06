@@ -292,7 +292,7 @@ class ConsolePrompt:
         """
         with self._con.cbreak(), self._con.hidden_cursor():
             key = self._con.inkey()
-        return repr(key)
+        return str(key)
 
     def _read_string(self) -> str:
         """Capture a string input from the user, handling enter and 
