@@ -30,6 +30,8 @@ void putScriptBanner(console, scriptName)
 END
 ```
 ## `ConsolePrompt`
+* [_putPrompt](#_putprompt)
+* [_putAlert](#_putalert)
 * [_printMessage](#_printmessage)
 ```mermaid
 graph TB
@@ -77,6 +79,30 @@ graph TB
     VR --> CBV
     VR --> CIV
     VR -- valid --> CALL
+```
+### `_putPrompt`
+```mermaid
+flowchart LR
+    STR([start]) --> CALL
+    CALL[call _printMessage] --> END
+    END([end])
+```
+```
+void _putPrompt(leaveCursorInline)
+    CALL _printMessage(_console.brightYellow + _prompt, leaveCursorInline)
+END
+```
+### `_putAlert`
+```mermaid
+flowchart LR
+    STR([start]) --> CALL
+    CALL[call _printMessage] --> END
+    END([end])
+```
+```
+void _putAlert(alert, leaveCursorInline)
+    CALL _printMessage(_console.red + alert, leaveCursorInline)
+END
 ```
 ### `_printMessage`
 ```mermaid

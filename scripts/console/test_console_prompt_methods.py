@@ -7,6 +7,7 @@ def mock_console(mocker):
     """Fixture to create a mock Terminal object."""
     return mocker.Mock(spec=Terminal)
 
+
 # Test _print_message
 @pytest.mark.parametrize(
     "width, padding,  is_inline, message", 
@@ -36,8 +37,44 @@ def test_print_message(mock_console, capfd, width, padding, message, is_inline):
     assert out.endswith("\n") != is_inline
     assert err == ""
 
+
 # Test _put_prompt
+@pytest.mark.parametrize("is_inline, end", [(True, " "), (False, "\n")])
+
+def test_put_prompt(mock_console, capfd, is_inline, end):
+    # Setup
+    mock_console.width = 79
+    mock_console.bright_yellow = lambda x: f"[yellow]{x}[/yellow]"
+    cp = ConsolePrompt("Test prompt")
+    cp._con = mock_console
+
+    # Execute
+    cp._put_prompt(leave_cursor_inline=is_inline)
+    out, err = capfd.readouterr()
+
+    # Verify
+    assert out.startswith("[yellow]Test prompt[/yellow]")
+    assert out.endswith(end)
+    assert err == ""
+
+
 # Test _put_alert
+def test_put_alert(mock_console, capfd):
+    # Setup
+    mock_console.width = 79
+    mock_console.red = lambda x: f"[red]{x}[/red]"
+    cp = ConsolePrompt("Test prompt")
+    cp._con = mock_console
+
+    # Execute
+    cp._put_alert("Alert message")
+    out, err = capfd.readouterr()
+
+    # Verify
+    assert out == "[red]Alert message[/red]\n"
+    assert err == ""
+
+
 # Test _read_keystroke
 # Test _read_string
 # Test _check_bool_validation
