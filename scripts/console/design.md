@@ -6,9 +6,9 @@
 ### `clearStdscr`
 ```mermaid
 flowchart LR
-    S([start]) --> P
-    P[/print/] --> E
-    E([end])
+    STR([start]) --> PUT
+    PUT[/print/] --> END
+    END([end])
 ```
 ```
 void clearStdscr(Terminal console)
@@ -18,9 +18,9 @@ END
 ### `putScriptBanner`
 ```mermaid
 flowchart LR
-    S([start]) --> P
-    P[/print/] --> E
-    E([end])
+    STR([start]) --> PUT
+    PUT[/print/] --> END
+    END([end])
 ```
 ```
 void putScriptBanner(Terminal console, string scriptName)
@@ -81,10 +81,10 @@ graph TB
 ### `_printMessage`
 ```mermaid
 flowchart LR
-    A([start]) --> C
-    C[compute displayWidth, padding, lineEnd] --> P
-    P[/print/] --> E
-    E([end])
+    STR([start]) --> SET
+    SET[compute displayWidth, padding, lineEnd] --> PUT
+    PUT[/print/] --> END
+    END([end])
 ```
 ```
 void _printMessage(self, string message, bool leaveCursorInline)
