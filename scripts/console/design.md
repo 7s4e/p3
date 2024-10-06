@@ -11,7 +11,7 @@ flowchart LR
     END([end])
 ```
 ```
-void clearStdscr(Terminal console)
+void clearStdscr(console)
     PUT console.home + console.clear
 END
 ```
@@ -23,7 +23,7 @@ flowchart LR
     END([end])
 ```
 ```
-void putScriptBanner(Terminal console, string scriptName)
+void putScriptBanner(console, scriptName)
     PUT "Running {scriptName}..."
         + left-justified(console.width)
         + console.reverse
@@ -87,10 +87,10 @@ flowchart LR
     END([end])
 ```
 ```
-void _printMessage(self, string message, bool leaveCursorInline)
+void _printMessage(message, leaveCursorInline)
     SET displayWidth
     SET padding
-    SET lineEnd
+    WITH leaveCursorInline SET lineEnd
     PUT message
 END
 ```
