@@ -11,7 +11,7 @@ flowchart LR
     END([end])
 ```
 ```
-void clearStdscr(console)
+clearStdscr(console)
     PUT console.home + console.clear
 END
 ```
@@ -23,16 +23,13 @@ flowchart LR
     END([end])
 ```
 ```
-void putScriptBanner(console, scriptName)
+putScriptBanner(console, scriptName)
     PUT "Running {scriptName}..."
         + left-justified(console.width)
         + console.reverse
 END
 ```
 ## `ConsolePrompt`
-* [_putPrompt](#_putprompt)
-* [_putAlert](#_putalert)
-* [_printMessage](#_printmessage)
 ```mermaid
 graph TB
     MAIN([ConsolePrompt]) 
@@ -80,6 +77,26 @@ graph TB
     VR --> CIV
     VR -- valid --> CALL
 ```
+* [_readKeystroke](#_readkeystroke)
+* [_readString](#_readstring)
+* [_putPrompt](#_putprompt)
+* [_putAlert](#_putalert)
+* [_printMessage](#_printmessage)
+### `_readKeystroke`
+```mermaid
+flowchart LR
+    STR([start]) --> GET
+    GET[/get keystroke/] --> RTN
+    RTN[return keystroke] --> END
+    END([end])
+```
+```
+_readKeystroke()
+    GET keystroke
+    RETURN keystroke
+END
+```
+### `_readString`
 ### `_putPrompt`
 ```mermaid
 flowchart LR
@@ -88,7 +105,7 @@ flowchart LR
     END([end])
 ```
 ```
-void _putPrompt(leaveCursorInline)
+_putPrompt(leaveCursorInline)
     CALL _printMessage(_console.brightYellow + _prompt, leaveCursorInline)
 END
 ```
@@ -100,7 +117,7 @@ flowchart LR
     END([end])
 ```
 ```
-void _putAlert(alert, leaveCursorInline)
+_putAlert(alert, leaveCursorInline)
     CALL _printMessage(_console.red + alert, leaveCursorInline)
 END
 ```
@@ -113,7 +130,7 @@ flowchart LR
     END([end])
 ```
 ```
-void _printMessage(message, leaveCursorInline)
+_printMessage(message, leaveCursorInline)
     SET displayWidth
     SET padding
     WITH leaveCursorInline SET lineEnd
