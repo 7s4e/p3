@@ -1,9 +1,11 @@
+"""Console module member"""
 # Standard library imports
 from typing import Any
 import textwrap
 
 # Third-party imports
 from blessed import Terminal
+
 
 class ConsolePrompt:
     """A class to manage console prompts and user input validation.
