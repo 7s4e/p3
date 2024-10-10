@@ -99,6 +99,138 @@ def test_read_keystroke(mock_console, key):
 
 
 # Test _read_string
+# @pytest.mark.parametrize(
+#     "expected_output, input_sequence", 
+#     [
+#      ("ab",           ['a', 'b', MagicMock(is_sequence=True, name='KEY_ENTER')]), 
+#     #  ("a",            ['a', 'b', MagicMock(is_sequence=True, name='KEY_BACKSPACE'), MagicMock(is_sequence=True, name='KEY_ENTER')]), 
+#     #  ("",             ['a', 'b', MagicMock(is_sequence=True, name='KEY_BACKSPACE'), MagicMock(is_sequence=True, name='KEY_BACKSPACE'), MagicMock(is_sequence=True, name='KEY_ENTER')])
+#      ])
+
+# def test_read_string(mock_console, input_sequence, expected_output):
+#     # Setup
+#     mock_console.cbreak = MagicMock()
+#     mock_console.cbreak.return_value.__enter__ = MagicMock()
+#     mock_console.cbreak.return_value.__exit__ = MagicMock()
+#     mock_input_sequence = []
+#     for char in input_sequence:
+#         if isinstance(char, str):
+#             key_mock = MagicMock(is_sequence=False)
+#             key_mock.__str__.return_value = char
+#             mock_input_sequence.append(key_mock)
+#         else:
+#             mock_input_sequence.append(char)
+#     mock_console.inkey.side_effect = mock_input_sequence
+#     # mock_console.green = lambda x: f"[green]{x}[/green]"
+#     cp = ConsolePrompt("Test prompt")
+#     cp._con = mock_console
+#     cp._put_prompt = MagicMock()
+
+#     # Execute
+#     result = cp._read_string()
+
+#     # Verify
+#     assert result == expected_output
+#     # mock_console.inkey.assert_called()
+#     # mock_console.green.assert_called()
+#     # cp._put_prompt.assert_called()
+
+# # Parametrized test for _read_string
+# @pytest.mark.parametrize(
+#     "expected_output, input_sequence", 
+#     [
+#         # ("ab", ['a', 'b', MagicMock(is_sequence=True, name='KEY_ENTER')]),  # Test without backspace
+#         ("a", ['a', 'b', 
+#                 MagicMock(is_sequence=True, name='KEY_BACKSPACE'),  # Remove 'b'
+#                 MagicMock(is_sequence=True, name='KEY_ENTER')])    # Press enter
+#     ]
+# )
+# def test_read_string(mock_console, expected_output, input_sequence):
+#     # Setup the mock console and behavior
+#     mock_console.cbreak = MagicMock()
+#     mock_console.cbreak.return_value.__enter__ = MagicMock()
+#     mock_console.cbreak.return_value.__exit__ = MagicMock()
+    
+#     # Create a list to hold the mock input sequence
+#     mock_input_sequence = []
+    
+#     for char in input_sequence:
+#         if isinstance(char, str):
+#             # Mock regular characters
+#             key_mock = MagicMock(is_sequence=False)
+#             key_mock.__str__.return_value = char  # Returns the character when printed or appended
+#             mock_input_sequence.append(key_mock)
+#         else:
+#             # Mock control keys (e.g., KEY_ENTER, KEY_BACKSPACE)
+#             mock_input_sequence.append(char)
+    
+#     # Simulate user input sequence via inkey side effect
+#     mock_console.inkey.side_effect = mock_input_sequence
+    
+#     # Create an instance of the class with the method _read_string
+#     cp = ConsolePrompt("Test prompt")
+#     cp._con = mock_console
+#     cp._put_prompt = MagicMock()
+
+#     # Execute the method
+#     result = cp._read_string()
+
+#     # Verify the result matches the expected output
+#     assert result == expected_output
+
+
+
+@pytest.mark.parametrize(
+    "expected_output, input_sequence", 
+    [
+        ("ab", ['a', 'b', MagicMock(is_sequence=False, name='a'), 
+                MagicMock(is_sequence=False, name='b'),
+                MagicMock(is_sequence=True, name='KEY_ENTER')]),  # Test without backspace
+        ("a", ['a', 'b', 
+               MagicMock(is_sequence=True, name='KEY_BACKSPACE'),  # Remove 'b'
+               MagicMock(is_sequence=True, name='KEY_ENTER')])  # Press enter
+    ]
+)
+def test_read_string(mock_console, expected_output, input_sequence):
+    # Setup the mock console and behavior
+    mock_console.cbreak = MagicMock()
+    mock_console.cbreak.return_value.__enter__ = MagicMock()
+    mock_console.cbreak.return_value.__exit__ = MagicMock()
+
+    # Create a list to hold the mock input sequence
+    mock_input_sequence = []
+    
+    for char in input_sequence:
+        if isinstance(char, str):
+            # Mock regular characters
+            key_mock = MagicMock(is_sequence=False)
+            key_mock.__str__.return_value = char  # Return the character when printed
+            mock_input_sequence.append(key_mock)
+        else:
+            # Mock control keys (e.g., KEY_ENTER, KEY_BACKSPACE)
+            key_mock = MagicMock(is_sequence=True)
+            if 'BACKSPACE' in char.name:
+                key_mock.name = 'KEY_BACKSPACE'  # Set backspace name
+            elif 'ENTER' in char.name:
+                key_mock.name = 'KEY_ENTER'  # Set enter name
+            mock_input_sequence.append(key_mock)
+
+    # Simulate user input sequence via inkey side effect
+    mock_console.inkey.side_effect = mock_input_sequence
+    
+    # Create an instance of the class with the method _read_string
+    cp = ConsolePrompt("Test prompt")
+    cp._con = mock_console
+    cp._put_prompt = MagicMock()
+
+    # Execute the method
+    result = cp._read_string()
+
+    # Verify the result matches the expected output
+    assert result == expected_output
+
+
+
 # Test _check_bool_validation
 # Test _check_int_validation
 # Test _get_response

@@ -269,35 +269,102 @@ class ConsolePrompt:
             key = self._con.inkey()
         return str(key)
 
+    # def _read_string(self) -> str:
+    #     """Capture a string input from the user, handling enter and 
+    #         backspace keys.
+
+    #     This method reads characters from the user input in a terminal 
+    #     session, with special handling for 'Enter' (which ends the 
+    #     input) and 'Backspace' (which removes the last entered 
+    #     character). The input is captured one character at a time until 
+    #     'Enter' is pressed.
+
+    #     Returns:
+    #         str: The string input provided by the user.
+    #     """
+    #     user_input = []
+    #     with self._con.cbreak():
+    #         while True:
+    #             key = self._con.inkey()
+    #             if key.is_sequence and key.name == 'KEY_ENTER':
+    #                 break
+    #             if key.is_sequence and key.name == 'KEY_BACKSPACE':
+    #                 if user_input:
+    #                     user_input.pop()
+    #                     self._put_prompt(leave_cursor_inline=True)
+    #                     print(self._con.move_left(), end='', flush=True)
+    #             else:
+    #                 user_input.append(str(key))
+    #                 # print(self._con.green(key), end='', flush=True)
+    #                 print(key, end='', flush=True)
+    #     print()
+    #     return ''.join(user_input)
+
     def _read_string(self) -> str:
-        """Capture a string input from the user, handling enter and 
-            backspace keys.
-
-        This method reads characters from the user input in a terminal 
-        session, with special handling for 'Enter' (which ends the 
-        input) and 'Backspace' (which removes the last entered 
-        character). The input is captured one character at a time until 
-        'Enter' is pressed.
-
-        Returns:
-            str: The string input provided by the user.
-        """
+        """Capture a string input from the user, handling Enter and Backspace."""
         user_input = []
         with self._con.cbreak():
             while True:
+                print(f"\nLoop start")  # Debugging statement
+
                 key = self._con.inkey()
+                print(f"Key attributes: is_sequence={key.is_sequence}, name={key.name}")
+            
+                # Handle Enter key
                 if key.is_sequence and key.name == 'KEY_ENTER':
+                    print(f"User input upon ENTER: {user_input}")  # Debugging statement
                     break
+            
+                # Handle Backspace key
+                print(f"Backspace test: {key.is_sequence} and {key.name}")
                 if key.is_sequence and key.name == 'KEY_BACKSPACE':
+                    print(f"User input upon BACKSPACE: {user_input}")  # Debugging statement
                     if user_input:
                         user_input.pop()
                         self._put_prompt(leave_cursor_inline=True)
                         print(self._con.move_left(), end='', flush=True)
                 else:
-                    user_input.append(key)
-                    print(self._con.green(key), end='', flush=True)
-        print()
+                    # Ensure that only string characters are appended and printed
+                    char = str(key)  # Convert key to string
+                    if len(char) == 1:  # Only print and append regular characters
+                        user_input.append(char)
+                        print(char, end='', flush=True)
+                print(f"\nLoop end: {user_input}")  # Debugging statement
+
+
+        print()  # End with a newline after input
         return ''.join(user_input)
+
+
+# def _read_string(self) -> str:
+#     """Capture a string input from the user, handling Enter and Backspace."""
+#     user_input = []
+#     with self._con.cbreak():
+#         while True:
+#             key = self._con.inkey()
+            
+#             # Handle Enter key
+#             if key.is_sequence and 'ENTER' in key.name:
+#                 break
+            
+#             # Handle Backspace key
+#             if key.is_sequence and 'BACKSPACE' in key.name:
+#                 if user_input:
+#                     user_input.pop()
+#                     self._put_prompt(leave_cursor_inline=True)
+#                     print(self._con.move_left(), end='', flush=True)
+#             else:
+#                 # Ensure that only string characters are appended and printed
+#                 char = str(key)  # Convert key to string
+#                 if len(char) == 1:  # Only print and append regular characters
+#                     user_input.append(char)
+#                     print(char, end='', flush=True)
+
+#     print()  # End with a newline after input
+#     return ''.join(user_input)
+
+
+
 
     def _validate_response(self) -> bool:
         """Validate the response based on the defined validation type.

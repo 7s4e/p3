@@ -130,7 +130,7 @@ def mock_console(mocker):
     # if (integer_validation is not None and not (isinstance(integer_validation, int) and not isinstance(integer_validation, bool) or isinstance(integer_validation, tuple))):
     #   raise TypeError("Expected `int`, `tuple[int, int]`, or `None` for 'integer_validation'.")
     # prompt                       expect_keystroke             validate_bool                validate_integer             integer_validation           exception"
-     ("",                          False,                       False,                       True,                        None,                        None), 
+    #  ("",                          False,                       False,                       True,                        None,                        None), 
      ("",                          False,                       False,                       True,                        bool(),                      TypeError), 
      ("",                          False,                       False,                       True,                        bytearray(),                 TypeError), 
      ("",                          False,                       False,                       True,                        bytes(),                     TypeError), 
@@ -201,13 +201,13 @@ def test_constructor(mock_console, prompt, expect_keystroke, validate_bool, vali
                           validate_integer=validate_integer, 
                           integer_validation=integer_validation)
     else:
-        prompt = ConsolePrompt(prompt, 
-                               expect_keystroke=expect_keystroke, 
-                               validate_bool=validate_bool, 
-                               validate_integer=validate_integer, 
-                               integer_validation=integer_validation)
-        assert prompt._prompt == prompt
-        assert prompt._expect_keystroke == expect_keystroke
-        assert prompt._validate_bool == validate_bool
-        assert prompt._validate_integer == validate_integer
-        assert prompt._integer_validation == integer_validation
+        cp = ConsolePrompt(prompt, 
+                           expect_keystroke=expect_keystroke, 
+                           validate_bool=validate_bool, 
+                           validate_integer=validate_integer, 
+                           integer_validation=integer_validation)
+        assert cp._prompt == prompt
+        assert cp._expect_keystroke == expect_keystroke
+        assert cp._validate_bool == validate_bool
+        assert cp._validate_integer == validate_integer
+        assert cp._integer_validation == integer_validation

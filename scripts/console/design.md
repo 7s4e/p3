@@ -117,7 +117,7 @@ flowchart TB
     END([end])
 ```
 ```
-_readString()
+readString()
     SET userInput <- []
     WHILE True
         SET key = input()
@@ -136,24 +136,24 @@ END
 ```mermaid
 flowchart LR
     STR([start]) --> CALL
-    CALL[call _printMessage] --> END
+    CALL[call printMessage] --> END
     END([end])
 ```
 ```
-_putPrompt(leaveCursorInline)
-    CALL _printMessage(_console.brightYellow + _prompt, leaveCursorInline)
+putPrompt(leaveCursorInline)
+    printMessage(console.brightYellow + prompt, leaveCursorInline)
 END
 ```
 ### `_putAlert`
 ```mermaid
 flowchart LR
     STR([start]) --> CALL
-    CALL[call _printMessage] --> END
+    CALL[call printMessage] --> END
     END([end])
 ```
 ```
-_putAlert(alert, leaveCursorInline)
-    CALL _printMessage(_console.red + alert, leaveCursorInline)
+putAlert(alert, leaveCursorInline)
+    printMessage(console.red + alert, leaveCursorInline)
 END
 ```
 ### `_printMessage`
@@ -165,7 +165,7 @@ flowchart LR
     END([end])
 ```
 ```
-_printMessage(message, leaveCursorInline)
+printMessage(message, leaveCursorInline)
     SET displayWidth
     SET padding
     WITH leaveCursorInline SET lineEnd
