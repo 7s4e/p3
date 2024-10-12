@@ -72,28 +72,29 @@ class ConsolePrompt:
             and not (isinstance(integer_validation, int) 
                      and not isinstance(integer_validation, bool)
                      or isinstance(integer_validation, tuple))):
-            raise TypeError(
-                "Expected `int`, `tuple[int, int]`, or `None` for 'integer_validation'.")
+            raise TypeError("Expected `int`, `tuple[int, int]`, or `None` " +
+                            "for 'integer_validation'.")
 
         # Value validation
         if validate_bool and validate_integer:
-            raise ValueError(
-                "Both 'validate_bool' and 'validate_integer' cannot be `True`.")
+            raise ValueError("Both 'validate_bool' and 'validate_integer' " +
+                             "cannot be `True`.")
         if integer_validation is not None:
             if not validate_integer:
-                raise ValueError(
-                    "With 'integer_validation', 'validate_integer' must be `True`.")
+                raise ValueError("With 'integer_validation', " +
+                                 "'validate_integer' must be `True`.")
             if isinstance(integer_validation, int):
                 if integer_validation < 0:
-                    raise ValueError(
-                        "Range for 'integer_validation' must be positive.")
+                    raise ValueError("Range for 'integer_validation' must " +
+                                     "be positive.")
             else:
                 if len(integer_validation) != 2:
-                    raise ValueError(
-                        "The 'integer_validation' `tuple` must have two elements.")
+                    raise ValueError("The 'integer_validation' `tuple` must " +
+                                     "have two elements.")
                 if integer_validation[0] > integer_validation[1]:
-                    raise ValueError(
-                        "The second value of the 'integer_validation' `tuple` cannot be less than the first.")
+                    raise ValueError("The second value of the " +
+                                     "'integer_validation' `tuple` cannot " +
+                                     "be less than the first.")
 
         # Assign validated attributes
         self._prompt = prompt
@@ -126,7 +127,7 @@ class ConsolePrompt:
         while not valid:
             self._get_response()
             valid = self._validate_response()
-        return self._response
+        return self.user_response
 
     # Private Methods
     def _check_bool_validation(self) -> bool:
@@ -143,8 +144,8 @@ class ConsolePrompt:
             bool: True if the response is valid ('y' or 'n'), False 
                 otherwise.
         """
-        if self._response.lower() in {"y", "n"}:
-            self._response = self._response.lower() == "y"
+        if self.user_response.lower() in {"y", "n"}:
+            self.user_response = self.user_response.lower() == "y"
             return True
 
         self._put_alert("Respond with 'y' or 'n'.")
@@ -167,7 +168,7 @@ class ConsolePrompt:
         """
         if self._integer_validation is None:
             try:
-                if isinstance(int(self._response), int):
+                if isinstance(int(self.user_response), int):
                     return True
             except ValueError:
                 pass
@@ -175,13 +176,13 @@ class ConsolePrompt:
             return False
 
         if isinstance(self._integer_validation, int):
-            if 0 <= int(self._response) < self._integer_validation:
+            if 0 <= int(self.user_response) < self._integer_validation:
                 return True
             self._put_alert("Response is out of range.")
             return False
 
         lo, hi = self._integer_validation
-        if lo <= int(self._response) <= hi:
+        if lo <= int(self.user_response) <= hi:
             return True
 
         self._put_alert(f"Enter a number between {lo} and {hi}.")
@@ -200,10 +201,10 @@ class ConsolePrompt:
         """
         if self._expect_keystroke:
             self._put_prompt(leave_cursor_inline=False)
-            self._response = self._read_keystroke()
+            self.user_response = self._read_keystroke()
         else:
             self._put_prompt(leave_cursor_inline=True)
-            self._response = self._read_string()
+            self.user_response = self._read_string()
 
     def _print_message(self, message: str, leave_cursor_inline: bool) -> None:
         """Print a centered, wrapped message to the console.
@@ -269,101 +270,23 @@ class ConsolePrompt:
             key = self._con.inkey()
         return str(key)
 
-    # def _read_string(self) -> str:
-    #     """Capture a string input from the user, handling enter and 
-    #         backspace keys.
-
-    #     This method reads characters from the user input in a terminal 
-    #     session, with special handling for 'Enter' (which ends the 
-    #     input) and 'Backspace' (which removes the last entered 
-    #     character). The input is captured one character at a time until 
-    #     'Enter' is pressed.
-
-    #     Returns:
-    #         str: The string input provided by the user.
-    #     """
-    #     user_input = []
-    #     with self._con.cbreak():
-    #         while True:
-    #             key = self._con.inkey()
-    #             if key.is_sequence and key.name == 'KEY_ENTER':
-    #                 break
-    #             if key.is_sequence and key.name == 'KEY_BACKSPACE':
-    #                 if user_input:
-    #                     user_input.pop()
-    #                     self._put_prompt(leave_cursor_inline=True)
-    #                     print(self._con.move_left(), end='', flush=True)
-    #             else:
-    #                 user_input.append(str(key))
-    #                 # print(self._con.green(key), end='', flush=True)
-    #                 print(key, end='', flush=True)
-    #     print()
-    #     return ''.join(user_input)
-
     def _read_string(self) -> str:
-        """Capture a string input from the user, handling Enter and Backspace."""
-        user_input = []
+        """Needs testing"""
+        response = []
         with self._con.cbreak():
             while True:
-                print(f"\nLoop start")  # Debugging statement
-
                 key = self._con.inkey()
-                print(f"Key attributes: is_sequence={key.is_sequence}, name={key.name}")
-            
-                # Handle Enter key
-                if key.is_sequence and key.name == 'KEY_ENTER':
-                    print(f"User input upon ENTER: {user_input}")  # Debugging statement
-                    break
-            
-                # Handle Backspace key
-                print(f"Backspace test: {key.is_sequence} and {key.name}")
-                if key.is_sequence and key.name == 'KEY_BACKSPACE':
-                    print(f"User input upon BACKSPACE: {user_input}")  # Debugging statement
-                    if user_input:
-                        user_input.pop()
-                        self._put_prompt(leave_cursor_inline=True)
-                        print(self._con.move_left(), end='', flush=True)
-                else:
-                    # Ensure that only string characters are appended and printed
-                    char = str(key)  # Convert key to string
-                    if len(char) == 1:  # Only print and append regular characters
-                        user_input.append(char)
-                        print(char, end='', flush=True)
-                print(f"\nLoop end: {user_input}")  # Debugging statement
-
-
-        print()  # End with a newline after input
-        return ''.join(user_input)
-
-
-# def _read_string(self) -> str:
-#     """Capture a string input from the user, handling Enter and Backspace."""
-#     user_input = []
-#     with self._con.cbreak():
-#         while True:
-#             key = self._con.inkey()
-            
-#             # Handle Enter key
-#             if key.is_sequence and 'ENTER' in key.name:
-#                 break
-            
-#             # Handle Backspace key
-#             if key.is_sequence and 'BACKSPACE' in key.name:
-#                 if user_input:
-#                     user_input.pop()
-#                     self._put_prompt(leave_cursor_inline=True)
-#                     print(self._con.move_left(), end='', flush=True)
-#             else:
-#                 # Ensure that only string characters are appended and printed
-#                 char = str(key)  # Convert key to string
-#                 if len(char) == 1:  # Only print and append regular characters
-#                     user_input.append(char)
-#                     print(char, end='', flush=True)
-
-#     print()  # End with a newline after input
-#     return ''.join(user_input)
-
-
+                if key == '\n':
+                    print()
+                    return ''.join(response)
+                elif key.code == self._con.KEY_BACKSPACE or key == '\x08':
+                    if response:
+                        response.pop()
+                        print(f"\b \b", end='', flush=True)
+                elif key.is_printable:
+                    response.append(str(key))
+                    print(self._con.green(str(key)), end='', flush=True)
+                    print()
 
 
     def _validate_response(self) -> bool:
