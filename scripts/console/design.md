@@ -3,6 +3,7 @@
 * [putScriptBanner](#putscriptbanner)
 * [ConsolePrompt](#consoleprompt)
 * [ConsoleTable](#consoletable)
+---
 ### `clearStdscr`
 ```mermaid
 flowchart LR
@@ -17,6 +18,7 @@ clearStdscr(console)
     PUT console.home + console.clear
 END
 ```
+---
 ### `putScriptBanner`
 ```mermaid
 flowchart LR
@@ -33,6 +35,8 @@ putScriptBanner(console, scriptName)
         + console.reverse
 END
 ```
+---
+---
 ## `ConsolePrompt`
 ```mermaid
 graph TB
@@ -98,11 +102,73 @@ graph TB
         VR --> CIV
         VR -- valid --> CALL
 ```
+* [call](#call)
+* [_getResponse](#_getresponse)
 * [_readKeystroke](#_readkeystroke)
 * [_readString](#_readstring)
 * [_putPrompt](#_putprompt)
 * [_putAlert](#_putalert)
 * [_printMessage](#_printmessage)
+---
+### `call`
+```mermaid
+flowchart LR
+    STR([start])
+        STR --> SET
+    SET[/set console/]
+        SET --> GR
+    GR[call getResponse]
+        GR --> VR
+    VLD{valid}
+        VLD -- True --> END
+        VLD -- False --> GR
+    VR[call validateResponse]
+        VR --> VLD
+    END([end])
+```
+```
+call(console)
+    SET self.console <- console
+    SET valid <- False
+    WHILE NOT valid
+        getResponse()
+        valid <- validateResponse()
+    RETURN self.validatedResponse
+END
+```
+---
+### `_getResponse`
+```mermaid
+flowchart LR
+    STR([start])
+        STR --> KEY
+    KEY{expectKeystroke}
+        KEY -- True --> CALLF
+        KEY -- False --> CALLT
+    CALLF[call putPrompt <br> cursor left on new line]
+        CALLF --> READK
+    CALLT[call putPrompt <br> cursor left inline]
+        CALLT --> READS
+    READK[call readKeystroke]
+        READK --> SET
+    READS[call readString]
+        READS --> SET
+    SET[/set userResponse/]
+        SET --> END
+    END([end])
+```
+```
+getResponse()
+    GET self.expectKeystroke
+    IF expectKeystroke
+        putPrompt(inlineCursor=False)
+        SET userResponse <- readKeystroke()
+    ELSE
+        putPrompt(inlineCursor=True)
+        SET userResponse <- readString()
+END
+```
+---
 ### `_readKeystroke`
 ```mermaid
 flowchart LR
@@ -120,6 +186,7 @@ _readKeystroke()
     RETURN keystroke
 END
 ```
+---
 ### `_readString`
 ```mermaid
 flowchart TB
@@ -159,6 +226,7 @@ readString()
     RETURN userInput
 END
 ```
+---
 ### `_putPrompt`
 ```mermaid
 flowchart LR
@@ -171,6 +239,13 @@ putPrompt(leaveCursorInline)
     printMessage(console.brightYellow + prompt, leaveCursorInline)
 END
 ```
+---
+### `_validateResponse`
+---
+### `_checkBoolValidation`
+---
+### `_checkIntegerValidation`
+---
 ### `_putAlert`
 ```mermaid
 flowchart LR
@@ -183,6 +258,7 @@ putAlert(alert, leaveCursorInline)
     printMessage(console.red + alert, leaveCursorInline)
 END
 ```
+---
 ### `_printMessage`
 ```mermaid
 flowchart LR
@@ -199,4 +275,6 @@ printMessage(message, leaveCursorInline)
     PUT message
 END
 ```
+---
+---
 ## `ConsoleTable`
