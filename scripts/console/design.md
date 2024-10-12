@@ -36,37 +36,64 @@ END
 ## `ConsolePrompt`
 ```mermaid
 graph TB
-    MAIN([ConsolePrompt])
-        MAIN 
-            -- prompt <br> expectKeystroke <br> validateBool <br> validateInteger <br> integerValidation 
-            --> INIT
+    MAIN([**ConsolePrompt**])
+        MAIN -- prompt
+                expectKeystroke
+                validateBool
+                validateInteger
+                integerValidation 
+             --> INIT
         MAIN -- console --> CALL
-    CALL(call <br> SET_console <br> GET_response)
+    CALL("<b><u>call</u></b>
+          <div style='text-align:left;'>SET console
+                                        GET validatedResponse</div>")
         CALL --> GR
         CALL --> VR
         CALL -- response --> MAIN
-    CBV(_checkBoolValitation <br> GET_response)
+    CBV("<b><u>_checkBoolValidation</u></b>
+         <div style='text-align:left;'>GET userResponse
+                                       SET validatedResponse</div>")
         CBV -- alert --> PA
         CBV -- valid --> VR
-    CIV(_checkIntegerValitation <br> GET_response)
+    CIV("<b><u>_checkIntegerValitation</u></b>
+         <div style='text-align:left;'>GET userResponse
+                                       SET validatedResponse</div>")
         CIV -- alert --> PA
         CIV -- valid --> VR
-    GR(_getResponse <br> GET_expectKeystroke <br> SET_response)
+    GR("<b><u>_getResponse</u></b>
+        <div style='text-align:left;'>GET expectKeystroke
+                                      SET userResponse</div>")
         GR -- leaveCursorInline --> PP
         GR --> RK
         GR --> RS
-    INIT(init <br> SET_prompt <br> SET_expectKeystroke <br> SET_validateBool <br> SET_validateInteger <br> SET_integerValidation)
-    PA(_putAlert <br> GET_console)
-        PA -- formattedAlert <br> leaveCursorInline--> PM
-    PM(_printMessage)
-    PP(_putPrompt <br> GET_console<br> GET_prompt)
-        PP -- formattedPrompt <br> leaveCursorInline--> PM
-    RK(_readKeystroke <br> GET_console)
+    INIT("<b><u>init</u></b>
+          <div style='text-align:left;'>SET prompt
+                                        SET expectKeystroke
+                                        SET validateBool
+                                        SET validateInteger
+                                        SET integerValidation</div>")
+    PA("<b><u>_putAlert</u></b>
+        <div style='text-align:left;'>GET console</div>")
+        PA -- formattedAlert
+              leaveCursorInline
+           --> PM
+    PM(**_printMessage**)
+    PP("<b><u>_putPrompt</u>
+        </b><div style='text-align:left;'>GET_console
+                                          GET_prompt</div>")
+        PP -- formattedPrompt
+              leaveCursorInline
+           --> PM
+    RK("<b><u>_readKeystroke</u></b>
+        <div style='text-align:left;'>GET console</div>")
         RK -- key --> GR
-    RS(_readString <br> GET_console)
+    RS("<b><u>_readString</u></b>
+        <div style='text-align:left;'>GET console</div>")
         RS -- leaveCursorInline --> PP
         RS -- string --> GR
-    VR(_validateResponse <br> GET_validateBool <br> GET_validateInteger)
+    VR("<b><u>_validateResponse</u></b>
+        <div style='text-align:left;'>GET_validateBool
+                                      GET_validateInteger</div>")
         VR --> CBV
         VR --> CIV
         VR -- valid --> CALL
