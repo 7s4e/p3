@@ -38,6 +38,16 @@ END
 ---
 ---
 ## `ConsolePrompt`
+* [call](#call)
+* [_getResponse](#_getresponse)
+* [_readKeystroke](#_readkeystroke)
+* [_readString](#_readstring)
+* [_putPrompt](#_putprompt)
+* [_validateResponse](#_validateresponse)
+* [_checkBoolValidation](#_checkboolvalidation)
+* [_checkIntegerValidation](#_checkintegervalidation)
+* [_putAlert](#_putalert)
+* [_printMessage](#_printmessage)
 ```mermaid
 graph TB
     MAIN([**ConsolePrompt**])
@@ -102,13 +112,7 @@ graph TB
         VR --> CIV
         VR -- valid --> CALL
 ```
-* [call](#call)
-* [_getResponse](#_getresponse)
-* [_readKeystroke](#_readkeystroke)
-* [_readString](#_readstring)
-* [_putPrompt](#_putprompt)
-* [_putAlert](#_putalert)
-* [_printMessage](#_printmessage)
+[️⬆️](#console-module)
 ---
 ### `call`
 ```mermaid
@@ -136,6 +140,7 @@ call(console)
     RETURN self.validatedResponse
 END
 ```
+ [️⬆️](#consoleprompt)
 ---
 ### `_getResponse`
 ```mermaid
@@ -168,6 +173,7 @@ getResponse()
         SET userResponse <- readString()
 END
 ```
+[️⬆️](#consoleprompt)
 ---
 ### `_readKeystroke`
 ```mermaid
@@ -186,6 +192,7 @@ _readKeystroke()
     RETURN keystroke
 END
 ```
+[️⬆️](#consoleprompt)
 ---
 ### `_readString`
 ```mermaid
@@ -226,6 +233,7 @@ readString()
     RETURN userInput
 END
 ```
+[️⬆️](#consoleprompt)
 ---
 ### `_putPrompt`
 ```mermaid
@@ -239,6 +247,7 @@ putPrompt(leaveCursorInline)
     printMessage(console.brightYellow + prompt, leaveCursorInline)
 END
 ```
+[️⬆️](#consoleprompt)
 ---
 ### `_validateResponse`
 ```mermaid
@@ -268,6 +277,7 @@ validateResponse()
     RETURN True
 END
 ```
+[️⬆️](#consoleprompt)
 ---
 ### `_checkBoolValidation`
 ```mermaid
@@ -293,6 +303,7 @@ checkBoolValidation()
     putAlert()
     RETURN False
 ```
+[️⬆️](#consoleprompt)
 ---
 ### `_checkIntegerValidation`
 ```mermaid
@@ -339,6 +350,7 @@ checkIntegerValidation()
             BREAK
     SET self.validatedResponse <- userResponse
 ```
+[️⬆️](#consoleprompt)
 ---
 ### `_putAlert`
 ```mermaid
@@ -352,6 +364,7 @@ putAlert(alert, leaveCursorInline)
     printMessage(console.red + alert, leaveCursorInline)
 END
 ```
+[️⬆️](#consoleprompt)
 ---
 ### `_printMessage`
 ```mermaid
@@ -369,6 +382,7 @@ printMessage(message, leaveCursorInline)
     PUT message
 END
 ```
+[️⬆️](#consoleprompt)
 ---
 ---
 ## `ConsoleTable`
