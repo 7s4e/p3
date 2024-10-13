@@ -1,6 +1,7 @@
 """Console module member"""
 # Standard library imports
 from typing import Any
+import re
 import textwrap
 
 # Third-party imports
@@ -127,7 +128,7 @@ class ConsolePrompt:
         while not valid:
             self._get_response()
             valid = self._validate_response()
-        return self.user_response
+        return self._user_response
 
     # Private Methods
     def _check_bool_validation(self) -> bool:
@@ -144,8 +145,8 @@ class ConsolePrompt:
             bool: True if the response is valid ('y' or 'n'), False 
                 otherwise.
         """
-        if self.user_response.lower() in {"y", "n"}:
-            self.user_response = self.user_response.lower() == "y"
+        if self._user_response.lower() in {"y", "n"}:
+            self._user_response = self._user_response.lower() == "y"
             return True
 
         self._put_alert("Respond with 'y' or 'n'.")
@@ -166,27 +167,25 @@ class ConsolePrompt:
         Returns:
             bool: True if the response is valid, False otherwise.
         """
-        if self._integer_validation is None:
-            try:
-                if isinstance(int(self.user_response), int):
-                    return True
-            except ValueError:
-                pass
+        if not bool(re.fullmatch(r'-?[0-9]+', self._user_response)):
             self._put_alert("Enter a valid number.")
             return False
+        response = int(self._user_response)
+        match self._integer_validation:
+            case int() as range:
+                if response < 0 or response >= range:
+                    self._put_alert("Response is out of range.")
+                    return False
+            case tuple() as limits:
+                low, high = limits
+                if response < low or response > high:
+                    self._put_alert(f"Enter a number between {low} and " +
+                                        f"{high}.")
+                    return False
+            case None: pass
+        self._validated_response = str(response)
+        return True            
 
-        if isinstance(self._integer_validation, int):
-            if 0 <= int(self.user_response) < self._integer_validation:
-                return True
-            self._put_alert("Response is out of range.")
-            return False
-
-        lo, hi = self._integer_validation
-        if lo <= int(self.user_response) <= hi:
-            return True
-
-        self._put_alert(f"Enter a number between {lo} and {hi}.")
-        return False
 
     def _get_response(self) -> None:
         """Prompt the user and capture their response.
@@ -201,10 +200,10 @@ class ConsolePrompt:
         """
         if self._expect_keystroke:
             self._put_prompt(leave_cursor_inline=False)
-            self.user_response = self._read_keystroke()
+            self._user_response = self._read_keystroke()
         else:
             self._put_prompt(leave_cursor_inline=True)
-            self.user_response = self._read_string()
+            self._user_response = self._read_string()
 
     def _print_message(self, message: str, leave_cursor_inline: bool) -> None:
         """Print a centered, wrapped message to the console.

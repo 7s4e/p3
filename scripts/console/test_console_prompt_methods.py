@@ -1,4 +1,5 @@
 import pytest
+import sys
 from unittest.mock import MagicMock
 from blessed import Terminal, keyboard
 from console import ConsolePrompt
@@ -104,25 +105,21 @@ def test_read_keystroke(mock_prompt, key):
 
 # Test _check_bool_validation
 @pytest.mark.parametrize(
-    "user_respose, valid, alert", 
-    [('!',         False, "Respond with 'y' or 'n'."), 
-     ('1',         False, "Respond with 'y' or 'n'."), 
-     ('a',         False, "Respond with 'y' or 'n'."), 
-     ('A',         False, "Respond with 'y' or 'n'."), 
-     ('y',         True,  ""), 
-     ('Y',         True,  ""), 
-     ('n',         True,  ""), 
-     ('N',         True,  "")])
+    " response, valid, alert", 
+    [('!',      False, "Respond with 'y' or 'n'."), 
+     ('1',      False, "Respond with 'y' or 'n'."), 
+     ('a',      False, "Respond with 'y' or 'n'."), 
+     ('A',      False, "Respond with 'y' or 'n'."), 
+     ('y',      True,  ""), 
+     ('Y',      True,  ""), 
+     ('n',      True,  ""), 
+     ('N',      True,  "")])
 
-def test_check_bool_validation(mock_prompt, 
-                               capfd, 
-                               user_respose, 
-                               valid, 
-                               alert):
+def test_check_bool_validation(mock_prompt, capfd, response, valid, alert):
     # Setup
     mock_prompt._con.width = 79
     mock_prompt._con.red = lambda x: f"[red]{x}[/red]"
-    mock_prompt.user_response = user_respose
+    mock_prompt._user_response = response
     
     # Execute
     result = mock_prompt._check_bool_validation()
@@ -134,33 +131,44 @@ def test_check_bool_validation(mock_prompt,
     assert out == message
     assert err == ""
 
-'''
-```mermaid
-flowchart LR
-    STR([start])
-        STR --> UR
-    PUT[/put alert/]
-        PUT --> RTN
-    RTN[return validation status]
-        RTN --> END
-    SET[set validatedResponse]
-        SET --> RTN
-    UR{userResponse}
-        UR -- y | n --> SET
-        UR -- invalid --> PUT
-    END([end])
-```
-```
-checkBoolValidation()
-    IF self.userResponse.lower IN {'y', 'n'}
-        SET self.validatedResponse <- userResponse == 'y'
-        RETURN True
-    putAlert()
-    RETURN False
-```
-'''
 
-# Test _check_int_validation
+# Test _check_intger_validation
+@pytest.mark.parametrize(
+    " validation, response, valid,  alert", 
+    [(None,       "123",    True,   ""), 
+     (None,       "-123",   True,   ""), 
+     (None,       "1.23",   False,  "Enter a valid number."), 
+     (None,       "abc",    False,  "Enter a valid number."), 
+     (9,          "0",      True,   ""), 
+     (9,          "9",      False,  "Response is out of range."), 
+     (9,          "-1",     False,  "Response is out of range."), 
+     ((-7, 7),    "0",      True,   ""), 
+     ((-7, 7),    "7",      True,   ""), 
+     ((-7, 7),    "9",      False,  "Enter a number between -7 and 7."), 
+     ((-7, 7),    "-7",     True,   ""), 
+     ((-7, 7),    "-9",     False,  "Enter a number between -7 and 7.")])
+
+def test_check_integer_validation(mock_prompt, capfd, validation, response, 
+                                  valid, alert):
+    # Setup
+    mock_prompt._con.width = 79
+    mock_prompt._con.red = lambda x: f"[red]{x}[/red]"
+    mock_prompt._integer_validation = validation
+    mock_prompt._user_response = response
+        
+    # Execute
+    result = mock_prompt._check_integer_validation()
+    message = "" if valid else f"[red]{alert}[/red]\n"
+    out, err = capfd.readouterr()
+
+    # Verify
+    if valid:
+        assert mock_prompt._validated_response == response
+    assert result == valid
+    assert out == message
+    assert err == ""
+
+
 # Test _get_response
 # Test _validate_response
 # Test call
