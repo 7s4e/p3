@@ -119,11 +119,11 @@ flowchart LR
         SET --> GR
     GR[call getResponse]
         GR --> VR
-    VLD{valid}
-        VLD -- True --> END
-        VLD -- False --> GR
+    RTN{valid}
+        RTN -- True --> END
+        RTN -- False --> GR
     VR[call validateResponse]
-        VR --> VLD
+        VR --> RTN
     END([end])
 ```
 ```
@@ -241,10 +241,104 @@ END
 ```
 ---
 ### `_validateResponse`
+```mermaid
+flowchart TB
+    STR([start])
+        STR --> VB
+    CBV[call checkBoolValidation]
+        CBV --> RTN
+    CIV[call checkIntegerValidation]
+        CIV --> RTN
+    RTN[/return validation status/]
+        RTN --> END
+    VB{validateBool}
+        VB -- True --> CBV
+        VB -- False --> VI
+    VI{validateInteger}
+        VI -- True --> CIV
+        VI -- False --> RTN
+    END([end])
+```
+```
+validateResponse()
+    IF self.validateBool
+        RETURN checkBoolValidation()
+    IF self.validateInteger
+        RETURN checkIntegerValidation()
+    RETURN True
+END
+```
 ---
 ### `_checkBoolValidation`
+```mermaid
+flowchart LR
+    STR([start])
+        STR --> UR
+    PUT[/put alert/]
+        PUT --> RTN
+    RTN[return validation status]
+        RTN --> END
+    SET[set validatedResponse]
+        SET --> RTN
+    UR{userResponse}
+        UR -- y | n --> SET
+        UR -- invalid --> PUT
+    END([end])
+```
+```
+checkBoolValidation()
+    IF self.userResponse.lower IN {'y', 'n'}
+        SET self.validatedResponse <- userResponse == 'y'
+        RETURN True
+    putAlert()
+    RETURN False
+```
 ---
 ### `_checkIntegerValidation`
+```mermaid
+flowchart TB
+    STR([start])
+        STR --> UR
+    INT{0 <= userResponse < integerValitation}
+        INT -- True --> SET
+        INT -- False --> PUT
+    IVT{integerValidation Type}
+        IVT -- None --> SET
+        IVT -- int --> INT
+        IVT -- tuple --> TPL
+    PUT[/put alert/]
+        PUT --> RTN
+    RTN[return validation status]
+        RTN --> END
+    SET[set validatedResponse]
+        SET --> RTN
+    TPL{integerValidation.0 <= userResponse <= integerValidation.1}
+        TPL -- True --> SET
+        TPL -- False --> PUT
+    UR{userReponse Type int}
+        UR -- True --> IVT
+        UR -- False --> PUT
+    END([end])
+```
+```
+checkIntegerValidation()
+    IF self.userResponse IS NOT TYPE int
+        putAlert(TypeError message)
+        RETURN False
+    SWITCH self.integerValidation TYPE
+        CASE int
+            IF userResponse < 0 OR userResponse >= integervalidation
+                putAlert(ValueError: exceeds range)
+                RETURN False
+        CASE tuple
+            SET lo, hi <- integervalidation
+            IF userResponse < lo OR userResponse > hi
+                putAlert(ValueError: exceeds limits)
+                RETURN False
+        CASE None
+            BREAK
+    SET self.validatedResponse <- userResponse
+```
 ---
 ### `_putAlert`
 ```mermaid
