@@ -103,7 +103,62 @@ def test_read_keystroke(mock_prompt, key):
 
 
 # Test _check_bool_validation
+@pytest.mark.parametrize(
+    "user_respose, valid, alert", 
+    [('!',         False, "Respond with 'y' or 'n'."), 
+     ('1',         False, "Respond with 'y' or 'n'."), 
+     ('a',         False, "Respond with 'y' or 'n'."), 
+     ('A',         False, "Respond with 'y' or 'n'."), 
+     ('y',         True,  ""), 
+     ('Y',         True,  ""), 
+     ('n',         True,  ""), 
+     ('N',         True,  "")])
 
+def test_check_bool_validation(mock_prompt, 
+                               capfd, 
+                               user_respose, 
+                               valid, 
+                               alert):
+    # Setup
+    mock_prompt._con.width = 79
+    mock_prompt._con.red = lambda x: f"[red]{x}[/red]"
+    mock_prompt.user_response = user_respose
+    
+    # Execute
+    result = mock_prompt._check_bool_validation()
+    message = "" if valid else f"[red]{alert}[/red]\n"
+    out, err = capfd.readouterr()
+
+    # Verify
+    assert result == valid
+    assert out == message
+    assert err == ""
+
+'''
+```mermaid
+flowchart LR
+    STR([start])
+        STR --> UR
+    PUT[/put alert/]
+        PUT --> RTN
+    RTN[return validation status]
+        RTN --> END
+    SET[set validatedResponse]
+        SET --> RTN
+    UR{userResponse}
+        UR -- y | n --> SET
+        UR -- invalid --> PUT
+    END([end])
+```
+```
+checkBoolValidation()
+    IF self.userResponse.lower IN {'y', 'n'}
+        SET self.validatedResponse <- userResponse == 'y'
+        RETURN True
+    putAlert()
+    RETURN False
+```
+'''
 
 # Test _check_int_validation
 # Test _get_response
