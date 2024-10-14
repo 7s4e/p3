@@ -1,5 +1,4 @@
 import pytest
-import sys
 from unittest.mock import MagicMock
 from blessed import Terminal, keyboard
 from console import ConsolePrompt
@@ -80,9 +79,21 @@ def test_put_alert(mock_prompt, capfd):
 
 
 # Test _read_keystroke
-@pytest.mark.parametrize("key", ['a', 'A', '1', '!', '\n', '\x08'])
+@pytest.mark.parametrize(
+    " expected_output, key_sequence", 
+    [('',              [keyboard.Keystroke('\n', 10)]), 
+     (' ',             [keyboard.Keystroke(' ', 32)]), 
+     ('!',             [keyboard.Keystroke('!', 33)]), 
+     ('1',             [keyboard.Keystroke('1', 49)]), 
+     ('A',             [keyboard.Keystroke('A', 65)]), 
+     ('a',             [keyboard.Keystroke('a', 97)]), 
+     ('~',             [keyboard.Keystroke('~', 126)]), 
+     ('a',             [keyboard.Keystroke('\x08', 8), 
+                        keyboard.Keystroke('\x09', 9), 
+                        keyboard.Keystroke('\x1b', 27), 
+                        keyboard.Keystroke('a', 97)])])
 
-def test_read_keystroke(mock_prompt, key):
+def test_read_keystroke(mock_prompt, key_sequence, expected_output, capfd):
     # Setup
     mock_prompt._con.cbreak = MagicMock()
     mock_prompt._con.cbreak.return_value.__enter__ = MagicMock()
@@ -90,13 +101,18 @@ def test_read_keystroke(mock_prompt, key):
     mock_prompt._con.hidden_cursor = MagicMock()
     mock_prompt._con.hidden_cursor.return_value.__enter__ = MagicMock()
     mock_prompt._con.hidden_cursor.return_value.__exit__ = MagicMock()
-    mock_prompt._con.inkey = lambda: key
+    key_iterator = iter(key_sequence)
+    mock_prompt._con.inkey = lambda: next(key_iterator)
 
     # Execute
-    result = mock_prompt._read_keystroke()
+    mock_prompt._read_keystroke()
+
+    out, err = capfd.readouterr()
+    print(out)
+    print(err)
 
     # Verify
-    assert result == str(key)
+    assert mock_prompt._user_response == expected_output
 
 
 # Test _read_string
@@ -170,8 +186,40 @@ def test_check_integer_validation(mock_prompt, capfd, validation, response,
 
 
 # Test _get_response
+# @pytest.mark.parametrize(
+#     " ", 
+#     [(None,       "123",    True,   ""), 
+#      ((-7, 7),    "-9",     False,  "Enter a number between -7 and 7.")])
+
+# def test_get_response(mock_prompt, ):
+#     # Setup
+#     mock_prompt._con.width = 79
+#     mock_prompt._con.red = lambda x: f"[red]{x}[/red]"
+#     mock_prompt._integer_validation = validation
+#     mock_prompt._user_response = response
+        
+#     # Execute
+#     result = mock_prompt._check_integer_validation()
+#     message = "" if valid else f"[red]{alert}[/red]\n"
+#     out, err = capfd.readouterr()
+
+#     # Verify
+#     if valid:
+#         assert mock_prompt._validated_response == response
+#     assert result == valid
+#     assert out == message
+#     assert err == ""
 
 """
+getResponse()
+    GET self.expectKeystroke
+    IF expectKeystroke
+        putPrompt(inlineCursor=False)
+        SET userResponse <- readKeystroke()
+    ELSE
+        putPrompt(inlineCursor=True)
+        SET userResponse <- readString()
+END
 """
 
 

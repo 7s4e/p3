@@ -255,19 +255,12 @@ class ConsolePrompt:
         self._print_message(self._con.bright_yellow(self._prompt), 
                             leave_cursor_inline=leave_cursor_inline)
         
-    def _read_keystroke(self) -> str:
-        """Read and return a single keystroke from the user.
-
-        This method captures a single keypress from the user, operating in 
-        'cbreak' mode, where input is read one character at a time without 
-        waiting for a newline. The cursor is hidden during the input.
-
-        Returns:
-            str: A string representation of the key pressed.
-        """
+    def _read_keystroke(self) -> None:
+        key = None
         with self._con.cbreak(), self._con.hidden_cursor():
-            key = self._con.inkey()
-        return str(key)
+            while key is None or not (32 <= key.code <= 126 or key.code == 10):
+                key = self._con.inkey()
+        self._user_response = str(key if key.code != 10 else "")
 
     def _read_string(self) -> str:
         """Needs testing"""
@@ -286,7 +279,6 @@ class ConsolePrompt:
                     response.append(str(key))
                     print(self._con.green(str(key)), end='', flush=True)
                     print()
-
 
     def _validate_response(self) -> bool:
         """Validate the response based on the defined validation type.

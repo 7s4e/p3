@@ -181,15 +181,15 @@ flowchart LR
     STR([start])
         STR --> GET
     GET[/get keystroke/]
-        GET --> RTN
-    RTN[return keystroke]
-        RTN --> END
+        GET --> SET
+    SET[set userResponse]
+        SET --> END
     END([end])
 ```
 ```
 _readKeystroke()
     GET keystroke
-    RETURN keystroke
+    SET userResponse <- keystroke
 END
 ```
 [️⬆️](#consoleprompt)
