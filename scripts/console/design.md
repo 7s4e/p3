@@ -198,23 +198,28 @@ END
 ```mermaid
 flowchart TB
     STR([start])
-        STR --> GET
+        STR --> GETK
     ADD[append key to string]
         ADD --> PUTK
-    BCK[pop from string]
-        BCK --> PUTP
-    EBO{Enter <br> Backspace <br> or other key}
-        EBO -- Enter --> RTN
-        EBO -- Backspace --> BCK
-        EBO -- other --> ADD
-    GET[/get keystroke/]
-        GET --> EBO
-    PUTK[/print key/]
-        PUTK --> GET
+    BCK{Backspace}
+        BCK -- True --> POP
+        BCK -- False --> PNT
+    ENT{Enter}
+        ENT -- True --> SET
+        ENT -- False --> BCK
+    GETK[/get keystroke/]
+        GETK --> ENT
+    PNT{printable}
+        PNT -- True --> ADD
+        PNT -- False --> GETK
+    POP[pop from string]
+        POP --> PUTP
+    PUTK[/put key/]
+        PUTK --> GETK
     PUTP[/put prompt, string/]
-        PUTP --> GET
-    RTN[return string]
-        RTN --> END
+        PUTP --> GETK
+    SET[set userResponse]
+        SET --> END
     END([end])
 ```
 ```

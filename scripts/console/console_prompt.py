@@ -262,23 +262,24 @@ class ConsolePrompt:
                 key = self._con.inkey()
         self._user_response = str(key if key.code != 10 else "")
 
-    def _read_string(self) -> str:
+    def _read_string(self) -> None:
         """Needs testing"""
+        key = None
         response = []
         with self._con.cbreak():
-            while True:
+            while key is None or key.code != 10:  # New Line/Line Feed
                 key = self._con.inkey()
-                if key == '\n':
-                    print()
-                    return ''.join(response)
-                elif key.code == self._con.KEY_BACKSPACE or key == '\x08':
+                if key.code == 8:  # Backspace
                     if response:
                         response.pop()
                         print(f"\b \b", end='', flush=True)
-                elif key.is_printable:
+                elif True:####
                     response.append(str(key))
                     print(self._con.green(str(key)), end='', flush=True)
                     print()
+                # if key == '\n':
+                #     print()
+                #     return ''.join(response)
 
     def _validate_response(self) -> bool:
         """Validate the response based on the defined validation type.
