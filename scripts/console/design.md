@@ -216,7 +216,7 @@ flowchart TB
         POP --> PUTP
     PUTK[/put key/]
         PUTK --> GETK
-    PUTP[/put prompt, string/]
+    PUTP[/put back-space-back/]
         PUTP --> GETK
     SET[set userResponse]
         SET --> END

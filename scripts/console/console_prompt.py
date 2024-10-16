@@ -263,7 +263,6 @@ class ConsolePrompt:
         self._user_response = str(key if key.code != 10 else "")
 
     def _read_string(self) -> None:
-        """Needs testing"""
         key = None
         response = []
         with self._con.cbreak():
@@ -272,14 +271,12 @@ class ConsolePrompt:
                 if key.code == 8:  # Backspace
                     if response:
                         response.pop()
-                        print(f"\b \b", end='', flush=True)
-                elif True:####
+                        print(f"\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b                 \b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b", end='', flush=True)
+                elif 32 <= key.code <= 126:
                     response.append(str(key))
                     print(self._con.green(str(key)), end='', flush=True)
-                    print()
-                # if key == '\n':
-                #     print()
-                #     return ''.join(response)
+            print()
+            self._user_response = ''.join(response)
 
     def _validate_response(self) -> bool:
         """Validate the response based on the defined validation type.

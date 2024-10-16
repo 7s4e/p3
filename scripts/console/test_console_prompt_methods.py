@@ -93,7 +93,7 @@ def test_put_alert(mock_prompt, capfd):
                         keyboard.Keystroke('\x1b', 27), 
                         keyboard.Keystroke('a', 97)])])
 
-def test_read_keystroke(mock_prompt, key_sequence, expected_output, capfd):
+def test_read_keystroke(mock_prompt, key_sequence, expected_output):
     # Setup
     mock_prompt._con.cbreak = MagicMock()
     mock_prompt._con.cbreak.return_value.__enter__ = MagicMock()
@@ -107,16 +107,44 @@ def test_read_keystroke(mock_prompt, key_sequence, expected_output, capfd):
     # Execute
     mock_prompt._read_keystroke()
 
-    out, err = capfd.readouterr()
-    print(out)
-    print(err)
-
     # Verify
     assert mock_prompt._user_response == expected_output
 
 
 # Test _read_string
-"""Needs work; see below."""
+@pytest.mark.parametrize(
+    " expected_output, input_sequence", 
+    [
+     ("abc",           [keyboard.Keystroke('a', 97), 
+                        keyboard.Keystroke('b', 98), 
+                        keyboard.Keystroke('c', 99), 
+                        keyboard.Keystroke('\n', 10)]), 
+     ("b",             [keyboard.Keystroke('a', 97), 
+                        keyboard.Keystroke('\x08', 8), 
+                        keyboard.Keystroke('b', 98), 
+                        keyboard.Keystroke('\n', 10)]), 
+    #  ("ab",            [keyboard.Keystroke('\x08', 8), 
+    #                     keyboard.Keystroke('a', 97), 
+    #                     keyboard.Keystroke('b', 98), 
+    #                     keyboard.Keystroke('\n', 8)])
+                        ])
+
+def test_read_string(mock_prompt, input_sequence, expected_output, capfd):
+    # Setup
+    mock_prompt._con.cbreak = MagicMock()
+    mock_prompt._con.cbreak.return_value.__enter__ = MagicMock()
+    mock_prompt._con.cbreak.return_value.__exit__ = MagicMock()
+    mock_prompt._con.inkey.side_effect = input_sequence
+    mock_prompt._con.green = lambda x: f"[green]{x}[/green]"
+    
+    # Execute
+    mock_prompt._read_string()
+    # out, err = capfd.readouterr()
+
+    # Verify
+    assert mock_prompt._user_response == expected_output
+    # assert out == f"{''.join(f'[green]{char}[/green]' for char in expected_output)}\n"
+    # assert err == ""
 
 
 # Test _check_bool_validation
@@ -280,43 +308,3 @@ END
 
 #     assert result == "test input"  # Expecting the string input
 
-# # Test _read_string
-# def mock_keystroke(char, code=None):
-#     """Create a mock blessed.keyboard.Keystroke object."""
-#     keystroke = MagicMock(spec=keyboard.Keystroke)
-#     keystroke.is_printable = char.isprintable()
-#     keystroke.code = code if code is not None else ord(char)  # Use ASCII value for non-None codes
-#     keystroke.__str__.return_value = char
-#     return keystroke
-# @pytest.mark.parametrize(
-#     "input_chars, expected_output",
-#     [
-#         # 'a', 'b', 'Enter' -> "ab"
-#         (['a', 'b', '\n'], "ab"),
-#         # 'a', 'b', 'Backspace', 'Enter' -> "a"
-#         (['a', 'b', '\x08', '\n'], "a"),
-#     ]
-# )
-# def test_read_string(mock_prompt, input_chars, expected_output):
-#     """Test _read_string method with various input sequences."""
-#     # Mock the backspace keycode
-#     mock_prompt._con.KEY_BACKSPACE = '\x08'  # Ensure it is set to the correct value
-#     # Convert input characters into mock keystrokes
-#     # print(input_sequence)
-#     input_sequence = [
-#         mock_keystroke(char)  # The code can default to None for non-backspace keys
-#         for char in input_chars
-#     ]
-#     # Debugging information
-#     print(f"Input sequence length: {len(input_sequence)}")  # Debugging print
-#     # Properly mock the cbreak context manager
-#     mock_prompt._con.cbreak = MagicMock()
-#     mock_prompt._con.cbreak.return_value.__enter__.return_value = True
-#     mock_prompt._con.cbreak.return_value.__exit__.return_value = False
-#     mock_prompt._con.green = lambda x: f"[green]{x}[/green]"
-#     # Mock the inkey method to simulate the input sequence
-#     mock_prompt._con.inkey = MagicMock(side_effect=input_sequence)
-#     # Call the method and check the result
-#     result = mock_prompt._read_string()
-#     print(f"Test result: {result}")  # Debugging print
-#     assert result == expected_output
