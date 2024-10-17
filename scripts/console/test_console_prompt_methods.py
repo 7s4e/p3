@@ -281,58 +281,19 @@ def test_get_validate_reponse(mock_prompt, boolean, integer, bool_rtn, int_rtn,
 
 
 # Test call
+def test_call(mock_console):
+    # Setup
+    mock_prompt = ConsolePrompt("Mocked prompt")
+    mock_prompt._validated_response = "mocked response"
+    with patch.object(mock_prompt, '_get_response') as mock_get_response, \
+         patch.object(mock_prompt, '_validate_response', 
+                      side_effect=[False, True]) as mock_validate_response:
+        
+    # Execute
+        result = mock_prompt.call(mock_console)
 
-
-# def test_boolean_validation_yes(mock_consolesole, mocker):
-#     prompt = ConsolePrompt("Do you want to continue? (y/n)", validate_bool=True)
-#     prompt._response = "y"  # Simulate user input
-
-#     mocker.patch.object(prompt, '_put_alert')  # Mock alert method
-#     assert prompt.call(mock_consolesole) is True  # Expecting valid response
-
-# def test_boolean_validation_no(mock_consolesole, mocker):
-#     prompt = ConsolePrompt("Do you want to continue? (y/n)", validate_bool=True)
-#     prompt._response = "n"  # Simulate user input
-
-#     mocker.patch.object(prompt, '_put_alert')
-#     assert prompt.call(mock_consolesole) is False  # Expecting valid response
-
-# def test_invalid_boolean_input(mock_consolesole, mocker):
-#     prompt = ConsolePrompt("Do you want to continue? (y/n)", validate_bool=True)
-#     prompt._response = "maybe"  # Simulate invalid user input
-
-#     mocker.patch.object(prompt, '_put_alert')  # Mock alert method
-#     assert prompt.call(mock_consolesole) is None  # Expecting re-prompt
-
-# def test_integer_validation_valid(mock_consolesole, mocker):
-#     prompt = ConsolePrompt("Enter a number (0-10):", validate_integer=True, integer_validation=(0, 10))
-#     prompt._response = "5"  # Simulate user input
-
-#     mocker.patch.object(prompt, '_put_alert')
-#     assert prompt.call(mock_consolesole) == "5"  # Expecting valid response
-
-# def test_integer_validation_invalid(mock_consolesole, mocker):
-#     prompt = ConsolePrompt("Enter a number (0-10):", validate_integer=True, integer_validation=(0, 10))
-#     prompt._response = "15"  # Simulate invalid user input
-
-#     mocker.patch.object(prompt, '_put_alert')
-#     assert prompt.call(mock_consolesole) is None  # Expecting re-prompt
-
-# def test_keystroke_input(mock_consolesole, mocker):
-#     prompt = ConsolePrompt("Press any key:", expect_keystroke=True)
-#     prompt._response = "a"  # Simulate keystroke input
-
-#     mocker.patch.object(prompt, '_put_alert')
-#     result = prompt.call(mock_consolesole)
-
-#     assert result == repr("a")  # Expecting the keystroke representation
-
-# def test_read_string(mock_consolesole, mocker):
-#     prompt = ConsolePrompt("Enter a string:")
-#     prompt._response = "test input"  # Simulate user input
-
-#     mocker.patch.object(prompt, '_put_alert')
-#     result = prompt.call(mock_consolesole)
-
-#     assert result == "test input"  # Expecting the string input
-
+    # Verify
+        assert result == "mocked response"
+        assert mock_prompt._con == mock_console
+        assert mock_get_response.call_count == 2
+        assert mock_validate_response.call_count == 2

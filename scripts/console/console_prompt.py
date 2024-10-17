@@ -128,7 +128,7 @@ class ConsolePrompt:
         while not valid:
             self._get_response()
             valid = self._validate_response()
-        return self._user_response
+        return self._validated_response
 
     # Private Methods
     def _check_bool_validation(self) -> bool:
