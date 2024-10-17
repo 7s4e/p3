@@ -253,29 +253,66 @@ class ConsolePrompt:
         """
         self._print_message(self._con.bright_yellow(self._prompt), 
                             leave_cursor_inline=leave_cursor_inline)
-        
+  
     def _read_keystroke(self) -> None:
+        """Captures a single keystroke from the user, waiting for a 
+            printable character or the Enter key, and stores the result 
+            in `_user_response`.
+        
+        This method operates in raw mode using the `cbreak()` and 
+        `hidden_cursor()` contexts of the terminal, allowing it to read 
+        user input without displaying the cursor. It continues to 
+        capture keystrokes until a valid character (ASCII codes 32-126) 
+        or the Enter key (ASCII code 10) is detected. If the Enter key 
+        is pressed, an empty string is stored in `_user_response`.
+
+        Attributes:
+            _user_response (str): The captured keystroke, or an empty 
+                string if the Enter key is pressed.
+        """
         key = None
+
         with self._con.cbreak(), self._con.hidden_cursor():
             while key is None or not (32 <= key.code <= 126 or key.code == 10):
                 key = self._con.inkey()
+
         self._user_response = str(key if key.code != 10 else "")
 
     def _read_string(self) -> None:
+        """Read a user input string character by character, handling 
+            backspace and printable characters, and store the final 
+            input in `_user_response`.
+
+        This method operates in raw mode using the `cbreak()` context of 
+        the terminal, allowing it to capture each keystroke as the user 
+        types. Backspace characters remove the last typed character from 
+        the display and the internal response, while printable 
+        characters (ASCII codes 32-126) are appended to the response and 
+        printed in green. The input ends when the Enter key (ASCII code 
+        10) is pressed.
+
+        Attributes:
+            _user_response (str): The final user input string captured.
+        """
         key = None
         response = []
+
         with self._con.cbreak():
-            while key is None or key.code != 10:  # New Line/Line Feed
+            while key is None or key.code != 10:  # Wait New Line/Enter
                 key = self._con.inkey()
-                if key.code == 8:  # Backspace
+
+                if key.code == 8:  # Handle Backspace
                     if response:
                         response.pop()
-                        print(f"\b \b", end='', flush=True)
-                elif 32 <= key.code <= 126:
+                        print("\b \b", end='', flush=True)
+                elif 32 <= key.code <= 126:  # Handle printable chars
                     response.append(str(key))
                     print(self._con.green(str(key)), end='', flush=True)
-            print()
+
+            print()  # Move to next line after Enter
+
         self._user_response = ''.join(response)
+
 
     def _validate_response(self) -> bool:
         """Validate the response based on the defined validation type.
