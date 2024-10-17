@@ -1,6 +1,6 @@
 import pytest
-from unittest.mock import MagicMock
-from blessed import Terminal, keyboard
+from unittest.mock import patch, MagicMock
+from blessed import keyboard, Terminal
 from console import ConsolePrompt
 
 
@@ -79,19 +79,18 @@ def test_put_alert(mock_prompt, capfd):
 
 
 # Test _read_keystroke
-@pytest.mark.parametrize(
-    " expected_output, key_sequence", 
-    [('',              [keyboard.Keystroke('\n', 10)]), 
-     (' ',             [keyboard.Keystroke(' ', 32)]), 
-     ('!',             [keyboard.Keystroke('!', 33)]), 
-     ('1',             [keyboard.Keystroke('1', 49)]), 
-     ('A',             [keyboard.Keystroke('A', 65)]), 
-     ('a',             [keyboard.Keystroke('a', 97)]), 
-     ('~',             [keyboard.Keystroke('~', 126)]), 
-     ('a',             [keyboard.Keystroke('\x08', 8), 
-                        keyboard.Keystroke('\x09', 9), 
-                        keyboard.Keystroke('\x1b', 27), 
-                        keyboard.Keystroke('a', 97)])])
+@pytest.mark.parametrize(" expected_output, key_sequence", 
+                         [('',              [keyboard.Keystroke('\n', 10)]), 
+                          (' ',             [keyboard.Keystroke(' ', 32)]), 
+                          ('!',             [keyboard.Keystroke('!', 33)]), 
+                          ('1',             [keyboard.Keystroke('1', 49)]), 
+                          ('A',             [keyboard.Keystroke('A', 65)]), 
+                          ('a',             [keyboard.Keystroke('a', 97)]), 
+                          ('~',             [keyboard.Keystroke('~', 126)]), 
+                          ('a',             [keyboard.Keystroke('\x08', 8), 
+                                             keyboard.Keystroke('\x09', 9), 
+                                             keyboard.Keystroke('\x1b', 27), 
+                                             keyboard.Keystroke('a', 97)])])
 
 def test_read_keystroke(mock_prompt, key_sequence, expected_output):
     # Setup
@@ -164,32 +163,30 @@ def test_read_keystroke(mock_prompt, key_sequence, expected_output):
 
 
 # Test _check_bool_validation
-@pytest.mark.parametrize(
-    " response, valid, alert", 
-    [('!',      False, "Respond with 'y' or 'n'."), 
-     ('1',      False, "Respond with 'y' or 'n'."), 
-     ('a',      False, "Respond with 'y' or 'n'."), 
-     ('A',      False, "Respond with 'y' or 'n'."), 
-     ('y',      True,  ""), 
-     ('Y',      True,  ""), 
-     ('n',      True,  ""), 
-     ('N',      True,  "")])
+@pytest.mark.parametrize(" response, valid", 
+                         [('!',      False), 
+                          ('1',      False), 
+                          ('a',      False), 
+                          ('A',      False), 
+                          ('y',      True), 
+                          ('Y',      True), 
+                          ('n',      True), 
+                          ('N',      True)])
 
-def test_check_bool_validation(mock_prompt, capfd, response, valid, alert):
+def test_check_bool_validation(mock_prompt, response, valid):
     # Setup
-    mock_prompt._con.width = 79
-    mock_prompt._con.red = lambda x: f"[red]{x}[/red]"
     mock_prompt._user_response = response
-    
+    with patch.object(mock_prompt, '_put_alert') as mock_put_alert:
+
     # Execute
-    result = mock_prompt._check_bool_validation()
-    message = "" if valid else f"[red]{alert}[/red]\n"
-    out, err = capfd.readouterr()
+        result = mock_prompt._check_bool_validation()
 
     # Verify
-    assert result == valid
-    assert out == message
-    assert err == ""
+        assert result == valid
+        if not valid:
+            mock_put_alert.assert_called_once_with("Respond with 'y' or 'n'.")
+        else:
+            mock_put_alert.assert_not_called()
 
 
 # Test _check_intger_validation
@@ -229,16 +226,15 @@ def test_check_integer_validation(mock_prompt, capfd, validation, response,
     assert err == ""
 
 
-# Test _get_response
+#Test _get_response
 # @pytest.mark.parametrize(
-#     " ", 
+#     " expect_keystroke", 
 #     [(None,       "123",    True,   ""), 
 #      ((-7, 7),    "-9",     False,  "Enter a number between -7 and 7.")])
 
-# def test_get_response(mock_prompt, ):
+# def test_get_response(mock_prompt, expect_keystroke):
 #     # Setup
-#     mock_prompt._con.width = 79
-#     mock_prompt._con.red = lambda x: f"[red]{x}[/red]"
+#     mock_prompt._expect_keystroke = expect_keystroke
 #     mock_prompt._integer_validation = validation
 #     mock_prompt._user_response = response
         

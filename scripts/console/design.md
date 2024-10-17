@@ -155,11 +155,9 @@ flowchart LR
     CALLT[call putPrompt <br> cursor left inline]
         CALLT --> READS
     READK[call readKeystroke]
-        READK --> SET
+        READK --> END
     READS[call readString]
-        READS --> SET
-    SET[/set userResponse/]
-        SET --> END
+        READS --> END
     END([end])
 ```
 ```
@@ -167,10 +165,10 @@ getResponse()
     GET self.expectKeystroke
     IF expectKeystroke
         putPrompt(inlineCursor=False)
-        SET userResponse <- readKeystroke()
+        userResponse <- readKeystroke()
     ELSE
         putPrompt(inlineCursor=True)
-        SET userResponse <- readString()
+        userResponse <- readString()
 END
 ```
 [️⬆️](#consoleprompt)
@@ -198,7 +196,7 @@ END
 ```mermaid
 flowchart TB
     STR([start])
-        STR --> GETK
+        STR --> GET
     ADD[append key to string]
         ADD --> PUTK
     BCK{Backspace}
@@ -207,17 +205,17 @@ flowchart TB
     ENT{Enter}
         ENT -- True --> SET
         ENT -- False --> BCK
-    GETK[/get keystroke/]
-        GETK --> ENT
+    GET[/get keystroke/]
+        GET --> ENT
     PNT{printable}
         PNT -- True --> ADD
-        PNT -- False --> GETK
+        PNT -- False --> GET
     POP[pop from string]
         POP --> PUTP
     PUTK[/put key/]
-        PUTK --> GETK
+        PUTK --> GET
     PUTP[/put back-space-back/]
-        PUTP --> GETK
+        PUTP --> GET
     SET[set userResponse]
         SET --> END
     END([end])

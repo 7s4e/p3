@@ -186,7 +186,6 @@ class ConsolePrompt:
         self._validated_response = str(response)
         return True            
 
-
     def _get_response(self) -> None:
         """Prompt the user and capture their response.
 
@@ -200,10 +199,10 @@ class ConsolePrompt:
         """
         if self._expect_keystroke:
             self._put_prompt(leave_cursor_inline=False)
-            self._user_response = self._read_keystroke()
+            self._read_keystroke()
         else:
             self._put_prompt(leave_cursor_inline=True)
-            self._user_response = self._read_string()
+            self._read_string()
 
     def _print_message(self, message: str, leave_cursor_inline: bool) -> None:
         """Print a centered, wrapped message to the console.
@@ -271,7 +270,7 @@ class ConsolePrompt:
                 if key.code == 8:  # Backspace
                     if response:
                         response.pop()
-                        print(f"\b\ \b", end='', flush=True)
+                        print(f"\b \b", end='', flush=True)
                 elif 32 <= key.code <= 126:
                     response.append(str(key))
                     print(self._con.green(str(key)), end='', flush=True)
