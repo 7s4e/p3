@@ -40,6 +40,7 @@ def test_print_message(mock_prompt, capfd, width, padding, message, is_inline):
     # Verify
     text = padding + message
     ln_break = text.rfind(" ", 0, min(width, 79))
+    
     assert out.startswith(text[:ln_break if ln_break > 0 else width])
     assert out.endswith("\n") != is_inline
     assert err == ""
@@ -100,6 +101,7 @@ def test_read_keystroke(mock_prompt, sequence, expected):
     mock_prompt._con.hidden_cursor = MagicMock()
     mock_prompt._con.hidden_cursor.return_value.__enter__ = MagicMock()
     mock_prompt._con.hidden_cursor.return_value.__exit__ = MagicMock()
+
     key_iterator = iter(sequence)
     mock_prompt._con.inkey = lambda: next(key_iterator)
 
@@ -176,13 +178,15 @@ def test_read_keystroke(mock_prompt, sequence, expected):
 def test_check_bool_validation(mock_prompt, response, expected):
     # Setup
     mock_prompt._user_response = response
+
     with patch.object(mock_prompt, '_put_alert') as mock_put_alert:
 
-    # Execute
+        # Execute
         result = mock_prompt._check_bool_validation()
 
-    # Verify
+        # Verify
         assert result == expected
+        
         if expected == False:
             mock_put_alert.assert_called_once_with("Respond with 'y' or 'n'.")
         else:
@@ -210,13 +214,15 @@ def test_check_integer_validation(mock_prompt, validation, response, expected,
     # Setup
     mock_prompt._integer_validation = validation
     mock_prompt._user_response = response
+
     with patch.object(mock_prompt, '_put_alert') as mock_put_alert:
 
-    # Execute
+        # Execute
         result = mock_prompt._check_integer_validation()
 
-    # Verify
+        # Verify
         assert result == expected
+        
         if expected == True:
             assert mock_prompt._validated_response == response
         else:
@@ -229,15 +235,17 @@ def test_check_integer_validation(mock_prompt, validation, response, expected,
 def test_get_response(mock_prompt, keystroke, cursor):
     # Setup
     mock_prompt._expect_keystroke = keystroke
+
     with patch.object(mock_prompt, '_put_prompt') as mock_put_prompt, \
          patch.object(mock_prompt, '_read_keystroke') as mock_read_keystroke, \
          patch.object(mock_prompt, '_read_string') as mock_read_string:
 
-    # Execute
+        # Execute
         mock_prompt._get_response()
 
-    # Verify
+        # Verify
         mock_put_prompt.assert_called_once_with(leave_cursor_inline=cursor)
+        
         if keystroke:
             mock_read_keystroke.assert_called_once()
             mock_read_string.assert_not_called()
@@ -259,16 +267,18 @@ def test_get_validate_reponse(mock_prompt, boolean, integer, bool_rtn, int_rtn,
     # Setup
     mock_prompt._validate_bool = boolean
     mock_prompt._validate_integer = integer
+
     with patch.object(mock_prompt, '_check_bool_validation', 
                       return_value=bool_rtn) as mock_check_bool_validation, \
          patch.object(mock_prompt, '_check_integer_validation', 
                       return_value=int_rtn) as mock_check_integer_validation:
 
-    # Execute
+        # Execute
         result = mock_prompt._validate_response()
         
-    # Verify
+        # Verify
         assert result == expected
+
         if boolean:
             mock_check_bool_validation.assert_called_once()
             mock_check_integer_validation.assert_not_called()
@@ -278,61 +288,3 @@ def test_get_validate_reponse(mock_prompt, boolean, integer, bool_rtn, int_rtn,
         else:
             mock_check_bool_validation.assert_not_called()
             mock_check_integer_validation.assert_not_called()
-
-
-# Test call
-
-
-# def test_boolean_validation_yes(mock_consolesole, mocker):
-#     prompt = ConsolePrompt("Do you want to continue? (y/n)", validate_bool=True)
-#     prompt._response = "y"  # Simulate user input
-
-#     mocker.patch.object(prompt, '_put_alert')  # Mock alert method
-#     assert prompt.call(mock_consolesole) is True  # Expecting valid response
-
-# def test_boolean_validation_no(mock_consolesole, mocker):
-#     prompt = ConsolePrompt("Do you want to continue? (y/n)", validate_bool=True)
-#     prompt._response = "n"  # Simulate user input
-
-#     mocker.patch.object(prompt, '_put_alert')
-#     assert prompt.call(mock_consolesole) is False  # Expecting valid response
-
-# def test_invalid_boolean_input(mock_consolesole, mocker):
-#     prompt = ConsolePrompt("Do you want to continue? (y/n)", validate_bool=True)
-#     prompt._response = "maybe"  # Simulate invalid user input
-
-#     mocker.patch.object(prompt, '_put_alert')  # Mock alert method
-#     assert prompt.call(mock_consolesole) is None  # Expecting re-prompt
-
-# def test_integer_validation_valid(mock_consolesole, mocker):
-#     prompt = ConsolePrompt("Enter a number (0-10):", validate_integer=True, integer_validation=(0, 10))
-#     prompt._response = "5"  # Simulate user input
-
-#     mocker.patch.object(prompt, '_put_alert')
-#     assert prompt.call(mock_consolesole) == "5"  # Expecting valid response
-
-# def test_integer_validation_invalid(mock_consolesole, mocker):
-#     prompt = ConsolePrompt("Enter a number (0-10):", validate_integer=True, integer_validation=(0, 10))
-#     prompt._response = "15"  # Simulate invalid user input
-
-#     mocker.patch.object(prompt, '_put_alert')
-#     assert prompt.call(mock_consolesole) is None  # Expecting re-prompt
-
-# def test_keystroke_input(mock_consolesole, mocker):
-#     prompt = ConsolePrompt("Press any key:", expect_keystroke=True)
-#     prompt._response = "a"  # Simulate keystroke input
-
-#     mocker.patch.object(prompt, '_put_alert')
-#     result = prompt.call(mock_consolesole)
-
-#     assert result == repr("a")  # Expecting the keystroke representation
-
-# def test_read_string(mock_consolesole, mocker):
-#     prompt = ConsolePrompt("Enter a string:")
-#     prompt._response = "test input"  # Simulate user input
-
-#     mocker.patch.object(prompt, '_put_alert')
-#     result = prompt.call(mock_consolesole)
-
-#     assert result == "test input"  # Expecting the string input
-
