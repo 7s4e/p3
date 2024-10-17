@@ -189,7 +189,7 @@ def test_check_bool_validation(mock_prompt, response, valid):
             mock_put_alert.assert_not_called()
 
 
-# Test _check_intger_validation
+# Test _check_integer_validation
 @pytest.mark.parametrize(
     " validation, response, valid,  alert", 
     [(None,       "123",    True,   ""), 
@@ -224,28 +224,27 @@ def test_check_integer_validation(mock_prompt, capfd, validation, response,
 
 
 #Test _get_response
-# @pytest.mark.parametrize(
-#     " expect_keystroke", 
-#     [(None,       "123",    True,   ""), 
-#      ((-7, 7),    "-9",     False,  "Enter a number between -7 and 7.")])
+@pytest.mark.parametrize("keystroke, cursor", [(True, False), (False, True)])
 
-# def test_get_response(mock_prompt, expect_keystroke):
-#     # Setup
-#     mock_prompt._expect_keystroke = expect_keystroke
-#     mock_prompt._integer_validation = validation
-#     mock_prompt._user_response = response
-        
-#     # Execute
-#     result = mock_prompt._check_integer_validation()
-#     message = "" if valid else f"[red]{alert}[/red]\n"
-#     out, err = capfd.readouterr()
+def test_get_response(mock_prompt, keystroke, cursor):
+    # Setup
+    mock_prompt._expect_keystroke = keystroke
+    with patch.object(mock_prompt, '_put_prompt') as mock_put_prompt, \
+         patch.object(mock_prompt, '_read_keystroke') as mock_read_keystroke, \
+         patch.object(mock_prompt, '_read_string') as mock_read_string:
 
-#     # Verify
-#     if valid:
-#         assert mock_prompt._validated_response == response
-#     assert result == valid
-#     assert out == message
-#     assert err == ""
+    # Execute
+        mock_prompt._get_response()
+
+    # Verify
+        mock_put_prompt.assert_called_once_with(leave_cursor_inline=cursor)
+        if keystroke:
+            mock_read_keystroke.assert_called_once()
+            mock_read_string.assert_not_called()
+        else:
+            mock_read_keystroke.assert_not_called()
+            mock_read_string.assert_called_once()
+
 
 """
 getResponse()
