@@ -79,20 +79,20 @@ def test_put_alert(mock_prompt, capfd):
 
 
 # Test _read_keystroke
-@pytest.mark.parametrize(" expected_output, key_sequence", 
-                         [('',              [keyboard.Keystroke('\n', 10)]), 
-                          (' ',             [keyboard.Keystroke(' ', 32)]), 
-                          ('!',             [keyboard.Keystroke('!', 33)]), 
-                          ('1',             [keyboard.Keystroke('1', 49)]), 
-                          ('A',             [keyboard.Keystroke('A', 65)]), 
-                          ('a',             [keyboard.Keystroke('a', 97)]), 
-                          ('~',             [keyboard.Keystroke('~', 126)]), 
-                          ('a',             [keyboard.Keystroke('\x08', 8), 
-                                             keyboard.Keystroke('\x09', 9), 
-                                             keyboard.Keystroke('\x1b', 27), 
-                                             keyboard.Keystroke('a', 97)])])
+@pytest.mark.parametrize(" expected, sequence", 
+                         [('',       [keyboard.Keystroke('\n', 10)]), 
+                          (' ',      [keyboard.Keystroke(' ', 32)]), 
+                          ('!',      [keyboard.Keystroke('!', 33)]), 
+                          ('1',      [keyboard.Keystroke('1', 49)]), 
+                          ('A',      [keyboard.Keystroke('A', 65)]), 
+                          ('a',      [keyboard.Keystroke('a', 97)]), 
+                          ('~',      [keyboard.Keystroke('~', 126)]), 
+                          ('a',      [keyboard.Keystroke('\x08', 8), 
+                                      keyboard.Keystroke('\x09', 9), 
+                                      keyboard.Keystroke('\x1b', 27), 
+                                      keyboard.Keystroke('a', 97)])])
 
-def test_read_keystroke(mock_prompt, key_sequence, expected_output):
+def test_read_keystroke(mock_prompt, sequence, expected):
     # Setup
     mock_prompt._con.cbreak = MagicMock()
     mock_prompt._con.cbreak.return_value.__enter__ = MagicMock()
@@ -100,14 +100,14 @@ def test_read_keystroke(mock_prompt, key_sequence, expected_output):
     mock_prompt._con.hidden_cursor = MagicMock()
     mock_prompt._con.hidden_cursor.return_value.__enter__ = MagicMock()
     mock_prompt._con.hidden_cursor.return_value.__exit__ = MagicMock()
-    key_iterator = iter(key_sequence)
+    key_iterator = iter(sequence)
     mock_prompt._con.inkey = lambda: next(key_iterator)
 
     # Execute
     mock_prompt._read_keystroke()
 
     # Verify
-    assert mock_prompt._user_response == expected_output
+    assert mock_prompt._user_response == expected
 
 
 # Test _read_string
@@ -163,7 +163,7 @@ def test_read_keystroke(mock_prompt, key_sequence, expected_output):
 
 
 # Test _check_bool_validation
-@pytest.mark.parametrize(" response, valid", 
+@pytest.mark.parametrize(" response, expected", 
                          [('!',      False), 
                           ('1',      False), 
                           ('a',      False), 
@@ -173,7 +173,7 @@ def test_read_keystroke(mock_prompt, key_sequence, expected_output):
                           ('n',      True), 
                           ('N',      True)])
 
-def test_check_bool_validation(mock_prompt, response, valid):
+def test_check_bool_validation(mock_prompt, response, expected):
     # Setup
     mock_prompt._user_response = response
     with patch.object(mock_prompt, '_put_alert') as mock_put_alert:
@@ -182,8 +182,8 @@ def test_check_bool_validation(mock_prompt, response, valid):
         result = mock_prompt._check_bool_validation()
 
     # Verify
-        assert result == valid
-        if not valid:
+        assert result == expected
+        if expected == False:
             mock_put_alert.assert_called_once_with("Respond with 'y' or 'n'.")
         else:
             mock_put_alert.assert_not_called()
@@ -191,22 +191,22 @@ def test_check_bool_validation(mock_prompt, response, valid):
 
 # Test _check_integer_validation
 @pytest.mark.parametrize(
-    " validation, response, valid,  alert", 
-    [(None,       "123",    True,   ""), 
-     (None,       "-123",   True,   ""), 
-     (None,       "1.23",   False,  "Enter a valid number."), 
-     (None,       "abc",    False,  "Enter a valid number."), 
-     (9,          "0",      True,   ""), 
-     (9,          "9",      False,  "Response is out of range."), 
-     (9,          "-1",     False,  "Response is out of range."), 
-     ((-7, 7),    "0",      True,   ""), 
-     ((-7, 7),    "7",      True,   ""), 
-     ((-7, 7),    "9",      False,  "Enter a number between -7 and 7."), 
-     ((-7, 7),    "-7",     True,   ""), 
-     ((-7, 7),    "-9",     False,  "Enter a number between -7 and 7.")])
+    " validation, response, expected,  alert", 
+    [(None,       "123",    True,      ""), 
+     (None,       "-123",   True,      ""), 
+     (None,       "1.23",   False,     "Enter a valid number."), 
+     (None,       "abc",    False,     "Enter a valid number."), 
+     (9,          "0",      True,      ""), 
+     (9,          "9",      False,     "Response is out of range."), 
+     (9,          "-1",     False,     "Response is out of range."), 
+     ((-7, 7),    "0",      True,      ""), 
+     ((-7, 7),    "7",      True,      ""), 
+     ((-7, 7),    "9",      False,     "Enter a number between -7 and 7."), 
+     ((-7, 7),    "-7",     True,      ""), 
+     ((-7, 7),    "-9",     False,     "Enter a number between -7 and 7.")])
 
-def test_check_integer_validation(mock_prompt, capfd, validation, response, 
-                                  valid, alert):
+def test_check_integer_validation(mock_prompt, validation, response, expected, 
+                                  alert):
     # Setup
     mock_prompt._integer_validation = validation
     mock_prompt._user_response = response
@@ -216,8 +216,8 @@ def test_check_integer_validation(mock_prompt, capfd, validation, response,
         result = mock_prompt._check_integer_validation()
 
     # Verify
-        assert result == valid
-        if valid:
+        assert result == expected
+        if expected == True:
             assert mock_prompt._validated_response == response
         else:
             mock_put_alert.assert_called_once_with(alert)
@@ -246,20 +246,40 @@ def test_get_response(mock_prompt, keystroke, cursor):
             mock_read_string.assert_called_once()
 
 
-"""
-getResponse()
-    GET self.expectKeystroke
-    IF expectKeystroke
-        putPrompt(inlineCursor=False)
-        SET userResponse <- readKeystroke()
-    ELSE
-        putPrompt(inlineCursor=True)
-        SET userResponse <- readString()
-END
-"""
-
-
 # Test _validate_response
+@pytest.mark.parametrize(" boolean, integer, bool_rtn, int_rtn, expected", 
+                         [(True,    False,   True,     None,    True), 
+                          (True,    False,   False,    None,    False), 
+                          (False,   True,    None,     True,    True), 
+                          (False,   True,    None,     False,   False), 
+                          (False,   False,   None,     None,    True)])
+
+def test_get_validate_reponse(mock_prompt, boolean, integer, bool_rtn, int_rtn, 
+                              expected):
+    # Setup
+    mock_prompt._validate_bool = boolean
+    mock_prompt._validate_integer = integer
+    with patch.object(mock_prompt, '_check_bool_validation', 
+                      return_value=bool_rtn) as mock_check_bool_validation, \
+         patch.object(mock_prompt, '_check_integer_validation', 
+                      return_value=int_rtn) as mock_check_integer_validation:
+
+    # Execute
+        result = mock_prompt._validate_response()
+        
+    # Verify
+        assert result == expected
+        if boolean:
+            mock_check_bool_validation.assert_called_once()
+            mock_check_integer_validation.assert_not_called()
+        elif integer:
+            mock_check_bool_validation.assert_not_called()
+            mock_check_integer_validation.assert_called_once()
+        else:
+            mock_check_bool_validation.assert_not_called()
+            mock_check_integer_validation.assert_not_called()
+
+
 # Test call
 
 
