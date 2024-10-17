@@ -208,22 +208,19 @@ def test_check_bool_validation(mock_prompt, response, valid):
 def test_check_integer_validation(mock_prompt, capfd, validation, response, 
                                   valid, alert):
     # Setup
-    mock_prompt._con.width = 79
-    mock_prompt._con.red = lambda x: f"[red]{x}[/red]"
     mock_prompt._integer_validation = validation
     mock_prompt._user_response = response
-        
+    with patch.object(mock_prompt, '_put_alert') as mock_put_alert:
+
     # Execute
-    result = mock_prompt._check_integer_validation()
-    message = "" if valid else f"[red]{alert}[/red]\n"
-    out, err = capfd.readouterr()
+        result = mock_prompt._check_integer_validation()
 
     # Verify
-    if valid:
-        assert mock_prompt._validated_response == response
-    assert result == valid
-    assert out == message
-    assert err == ""
+        assert result == valid
+        if valid:
+            assert mock_prompt._validated_response == response
+        else:
+            mock_put_alert.assert_called_once_with(alert)
 
 
 #Test _get_response
