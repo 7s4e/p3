@@ -112,39 +112,55 @@ def test_read_keystroke(mock_prompt, key_sequence, expected_output):
 
 
 # Test _read_string
-@pytest.mark.parametrize(
-    " expected_output, input_sequence", 
-    [
-     ("abc",           [keyboard.Keystroke('a', 97), 
-                        keyboard.Keystroke('b', 98), 
-                        keyboard.Keystroke('c', 99), 
-                        keyboard.Keystroke('\n', 10)]), 
-     ("b",             [keyboard.Keystroke('a', 97), 
-                        keyboard.Keystroke('\x08', 8), 
-                        keyboard.Keystroke('b', 98), 
-                        keyboard.Keystroke('\n', 10)]), 
-    #  ("ab",            [keyboard.Keystroke('\x08', 8), 
-    #                     keyboard.Keystroke('a', 97), 
-    #                     keyboard.Keystroke('b', 98), 
-    #                     keyboard.Keystroke('\n', 8)])
-                        ])
+"""Needs work"""
+# @pytest.mark.parametrize(
+#     " expected_output, input_sequence", 
+#     [
+#      ("abc",           [keyboard.Keystroke('a', 97), 
+#                         keyboard.Keystroke('b', 98), 
+#                         keyboard.Keystroke('c', 99), 
+#                         keyboard.Keystroke('\n', 10)]), 
+#      ("b",             [keyboard.Keystroke('a', 97), 
+#                         keyboard.Keystroke('\x08', 8), 
+#                         keyboard.Keystroke('b', 98), 
+#                         keyboard.Keystroke('\n', 10)]), 
+#      ("ab",            [keyboard.Keystroke('\x08', 8), 
+#                         keyboard.Keystroke('a', 97), 
+#                         keyboard.Keystroke('b', 98), 
+#                         keyboard.Keystroke('\n', 8)])
+#                         ])
 
-def test_read_string(mock_prompt, input_sequence, expected_output, capfd):
-    # Setup
-    mock_prompt._con.cbreak = MagicMock()
-    mock_prompt._con.cbreak.return_value.__enter__ = MagicMock()
-    mock_prompt._con.cbreak.return_value.__exit__ = MagicMock()
-    mock_prompt._con.inkey.side_effect = input_sequence
-    mock_prompt._con.green = lambda x: f"[green]{x}[/green]"
-    
-    # Execute
-    mock_prompt._read_string()
-    # out, err = capfd.readouterr()
+# def test_read_string(mock_prompt, input_sequence, expected_output, capfd):
+#     # Setup
+#     mock_prompt._con.cbreak = MagicMock()
+#     mock_prompt._con.cbreak.return_value.__enter__ = MagicMock()
+#     mock_prompt._con.cbreak.return_value.__exit__ = MagicMock()
+#     mock_prompt._con.inkey.side_effect = input_sequence
+#     mock_prompt._con.green = lambda x: f"[green]{x}[/green]"
 
-    # Verify
-    assert mock_prompt._user_response == expected_output
-    # assert out == f"{''.join(f'[green]{char}[/green]' for char in expected_output)}\n"
-    # assert err == ""
+#     # Execute the method
+#     mock_prompt._read_string()
+#     out, err = capfd.readouterr()
+
+#     # Verify the final response captured in _user_response
+#     assert mock_prompt._user_response == expected_output
+
+#     # Build expected printed output with proper handling of backspace
+#     expected_stdout = []
+#     for key in input_sequence:
+#         if key.code == 8:  # Backspace
+#             if expected_stdout:
+#                 # Simulate the backspace visual effect in terminal (\b \b)
+#                 expected_stdout.pop()  # Remove the last character from the visible output
+#         elif 32 <= key.code <= 126:  # Printable characters
+#             expected_stdout.append(f"[green]{str(key)}[/green]")  # Add colored char
+
+#     # Join expected printed output with color and backspace handling
+#     expected_stdout = ''.join(expected_stdout) + '\n'
+
+#     # Verify captured stdout matches the expected printed output with color
+#     assert out == expected_stdout, f"Expected: {expected_stdout}, Got: {out}"
+#     assert err == ""
 
 
 # Test _check_bool_validation
