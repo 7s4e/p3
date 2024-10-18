@@ -58,6 +58,12 @@ graph TB
                 integerValidation 
              --> INIT
         MAIN -- console --> CALL
+    INIT("<b><u><i>init</i></u></b>
+          <div style='text-align:left;'>SET prompt
+                                        SET expectKeystroke
+                                        SET validateBool
+                                        SET validateInteger
+                                        SET integerValidation</div>")
     CALL("<b><u>call</u></b>
           <div style='text-align:left;'>SET console
                                         GET validatedResponse</div>")
@@ -80,12 +86,6 @@ graph TB
         GR -- leaveCursorInline --> PP
         GR --> RK
         GR --> RS
-    INIT("<b><u>init</u></b>
-          <div style='text-align:left;'>SET prompt
-                                        SET expectKeystroke
-                                        SET validateBool
-                                        SET validateInteger
-                                        SET integerValidation</div>")
     PA("<b><u>_putAlert</u></b>
         <div style='text-align:left;'>GET console</div>")
         PA -- formattedAlert

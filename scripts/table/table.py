@@ -119,6 +119,15 @@ class Table:
             if record.get(key.upper(), '').startswith(prefix)
         ]
         self._records_count = len(self._dataset)
+
+    def get_column_widths(self) -> dict[str, int]:
+        """Return a dictionary of column widths.
+        Returns:
+            dict[str, int]: A dictionary with column names as keys and 
+                their widths as values.
+        """
+        return self._column_widths
+
     def get_headings(self) -> dict[str, str]:
         """Return a dictionary of column headings where each key is 
             mapped to itself.
@@ -127,13 +136,7 @@ class Table:
                 and values.
         """
         return {key: key for key in self._dataset[0].keys()}
-    def get_column_widths(self) -> dict[str, int]:
-        """Return a dictionary of column widths.
-        Returns:
-            dict[str, int]: A dictionary with column names as keys and 
-                their widths as values.
-        """
-        return self._column_widths
+
     def get_record(self, index: int) -> dict[str, str]:
         """Retrieve a specific record from the dataset.
         Args:
@@ -147,24 +150,28 @@ class Table:
         if index < 0 or index >= len(self._dataset):
             raise IndexError("Index out of range.")
         return self._dataset[index]
+
     def get_rjust_columns(self) -> set[str]:
         """Return a set of column names that are right-justified.
         Returns:
             set[str]: A set of column names that are right-justified.
         """
         return self._right_justified_columns
+
     def get_table_width(self) -> int:
         """Return the width of the table.
         Returns:
             int: The width of the table.
         """
         return self._table_width
+
     def get_title(self) -> str:
         """Return the title of the table.
         Returns:
             str: The title of the table.
         """
         return self._title
+
     def put_table(self, 
                   console: Terminal,
                   is_menu: bool = False) -> None:
@@ -183,6 +190,7 @@ class Table:
         table = Console_Table(self)
         # Display the table using the provided Terminal object
         table.display(console)
+
     def resize_columns(self, width_limit: int) -> None:
         """Resize column widths to fit within the specified width limit.
         Args:
@@ -215,6 +223,7 @@ class Table:
             self._right_justified_columns.update(label)
         else:
             self._right_justified_columns.add(label)
+
     def _calculate_widths(self) -> None:
         """Calculate the width of each column and the total table width 
             based on the dataset.
@@ -230,6 +239,7 @@ class Table:
         }
         self._table_width = (sum(self._column_widths.values()) 
                              + 2 * (len(self._column_widths) - 1))
+
     def _capitalize_keys(self, data: list[dict[str, str]]) -> None:
         """Convert all dictionary keys in the dataset to uppercase.
         Args:
