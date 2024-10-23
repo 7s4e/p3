@@ -1,6 +1,10 @@
 # Table Module
 ## `Table`
 * [\_\_init__](#__init__)
+* [_capitalizeKeys](#_capitalizekeys)
+* [_readTable](#_readtable)
+* [_findColumnPositions](#_findcolumnpositions)
+* [_getSlice](#_getslice)
 ```mermaid
 graph TB
     MAIN([**Table**])
@@ -100,9 +104,90 @@ END
 ```mermaid
 flowchart LR
     STR([start])
+        STR --> DATA
+    DATA{datum in data}
+        DATA -- True --> CAP
+        DATA -- False --> SET
+    CAP[set KEY:value]
+        CAP --> DATA
+    SET[set dataset, length]
+        SET --> END
     END([end])
+```
+```
+capitalize_keys(data)
+    SET self.dataset <- []
+    FOR datum IN data
+        FOR key, value IN datum
+            SET datum[key.upper] <- value
+        APPEND datum TO self.dataset
+    SET self.recordsCount <- self.dataset.length
 ```
 [️⬆️](#table)
 ---
 ### `_readTable`
+```mermaid
+flowchart LR
+    STR([start])
+        STR --> SPLTSET
+    SPLTSET[split lines <br> set headers]
+        SPLTSET --> FCP
+    FCP[call findColumnPositions]
+        FCP --> LNS
+    LNS{line in lines}
+        LNS -- True --> HDR
+        LNS --> SETLN
+    HDR{header in headers}
+        HDR -- True --> GS
+        HDR -- False --> SETDS
+    GS[call getSlice]
+        GS --> SETKV
+    SETKV[set HEADER:value]
+        SETKV --> HDR
+    SETDS[set dataset]
+        SETDS --> LNS
+    SETLN[set length]
+        SETLN --> END
+    END([end])
+```
+```
+readTable(string)
+    SET lines <- string.splitlines
+    SET headers <- lines[0].split
+    SET columnPositions <- findColumnPositions()
+    FOR line IN lines
+        FOR header, index in headers
+            SET value <- getSlice()
+            SET datum[header.upper] <- value
+        APPEND datum TO self.dataset
+    SET self.recordsCount <- self.dataset.length
+```
 [️⬆️](#table)
+---
+### `_findColumnPositions`
+```mermaid
+flowchart LR
+    STR([start])
+        STR --> KEY
+    KEY{key in keys}
+        KEY -- True --> POS
+        KEY -- False --> RTN
+    POS[set position <br> append to positions]
+        POS --> KEY
+    RTN[return positions]
+        RTN --> END
+    END([end])
+```
+```
+findColumnPositions(headerLine, keys)
+    SET positions <- []
+    FOR key IN keys
+        SET position <- headerLine.index OF key
+        APPEND position TO positions
+    RETURN positions
+```
+[️⬆️](#table)
+---
+### `_getSlice`
+[️⬆️](#table)
+---
