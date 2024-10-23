@@ -189,5 +189,21 @@ findColumnPositions(headerLine, keys)
 [️⬆️](#table)
 ---
 ### `_getSlice`
+```mermaid
+flowchart LR
+    STR([start])
+        STR --> PRCS
+    PRCS[call findBoundaries <br> set start, end <br> return line.slice]
+        PRCS --> END
+    END([end])
+```
+```
+getSlice(columnIndex, positionsList, line)
+    SET start, end <- findBoundaries(columnIndex, positionsList, line)
+    RETURN line[start:end]
+```
+[️⬆️](#table)
+---
+### `_findBoundaries`
 [️⬆️](#table)
 ---
