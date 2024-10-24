@@ -206,4 +206,35 @@ getSlice(columnIndex, positionsList, line)
 ---
 ### `_findBoundaries`
 [️⬆️](#table)
+```
+findBoundaries(columnIndex, positionsList, line)
+    # Determine the initial start and end positions
+    SET start <- positionsList[columnIndex]
+    IF columnIndex + 1 < positionsList.length
+        SET end <- positionsList[columnIndex + 1]
+    ELSE
+        SET end <- line.length
+    
+    # Adjust the start position to align with non-whitespace content
+    IF start < line.length
+        IF line[start] == " "
+            WHILE start < end && line[start] == " "
+                start += 1
+        ELSE
+            WHILE start > 0 && line[start - 1] != " "
+                start -= 1
+    ELSE
+        start = line.length
+    
+    # Adjust the end position to align with non-whitespace content
+    IF end < line.length
+        WHILE end > start && line[end] != " "
+            end -= 1
+        WHILE end > start && line[end - 1] == " "
+            end -= 1
+    ELSE:
+        end = line.length
+    
+    RETURN start, end
+```
 ---
