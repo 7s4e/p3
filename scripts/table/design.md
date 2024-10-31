@@ -1,11 +1,27 @@
 # Table Module
 ## `Table`
+### Initialize Table
 * [\_\_init__](#__init__)
 * [_capitalizeKeys](#_capitalizekeys)
 * [_readTable](#_readtable)
 * [_findColumnPositions](#_findcolumnpositions)
 * [_getSlice](#_getslice)
 * [_findBoundaries](#_findboundaries)
+* [_addRjustColLabel](#_addrjustcollabel)
+### Modify Table
+* [filterNonempty](#filternonempty)
+* [filterStartswith](#filterstartswith)
+* [resizeColumns](#resizecolumns)
+### Display Table
+* [putTable](#puttable)
+* [_numberRecords](#_numberrecords)
+* [_calculateWidths](#_calculatewidths)
+### Getters
+* [getRecord](#getrecord)
+* [getTitle](#gettitle)
+* [getHeadings](#getheadings)
+* [getTableWidth](#gettablewidth)
+* [getRjustColumns](#getrjustcolumns)
 ```mermaid
 graph TB
     MAIN([**Table**])
@@ -21,53 +37,61 @@ graph TB
                 isMenu
              --> PT
         MAIN -- widthLimit --> RC
-    INIT(*init*)
-        INIT -- tableData --> CK
-        INIT -- tableString --> RT
-        INIT -- rjustColumns --> ARJCL
-    ARJCL(_addRjustColLabel)
-    CK(_capitalizeKeys)
-    CR(countRecords)
         CR -- recordsCount --> MAIN
-    CW(_calculateWidths)
-    FB(_findBoundaries)
-        FB -- boundaries --> GS
-    FCP(_findColumnPositions)
-        FCP -- columnPositions --> RT
-    FNE(filterNonempty)
-    FSW(filterStartswith)
-    GH(getHeadings)
         GH -- headings --> MAIN
-    GCW(getColumnWidths)
         GCW -- columnWidths --> MAIN
-    GRCD(getRecord)
         GRCD -- record --> MAIN
-    GRJC(getRjustColumns)
         GRJC -- rightJustifiedColumns --> MAIN
-    GS(_getSlice)
-        GS -- columnIndex
-              positionsList
-              line
-           --> FB
-        GS -- slice --> RT
-    GTW(getTableWidth)
         GTW -- tableWidth --> MAIN
-    GTTL(getTitle)
         GTTL -- title --> MAIN
-    NR(_numberRecords)
-        NR --> ARJCL
-    PT(putTable)
-        PT --> NR
-        PT --> CW
-    RC(resizeColumns)
-    RT(_readTable)
-        RT -- headerLine
-              keys
-           --> FCP
-        RT -- columnIndex
-              positionsList
-              line
-           --> GS
+    subgraph inititialize [Initialize Table]
+        INIT(*init*)
+            INIT -- tableData --> CK
+            INIT -- tableString --> RT
+        CK(_capitalizeKeys)
+        RT(_readTable)
+            RT -- headerLine
+                  keys
+               --> FCP
+            RT -- columnIndex
+                  positionsList
+                  line
+               --> GS
+        FCP(_findColumnPositions)
+            FCP -- columnPositions --> RT
+        GS(_getSlice)
+            GS -- columnIndex
+                  positionsList
+                  line
+               --> FB
+            GS -- slice --> RT
+        FB(_findBoundaries)
+            FB -- boundaries --> GS
+    end
+    subgraph modify [Modify Table]
+        FNE(filterNonempty)
+        FSW(filterStartswith)
+        RC(resizeColumns)
+    end
+    subgraph display [Display Table]
+        PT(putTable)
+            PT --> NR
+            PT --> CW
+        NR(_numberRecords)
+        CW(_calculateWidths)
+    end
+    subgraph getters [Getters]
+        CR(countRecords)
+        GH(getHeadings)
+        GCW(getColumnWidths)
+        GRCD(getRecord)
+        GRJC(getRjustColumns)
+        GTW(getTableWidth)
+        GTTL(getTitle)
+    end
+    ARJCL(_addRjustColLabel)
+        INIT -- rjustColumns --> ARJCL
+        NR -- No. --> ARJCL
 ```
 [️⬆️](#table-module)
 ---
@@ -236,7 +260,7 @@ flowchart TB
         STRWHL1{while startPosition < endPosition & is space}
             STRWHL1 -- True --> MOVSTRRGT
             STRWHL1 -- False --> ENDINLINE
-        STRWHL2{while startPosition - 1 is not space}
+        STRWHL2{while left of startPosition is not space}
             STRWHL2 -- True --> MOVSTRLFT
             STRWHL2 -- False --> ENDINLINE
         RESETSTR[reset startPosition as line length]
@@ -253,7 +277,7 @@ flowchart TB
         MOVENDLFT2[move endPosition left]
             MOVENDLFT2 --> ENDWHL2
     end
-        ENDWHL2{while endPosition - 1 is space}
+        ENDWHL2{while left of endPosition is space}
             ENDWHL2 -- True --> MOVENDLFT2
             ENDWHL2 -- False --> RTN
         RESETEND[reset endPosition as line length]
@@ -264,14 +288,12 @@ flowchart TB
 ```
 ```
 findBoundaries(columnIndex, positionsList, line)
-
     # Initial start and end positions
     SET start <- positionsList[columnIndex]
     IF columnIndex + 1 < positionsList.length
         SET end <- positionsList[columnIndex + 1]
     ELSE
         SET end <- line.length
-
     # Adjust start position
     IF start < line.length
         IF line[start] == " "
@@ -282,7 +304,6 @@ findBoundaries(columnIndex, positionsList, line)
                 start -= 1
     ELSE
         start = line.length
-
     # Adjust end position
     IF end < line.length
         WHILE end > start && line[end] != " "
@@ -291,8 +312,43 @@ findBoundaries(columnIndex, positionsList, line)
             end -= 1
     ELSE:
         end = line.length
-    
     RETURN start, end
 ```
+[️⬆️](#table)
+---
+### `_addRjustColLabel`
+[️⬆️](#table)
+---
+### `filterNonempty`
+[️⬆️](#table)
+---
+### `filterStartswith`
+[️⬆️](#table)
+---
+### `resizeColumns`
+[️⬆️](#table)
+---
+### `putTable`
+[️⬆️](#table)
+---
+### `_numberRecords`
+[️⬆️](#table)
+---
+### `_calculateWidths`
+[️⬆️](#table)
+---
+### `getRecord`
+[️⬆️](#table)
+---
+### `getTitle`
+[️⬆️](#table)
+---
+### `getHeadings`
+[️⬆️](#table)
+---
+### `getTableWidth`
+[️⬆️](#table)
+---
+### `getRjustColumns`
 [️⬆️](#table)
 ---
