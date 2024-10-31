@@ -5,6 +5,7 @@
 * [_readTable](#_readtable)
 * [_findColumnPositions](#_findcolumnpositions)
 * [_getSlice](#_getslice)
+* [_findBoundaries](#_findboundaries)
 ```mermaid
 graph TB
     MAIN([**Table**])
@@ -205,17 +206,73 @@ getSlice(columnIndex, positionsList, line)
 [️⬆️](#table)
 ---
 ### `_findBoundaries`
-[️⬆️](#table)
+```mermaid
+flowchart TB
+    STR([start])
+        STR --> SETSTR
+    subgraph init [Initialize start, end]
+        SETSTR[set current column as startPosition]
+            SETSTR --> LSTCOL
+        LSTCOL{last column}
+            LSTCOL -- False --> SETEND1
+            LSTCOL -- True --> SETEND2
+    end
+        SETEND1[set next column as endPosition]
+            SETEND1 --> STRINLINE
+        SETEND2[set line length as endPosition]
+            SETEND2 --> STRINLINE
+    subgraph start [Adjust start]
+        STRINLINE{startPosition < line length}
+            STRINLINE -- True --> STRISSPCE
+            STRINLINE -- False --> RESETSTR
+        STRISSPCE{startPosition is space}
+            STRISSPCE -- True --> STRWHL1
+            STRISSPCE -- False --> STRWHL2
+        MOVSTRRGT[move startPosition right]
+            MOVSTRRGT --> STRWHL1
+        MOVSTRLFT[move startPosition left]
+            MOVSTRLFT --> STRWHL2
+    end
+        STRWHL1{while startPosition < endPosition & is space}
+            STRWHL1 -- True --> MOVSTRRGT
+            STRWHL1 -- False --> ENDINLINE
+        STRWHL2{while startPosition - 1 is not space}
+            STRWHL2 -- True --> MOVSTRLFT
+            STRWHL2 -- False --> ENDINLINE
+        RESETSTR[reset startPosition as line length]
+            RESETSTR --> ENDINLINE
+    subgraph end [Adjust end]
+        ENDINLINE{endPosition < line length}
+            ENDINLINE -- True --> ENDWHL1
+            ENDINLINE -- False --> RESETEND
+        ENDWHL1{while endPosition is not space}
+            ENDWHL1 -- True --> MOVENDLFT1
+            ENDWHL1 -- False --> ENDWHL2
+        MOVENDLFT1[move endPosition left]
+            MOVENDLFT1 --> ENDWHL1
+        MOVENDLFT2[move endPosition left]
+            MOVENDLFT2 --> ENDWHL2
+    end
+        ENDWHL2{while endPosition - 1 is space}
+            ENDWHL2 -- True --> MOVENDLFT2
+            ENDWHL2 -- False --> RTN
+        RESETEND[reset endPosition as line length]
+            RESETEND --> RTN
+    RTN[return startPosition, endPosition]
+        RTN --> END
+    END([end])
+```
 ```
 findBoundaries(columnIndex, positionsList, line)
-    # Determine the initial start and end positions
+
+    # Initial start and end positions
     SET start <- positionsList[columnIndex]
     IF columnIndex + 1 < positionsList.length
         SET end <- positionsList[columnIndex + 1]
     ELSE
         SET end <- line.length
-    
-    # Adjust the start position to align with non-whitespace content
+
+    # Adjust start position
     IF start < line.length
         IF line[start] == " "
             WHILE start < end && line[start] == " "
@@ -225,8 +282,8 @@ findBoundaries(columnIndex, positionsList, line)
                 start -= 1
     ELSE
         start = line.length
-    
-    # Adjust the end position to align with non-whitespace content
+
+    # Adjust end position
     IF end < line.length
         WHILE end > start && line[end] != " "
             end -= 1
@@ -237,4 +294,5 @@ findBoundaries(columnIndex, positionsList, line)
     
     RETURN start, end
 ```
+[️⬆️](#table)
 ---
