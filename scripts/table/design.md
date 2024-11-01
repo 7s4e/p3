@@ -361,24 +361,30 @@ filterNonempty(key)
 [️⬆️](#table)
 ---
 ### `filterStartswith`
+```mermaid
+flowchart LR
+    STR([start])
+        STR --> RCD
+    RCD{record in existing dataset}
+        RCD -- True --> KEY
+        RCD -- False --> SET
+    KEY{key start with prefix}
+        KEY -- True --> ADD
+        KEY -- False --> RCD
+    ADD[add record to new dataset]
+        ADD --> RCD
+    SET[replace exisiting dataset with new]
+        SET --> END
+    END([end])
 ```
-    def filter_startswith(self, key: str, prefix: str) -> None:
-        """Filter records to include only those where the value for the 
-            specified key starts with the given prefix.
-        Args:
-            key (str): The key in the records to check.
-            prefix (str): The prefix to match against.
-        Updates:
-            Filters self._dataset in place to include only records where 
-            the value for the specified key starts with the given 
-            prefix. Updates self._records_count to reflect the new 
-            number of records.
-        """
-        self._dataset = [
-            record for record in self._dataset
-            if record.get(key.upper(), '').startswith(prefix)
-        ]
-        self._records_count = len(self._dataset)
+```
+filterStartswith(key, prefix)
+    SET newDataset <- []
+    FOR record IN self.dataset
+        IF key STARTSWITH prefix
+            APPEND record TO newDataset
+    SET self.dataset <- newDataset
+    SET self.recordsCount <- self.dataset.length
 ```
 [️⬆️](#table)
 ---
