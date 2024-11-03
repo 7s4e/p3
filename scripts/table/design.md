@@ -390,13 +390,8 @@ filterStartswith(key, prefix)
 ---
 ### `resizeColumns`
 ```
-    def resize_columns(self, width_limit: int) -> None:
-        """Resize column widths to fit within the specified width limit.
-        Args:
-            width_limit (int): The maximum allowable width for the 
-                table.
-        """
-        # Calculate the total width to trim
+resizeColumns(widthLimit)
+    # Calculate the total width to trim
         trim_length = self._table_width - width_limit
         # Continue trimming column widths until the trim length is 
         # satisfied
