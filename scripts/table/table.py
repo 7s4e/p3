@@ -32,7 +32,7 @@ class Table:
             specified key.
         filter_startswith: Filter records based on values that start with a 
             specified prefix for a key.
-        get _column_widths: Return the width of each column.
+        get_column_widths: Return the width of each column.
         get_headings: Return a dictionary of column headings.
         get_record: Retrieve a specific record by its index.
         get_rjust_columns: Return the set of right-justified columns.
