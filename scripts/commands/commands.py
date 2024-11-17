@@ -8,48 +8,6 @@ import sys
 from get_disk.src.table import Table
 
 
-def run_command(command: str, 
-                capture_output: bool = True,
-                use_shell: bool = True) -> str | None:
-    """Execute a shell command and return the output or print to stdout.
-
-    Args:
-        command (str): The command to run.
-        capture_output (bool, optional): Whether to capture the output 
-            or print to stdout. Defaults to True.
-        use_shell (bool, optional): Whether to use the shell to execute 
-            the command. Defaults to True
-
-    Returns:
-        str | None: The standard output from the command if 
-            capture_output is True; otherwise None.
-
-    Raises:
-        RuntimeError: If the command fails, an exception is raised with 
-            the error message.
-    """
-    if capture_output:
-        result = subprocess.run(command, 
-                                capture_output=True, 
-                                shell=use_shell, 
-                                text=True)
-    else:
-        result = subprocess.run(command, 
-                                stdout=sys.stdout, 
-                                stderr=sys.stderr, 
-                                shell=use_shell, 
-                                text=True)
-
-    # Check for command failure and raise an error with the appropriate message.
-    if result.returncode != 0:
-        error_message = (result.stderr.strip() 
-                         if capture_output else "Command failed.")
-        raise RuntimeError(error_message)
-
-    # Return the output or None, depending on the capture_output flag.
-    return result.stdout.strip() if capture_output else None
-
-
 def list_block_devices(disk: str | None = None, 
                        columns: list[str] = list(),
                        show_dependents: bool = True) -> str:
@@ -109,6 +67,48 @@ def run_badblocks(disk: str,
         return run_command(command)
     run_command(command, capture_output=False)
     return None
+
+
+def run_command(command: str, 
+                capture_output: bool = True,
+                use_shell: bool = True) -> str | None:
+    """Execute a shell command and return the output or print to stdout.
+
+    Args:
+        command (str): The command to run.
+        capture_output (bool, optional): Whether to capture the output 
+            or print to stdout. Defaults to True.
+        use_shell (bool, optional): Whether to use the shell to execute 
+            the command. Defaults to True
+
+    Returns:
+        str | None: The standard output from the command if 
+            capture_output is True; otherwise None.
+
+    Raises:
+        RuntimeError: If the command fails, an exception is raised with 
+            the error message.
+    """
+    if capture_output:
+        result = subprocess.run(command, 
+                                capture_output=True, 
+                                shell=use_shell, 
+                                text=True)
+    else:
+        result = subprocess.run(command, 
+                                stdout=sys.stdout, 
+                                stderr=sys.stderr, 
+                                shell=use_shell, 
+                                text=True)
+
+    # Check for command failure and raise an error with the appropriate message.
+    if result.returncode != 0:
+        error_message = (result.stderr.strip() 
+                         if capture_output else "Command failed.")
+        raise RuntimeError(error_message)
+
+    # Return the output or None, depending on the capture_output flag.
+    return result.stdout.strip() if capture_output else None
 
 
 def unmount_disk(disk: str) -> None:
