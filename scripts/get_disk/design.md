@@ -1,9 +1,9 @@
 # getDisk Script
 ```mermaid
 flowchart LR
-    classDef complete color:#0f0,stroke:#0f0,fill:#222
-    classDef working color:#ff0,stroke:#ff0,fill:#222
-    classDef library color:#0ff,stroke:#0ff,fill:#222
+    classDef complete color:#0f0,stroke:#0f0,fill:#555
+    classDef working color:#ff0,stroke:#ff0,fill:#555
+    classDef library color:#0ff,stroke:#0ff,fill:#555
     IF([start])
         IF:::working
         IF --> TRM
