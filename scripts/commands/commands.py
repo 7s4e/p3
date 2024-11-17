@@ -5,7 +5,7 @@ import subprocess
 import sys
 
 # Local module imports
-from get_disk.src.table import Table
+from table import Table
 
 
 def list_block_devices(disk: str | None = None, 
