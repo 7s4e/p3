@@ -8,7 +8,7 @@ from blessed import Terminal
 
 # Local module import
 if TYPE_CHECKING:
-    from get_disk.src.table import Table
+    from table import Table
 
 
 class ConsoleTable:
