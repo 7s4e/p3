@@ -7,6 +7,13 @@
 ### `listBlockDevices`
 ```mermaid
 flowchart LR
+    STR([start])
+        STR --> PRCS
+    PRCS[set path, output, deps]
+        PRCS --> RTN
+    RTN[return runCommand]
+        RTN --> END
+    END([end])
 ```
 ```
 listBlockDevices(disk, columns, showDependents)
@@ -26,9 +33,24 @@ listBlockDevices(disk, columns, showDependents)
     RETURN runCommand("lsblk {deps} {output} {path}")
 END
 ```
+---
 ### `runBadblocks`
 ```mermaid
 flowchart LR
+    STR([start])
+        STR --> PRCS
+    PRCS[set mode, command]
+        PRCS --> CAPT
+    CAPT{captureOutput}
+        CAPT -- True --> RTNC
+        CAPT -- False --> CALL
+    RTNC[return runCommand]
+        RTNC --> END
+    CALL[call runCommand]
+        CALL --> RTNN
+    RTNN[return None]
+        RTNN --> END
+    END([end])
 ```
 ```
 runBadblocks(disk, nonDestructive, captureOutput)
@@ -43,9 +65,27 @@ runBadblocks(disk, nonDestructive, captureOutput)
     RETURN None
 END
 ```
+---
 ### `runCommand`
 ```mermaid
 flowchart LR
+    STR([start])
+        STR --> PRCS
+    PRCS[set result]
+        PRCS --> ERR
+    ERR{error}
+        ERR -- True --> RSE
+        ERR -- False --> CAPT
+    RSE[raise error]
+        RSE --> END
+    CAPT{captureOutput}
+        CAPT -- True --> RTNR
+        CAPT -- False --> RTNN
+    RTNR[return result]
+        RTNR --> END
+    RTNN[return None]
+        RTNN --> END
+    END([end])
 ```
 ```
 runCommand(command, captureOutput, useShell)
@@ -62,9 +102,24 @@ runCommand(command, captureOutput, useShell)
         RETURN None
 END
 ```
+---
 ### `unmountDisk`
 ```mermaid
 flowchart LR
+    STR([start])
+        STR --> SET1
+    SET1[set output, diskPaths]
+        SET1 --> FLTR
+    FLTR[filter diskPaths]
+        FLTR --> FOR
+    FOR{for diskPaths record}
+        FOR -- True --> SET2
+        FOR -- False --> END
+    SET2[set cmdStr]
+        SET2 --> CALL
+    CALL[call runCommand]
+        CALL --> FOR
+    END([end])
 ```
 ```
 unmountDisk(disk)
