@@ -5,13 +5,13 @@ flowchart LR
     classDef working color:#ff0,stroke:#ff0,fill:#555
     classDef library color:#0ff,stroke:#0ff,fill:#555
     IF([start])
-        IF:::working
+        IF:::complete
         IF --> TRM
         IF --> MAIN
     TRM(blessed.Terminal)
         TRM:::library
     MAIN[main]
-        MAIN:::working
+        MAIN:::complete
         MAIN --> CON
         MAIN --> GD
     CON(console)
