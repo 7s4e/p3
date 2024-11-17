@@ -25,7 +25,7 @@ flowchart LR
         GDS --> CMD
         GDS --> TBL
     CMD(commands)
-        CMD:::complete
+        CMD:::working
     TBL(Table)
         TBL:::working
 ```
