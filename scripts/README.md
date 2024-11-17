@@ -8,6 +8,9 @@
 | [partition_disk](partition_disk.py) | script |
 | [table](table.py) | class |
 
+## Status
+* get_disk > main > get_disk
+
 # Links
 [Curses Programming in Python](https://www.devdungeon.com/content/curses-programming-python)
 [Curses Programming with Python](https://docs.python.org/3/howto/curses.html)

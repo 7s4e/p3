@@ -2,7 +2,7 @@
 
 
 from get_disk import get_disk
-import get_disk.src.commands as cmd
+import scripts.commands as cmd
 import interface as itf
 
 

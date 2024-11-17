@@ -2,7 +2,7 @@
 
 # Local module imports
 # from menu import Menu
-import get_disk.src.commands as cmd
+import scripts.commands as cmd
 
 def delete_disk(disk: str) -> None:
     options = ["dd", "shred", "wipefs", "blkdiscard"]
