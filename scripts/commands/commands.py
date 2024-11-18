@@ -92,10 +92,13 @@ def run_command(command: str,
     if capture_output:
         result = subprocess.run(command, 
                                 capture_output=True, 
+                                stdout=None, 
+                                stderr=None, 
                                 shell=use_shell, 
                                 text=True)
     else:
         result = subprocess.run(command, 
+                                capture_output=False, 
                                 stdout=sys.stdout, 
                                 stderr=sys.stderr, 
                                 shell=use_shell, 
