@@ -23,9 +23,9 @@ flowchart LR
     GDS[getDisks]
         GDS:::working
         GDS --> CMD
-        GDS --> TBL
     CMD(commands)
         CMD:::working
+        CMD --> TBL
     TBL(Table)
         TBL:::working
 ```
