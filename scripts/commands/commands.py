@@ -64,7 +64,7 @@ def run_badblocks(disk: str,
     # Run the command and capture or display the output based on the 
     # capture_output flag
     if capture_output:
-        return run_command(command)
+        return run_command(command, capture_output=True)
     run_command(command, capture_output=False)
     return None
 
