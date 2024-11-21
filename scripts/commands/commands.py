@@ -27,12 +27,12 @@ def list_block_devices(disk: str | None = None,
         str: The output of the 'lsblk' command.
     """
     # Construct the command based on the parameters
-    deps = "" if show_dependents else "--nodeps"
-    output = "" if not columns else f"--output {','.join(columns)}"
-    path = "" if disk is None else f"/dev/{disk}"
+    deps = "" if show_dependents else " --nodeps"
+    output = "" if not columns else f" --output {','.join(columns)}"
+    path = "" if disk is None else f" /dev/{disk}"
     
     # Run the constructed 'lsblk' command and return its output.
-    return run_command(f"lsblk {deps} {output} {path}")
+    return run_command("lsblk" + deps + output + path)
 
 
 def run_badblocks(disk: str, 
