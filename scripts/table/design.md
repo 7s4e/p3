@@ -376,17 +376,22 @@ graph TB
 ##### `filterNonempty`
 ```mermaid
 flowchart LR
-    STR([start])
-        STR --> RCD
-    RCD{record in existing dataset}
-        RCD -- True --> KEY
-        RCD -- False --> SET
-    KEY{key in record}
-        KEY -- True --> ADD
+    STR([Table])
+        STR --> INP
+    INP[\"<span style='color:cyan;'>dataset</span>
+          <span style='color:magenta;'>key</span>"\]
+        INP --> RCD
+    RCD{"<span style='color:cyan;'>record</span>"}
+        RCD -- True  --> KEY
         KEY -- False --> RCD
-    ADD[add record to new dataset]
-        ADD --> RCD
-    SET[replace exisiting dataset with new]
+        ADD          --> RCD
+        RCD -- False --> SET
+    KEY{"<span style='color:magenta;'>key</span> in <span style=
+             'color:cyan;'>record</span>"}
+        KEY -- True --> ADD
+    ADD["add <span style='color:cyan;'>record</span> to <span style=
+             'color:yellow;'>newDataset</span>"]
+    SET[/"<span style='color:yellow;'>newDataset</span>"/]
         SET --> END
     END([end])
 ```
@@ -405,16 +410,22 @@ filterNonempty(key)
 ```mermaid
 flowchart LR
     STR([start])
-        STR --> RCD
-    RCD{record in existing dataset}
-        RCD -- True --> KEY
-        RCD -- False --> SET
-    KEY{key start with prefix}
-        KEY -- True --> ADD
+        STR --> INP
+    INP[\"<span style='color:cyan;'>dataset</span>
+          <span style='color:magenta;'>key</span>
+          <span style='color:yellow;'>prefix</span>"\]
+        INP --> RCD
+    RCD{"<span style='color:cyan;'>record</span>"}
+        RCD -- True  --> KEY
         KEY -- False --> RCD
-    ADD[add record to new dataset]
-        ADD --> RCD
-    SET[replace exisiting dataset with new]
+        ADD          --> RCD
+        RCD -- False --> SET
+    KEY{"<span style='color:magenta;'>key</span> starts with <span style=
+             'color:yellow;'>prefix</span>"}
+        KEY -- True --> ADD
+    ADD["add <span style='color:cyan;'>record</span> to <span style=
+             'color:yellow;'>newDataset</span>"]
+    SET[/"<span style='color:yellow;'>newDataset</span>"/]
         SET --> END
     END([end])
 ```
@@ -430,6 +441,8 @@ filterStartswith(key, prefix)
 [️⬆️](#modify-table-methods)
 ---
 ##### `resizeColumns`
+```mermaid
+```
 ```
 resizeColumns(widthLimit)
     # Calculate the total width to trim
