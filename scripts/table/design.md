@@ -409,7 +409,7 @@ filterNonempty(key)
 ##### `filterStartswith`
 ```mermaid
 flowchart LR
-    STR([start])
+    STR([Table])
         STR --> INP
     INP[\"<span style='color:cyan;'>dataset</span>
           <span style='color:magenta;'>key</span>
@@ -442,24 +442,39 @@ filterStartswith(key, prefix)
 ---
 ##### `resizeColumns`
 ```mermaid
+flowchart TB
+    STR([Table])
+        STR --> INP
+    INP[\"<span style='color:cyan;'>tableWidth</span>
+          <span style='color:magenta;'>widthLimit</span>
+          <span style='color:yellow;'>columnWidths</span>"\]
+        INP --> TRM
+    TRM["trimLength = <span style='color:cyan;'>tableWidth</span> - <span 
+             style='color:magenta;'>widthLimit</span>"]
+        TRM --> WHL
+    WHL{trimLength > 0}
+        WHL -- True  --> WTH
+        DEC          --> WHL
+        WHL -- False --> END
+    WTH["get key of <span style='color:yellow;'>columnWidths</span>.values.max"]
+        WTH --> SET
+    SET[/"<span style='color:yellow;'>columnWidths</span>.key -= 1
+         <span style='color:cyan;'>tableWidth</span> -= 1"/]
+        SET --> DEC
+    DEC[trimLength -= 1]
+    END([end])
 ```
 ```
 resizeColumns(widthLimit)
-    # Calculate the total width to trim
-        trim_length = self._table_width - width_limit
-        # Continue trimming column widths until the trim length is 
-        # satisfied
-        while trim_length > 0:
-            # Find the column with the maximum width
-            widest_column = max(self._column_widths, 
-                                key=self._column_widths.get)
-            # Reduce the width of the widest column
-            self._column_widths[widest_column] -= 1
-        
-            # Update the total width to be trimmed
-            trim_length -= 1
-            # Update the current table width
-            self._table_width -= 1
+    SET trimLength <- self.tableWidth - widthLimit
+    WHILE trimLength > 0
+        SET maxWidth <- 0
+        FOR key, value IN self.columnWidths
+            IF value > maxWidth
+                SET widestColumn <- key
+        self.columnWidth[widestColumn] -= 1
+        self.tablewidth -= 1
+        trimLength -= 1
 ```
 [️⬆️](#modify-table-methods)
 ---
