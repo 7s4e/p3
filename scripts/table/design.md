@@ -125,8 +125,8 @@ flowchart TB
         STR --> TBS
     TBS[\string\]
         TBS --> SPT
-    SPT["<span style='color:cyan;'>split lines</span>
-         <span style='color:magenta;'>set headers</span>"]
+    SPT["split <span style='color:cyan;'>lines</span>
+         set <span style='color:magenta;'>headers</span>"]
         SPT --> FCP
     FCP[[findColumnPositions]]
         FCP --> LNS
@@ -172,7 +172,7 @@ flowchart LR
         KEY -- True  --> POS
         POS          --> KEY
         KEY -- False --> END
-    POS["<span style='color:cyan;'>get position</span>
+    POS["get <span style='color:cyan;'>position</span>
          append to positions"]
     END([return positions])
 ```
@@ -220,7 +220,8 @@ flowchart LR
         AJS --> AJE
     AJE[[adjust end]]
         AJE --> END
-    END([return start, end])
+    END(["return <span style='color:green;'>start</span>, <span style=
+              'color:red;'>end</span>"])
 ```
 ###### Initialize Subgraph
 ```mermaid
@@ -228,13 +229,19 @@ flowchart LR
     INP[\input\]
         INP --> SST
     subgraph init [Initialize start, end]
-        SST["set <span style='color:magenta;'>positions</span>.<span style='color:cyan;'>index</span> as <span style='color:green;'>start</span>"]
+        SST["<span style='color:green;'>start</span> = <span style=
+                 'color:magenta;'>positions</span>.<span style='color:cyan;'
+                 >index</span>"]
             SST --> LST
-        LST{"<span style='color:cyan;'>index</span> + 1 < <span style='color:magenta;'>positions</span>.length"}
+        LST{"<span style='color:cyan;'>index</span> + 1 < <span style=
+                 'color:magenta;'>positions</span>.length"}
             LST -- False --> SE1
             LST -- True  --> SE2
-        SE1["set <span style='color:magenta;'>positions</span>.<span style='color:cyan;'>i+1</span> as <span style='color:red;'>end</span>"]
-        SE2["set <span style='color:magenta;'>positions</span>.length as <span style='color:red;'>end</span>"]
+        SE1["<span style='color:red;'>end</span> = <span style=
+                 'color:magenta;'>positions</span>.<span style='color:cyan;'
+                 >index</span>+1"]
+        SE2["<span style='color:red;'>end</span> = <span style=
+                 'color:magenta;'>positions</span>.length"]
     end
     AJS[[adjust start]]
         SE1 --> AJS
@@ -244,118 +251,63 @@ flowchart LR
 ```mermaid
 flowchart LR
     INT[[initialize start, end]]
+        INT --> SIL
     subgraph start [Adjust start]
-        STRINLINE{startPosition < line length}
-            STRINLINE -- True --> STRISSPCE
-            STRINLINE -- False --> RESETSTR
-        STRISSPCE{startPosition is space}
-            STRISSPCE -- True --> STRWHL1
-            STRISSPCE -- False --> STRWHL2
-        MOVSTRRGT[move startPosition right]
-            MOVSTRRGT --> STRWHL1
-        MOVSTRLFT[move startPosition left]
-            MOVSTRLFT --> STRWHL2
-        STRWHL1{while startPosition < endPosition & is space}
-            STRWHL1 -- True --> MOVSTRRGT
-            STRWHL1 -- False --> AED
-        STRWHL2{while left of startPosition is not space}
-            STRWHL2 -- True --> MOVSTRLFT
-            STRWHL2 -- False --> AED
-        RESETSTR[reset startPosition as line length]
-            RESETSTR --> AED
-        AED[[adjust end]]
+        SIL{"<span style='color:green;'>start</span> < <span style=
+                 'color:yellow;'>line</span>.length"}
+            SIL -- True --> SIS
+            SIL -- False --> SLL
+        SIS{"<span style='color:yellow;'>line</span>.<span style=
+                 'color:green;'>start</span> == space"}
+            SIS -- True --> WIS
+            SIS -- False --> WNS
+        WIS{"<span style='color:green;'>start</span> < <span style=
+                 'color:red;'>end</span> &&
+             <span style='color:yellow;'>line</span>.<span style=
+                 'color:green;'>start</span> == space"}
+            WIS -- True --> MSR
+            MSR         --> WIS
+        WNS{"<span style='color:yellow;'>line</span>.<span style=
+                 'color:green;'>start</span>-1 != space"}
+            WNS -- True --> MSL
+            MSL         --> WNS
+        MSR["<span style='color:green;'>start</span> += 1"]
+        MSL["<span style='color:green;'>start</span> -= 1"]
+        SLL["<span style='color:green;'>start</span> = <span style=
+                 'color:yellow;'>line</span>.length"]
     end
-    subgraph end [Adjust end]
-        ENDINLINE{endPosition < line length}
-            ENDINLINE -- True --> ENDWHL1
-            ENDINLINE -- False --> RESETEND
-        ENDWHL1{while endPosition is not space}
-            ENDWHL1 -- True --> MOVENDLFT1
-            ENDWHL1 -- False --> ENDWHL2
-        MOVENDLFT1[move endPosition left]
-            MOVENDLFT1 --> ENDWHL1
-        MOVENDLFT2[move endPosition left]
-            MOVENDLFT2 --> ENDWHL2
-    end
-        ENDWHL2{while left of endPosition is space}
-            ENDWHL2 -- True --> MOVENDLFT2
-            ENDWHL2 -- False --> RTN
-        RESETEND[reset endPosition as line length]
-            RESETEND --> RTN
-    RTN[return startPosition, endPosition]
-        RTN --> END
-    END([end])
+    AJE[[adjust end]]
+            WIS -- False --> AJE
+            WNS -- False --> AJE
+            SLL          --> AJE
 ```
 ###### End Subgraph
 ```mermaid
-flowchart
-    STR([getSlice])
-        STR --> ARG
-    ARG[\"<span style='color:cyan;'>columnIndex</span>
-          <span style='color:magenta;'>positionsList</span>
-          <span style='color:yellow;'>line</span>"\]
-        ARG --> INT
-    INT[[initialize start, end]]
-        INT --> AJS
+flowchart LR
     AJS[[adjust start]]
-        AJS --> AJE
-    AJE[[adjust end]]
-    END
-    subgraph init [Initialize start, end]
-        INP[\input\]
-            INP --> SST
-        SST["set <span style='color:magenta;'>positions</span>.<span style='color:cyan;'>index</span> as start"]
-            SST --> LST
-        LST{"<span style='color:cyan;'>index</span> + 1 < <span style='color:magenta;'>positions</span>.length"}
-            LST -- False --> SE1
-            LST -- True  --> SE2
-        SE1["set <span style='color:magenta;'>positions</span>.<span style='color:cyan;'>i+1</span> as end"]
-            SE1 --> AST
-        SE2["set <span style='color:magenta;'>positions</span>.length as end"]
-            SE2 --> AST
-        AST[[adjust start]]
-    end
-    subgraph start [Adjust start]
-        STRINLINE{startPosition < line length}
-            STRINLINE -- True --> STRISSPCE
-            STRINLINE -- False --> RESETSTR
-        STRISSPCE{startPosition is space}
-            STRISSPCE -- True --> STRWHL1
-            STRISSPCE -- False --> STRWHL2
-        MOVSTRRGT[move startPosition right]
-            MOVSTRRGT --> STRWHL1
-        MOVSTRLFT[move startPosition left]
-            MOVSTRLFT --> STRWHL2
-        STRWHL1{while startPosition < endPosition & is space}
-            STRWHL1 -- True --> MOVSTRRGT
-            STRWHL1 -- False --> AED
-        STRWHL2{while left of startPosition is not space}
-            STRWHL2 -- True --> MOVSTRLFT
-            STRWHL2 -- False --> AED
-        RESETSTR[reset startPosition as line length]
-            RESETSTR --> AED
-        AED[[adjust end]]
-    end
+        AJS --> EIL
     subgraph end [Adjust end]
-        ENDINLINE{endPosition < line length}
-            ENDINLINE -- True --> ENDWHL1
-            ENDINLINE -- False --> RESETEND
-        ENDWHL1{while endPosition is not space}
-            ENDWHL1 -- True --> MOVENDLFT1
-            ENDWHL1 -- False --> ENDWHL2
-        MOVENDLFT1[move endPosition left]
-            MOVENDLFT1 --> ENDWHL1
-        MOVENDLFT2[move endPosition left]
-            MOVENDLFT2 --> ENDWHL2
+        EIL{"<span style='color:red;'>end</span> < <span style='color:yellow;'
+                 >line</span>.length"}
+            EIL -- True  --> WNS
+            EIL -- False --> ELL
+        WNS{"<span style='color:yellow;'>line</span>.<span style=
+                 'color:red;'>end</span> != space"}
+            WNS -- True  --> ML1
+            ML1          --> WNS
+            WNS -- False --> WLS
+        WLS{"<span style='color:yellow;'>line</span>.<span style=
+                 'color:red;'>end</span>-1 == space"}
+            WLS -- True --> ML2
+            ML2         --> WLS
+        ML1["<span style='color:red;'>end</span> -= 1"]
+        ML2["<span style='color:red;'>end</span> -= 1"]
+        ELL["<span style='color:red;'>end</span> = <span style=
+                 'color:yellow;'>line</span>.length"]
     end
-        ENDWHL2{while left of endPosition is space}
-            ENDWHL2 -- True --> MOVENDLFT2
-            ENDWHL2 -- False --> RTN
-        RESETEND[reset endPosition as line length]
-            RESETEND --> RTN
-    RTN[return startPosition, endPosition]
-        RTN --> END
-    END([end])
+    RTN([return])
+            WLS -- False --> RTN
+            ELL --> RTN
 ```
 ```
 findBoundaries(columnIndex, positionsList, line)
@@ -407,90 +359,21 @@ addRjustColLabel(label)
 * [filterNonempty](#filternonempty)
 * [filterStartswith](#filterstartswith)
 * [resizeColumns](#resizecolumns)
-#### Display Table Methods
-* [putTable](#puttable)
-* [_numberRecords](#_numberrecords)
-* [_calculateWidths](#_calculatewidths)
-#### Getters
-* [getRecord](#getrecord)
-* [getTitle](#gettitle)
-* [getHeadings](#getheadings)
-* [getTableWidth](#gettablewidth)
-* [getRjustColumns](#getrjustcolumns)
 ```mermaid
 graph TB
-    MAIN([**Table**])
-        MAIN -- tableData
-                tableString
-                title
-                rjustColumns
-             --> INIT
-        MAIN --> FNE
-        MAIN --> FSW
-        MAIN -- index --> GRCD
-        MAIN -- console
-                isMenu
-             --> PT
-        MAIN -- widthLimit --> RC
-        CR -- recordsCount --> MAIN
-        GH -- headings --> MAIN
-        GCW -- columnWidths --> MAIN
-        GRCD -- record --> MAIN
-        GRJC -- rightJustifiedColumns --> MAIN
-        GTW -- tableWidth --> MAIN
-        GTTL -- title --> MAIN
-    subgraph inititialize [Initialize Table]
-        INIT(*init*)
-            INIT -- tableData --> CK
-            INIT -- tableString --> RT
-        CK(_capitalizeKeys)
-        RT(_readTable)
-            RT -- headerLine
-                  keys
-               --> FCP
-            RT -- columnIndex
-                  positionsList
-                  line
-               --> GS
-        FCP(_findColumnPositions)
-            FCP -- columnPositions --> RT
-        GS(_getSlice)
-            GS -- columnIndex
-                  positionsList
-                  line
-               --> FB
-            GS -- slice --> RT
-        FB(_findBoundaries)
-            FB -- boundaries --> GS
+    TABL([**Table**])
+        TABL --> FTNE
+        TABL --> FTSW
+        TABL -- widthLimit --> RSZC
+    subgraph m [Modify Table Methods]
+        FTNE(filterNonempty)
+        FTSW(filterStartswith)
+        RSZC(resizeColumns)
     end
-    subgraph modify [Modify Table]
-        FNE(filterNonempty)
-        FSW(filterStartswith)
-        RC(resizeColumns)
-    end
-    subgraph display [Display Table]
-        PT(putTable)
-            PT --> NR
-            PT --> CW
-        NR(_numberRecords)
-        CW(_calculateWidths)
-    end
-    subgraph getters [Getters]
-        CR(countRecords)
-        GH(getHeadings)
-        GCW(getColumnWidths)
-        GRCD(getRecord)
-        GRJC(getRjustColumns)
-        GTW(getTableWidth)
-        GTTL(getTitle)
-    end
-    ARJCL(_addRjustColLabel)
-        INIT -- rjustColumns --> ARJCL
-        NR -- No. --> ARJCL
 ```
-[️⬆️](#table-module)
+[️⬆️](#method-groups)
 ---
-### `filterNonempty`
+##### `filterNonempty`
 ```mermaid
 flowchart LR
     STR([start])
@@ -516,9 +399,9 @@ filterNonempty(key)
     SET self.dataset <- newDataset
     SET self.recordsCount <- self.dataset.length
 ```
-[️⬆️](#table)
+[️⬆️](#modify-table-methods)
 ---
-### `filterStartswith`
+##### `filterStartswith`
 ```mermaid
 flowchart LR
     STR([start])
@@ -544,9 +427,9 @@ filterStartswith(key, prefix)
     SET self.dataset <- newDataset
     SET self.recordsCount <- self.dataset.length
 ```
-[️⬆️](#table)
+[️⬆️](#modify-table-methods)
 ---
-### `resizeColumns`
+##### `resizeColumns`
 ```
 resizeColumns(widthLimit)
     # Calculate the total width to trim
@@ -565,9 +448,35 @@ resizeColumns(widthLimit)
             # Update the current table width
             self._table_width -= 1
 ```
-[️⬆️](#table)
+[️⬆️](#modify-table-methods)
 ---
-### `putTable`
+#### Display Table Methods
+* [putTable](#puttable)
+* [_numberRecords](#_numberrecords)
+* [_calculateWidths](#_calculatewidths)
+* [_addRjustColLabel](#_addrjustcollabel) (see Initialize Table Methods)
+```mermaid
+graph LR
+    TABL([**Table**])
+        TABL -- console
+                isMenu  --> PTBL
+    subgraph i [Initialize Table Methods]
+        INIT(*init*)
+    end
+    subgraph d [Display Table Methods]
+        PTBL(putTable)
+            PTBL --> NUMR
+            PTBL --> CALW
+        NUMR(_numberRecords)
+        CALW(_calculateWidths)
+    end
+    ARJC(_addRjustColLabel)
+        INIT        --> ARJC
+        NUMR -- No. --> ARJC
+```
+[️⬆️](#method-groups)
+---
+##### `putTable`
 ```
     def put_table(self, 
                   console: Terminal,
@@ -588,9 +497,9 @@ resizeColumns(widthLimit)
         # Display the table using the provided Terminal object
         table.display(console)
 ```
-[️⬆️](#table)
+[️⬆️](#display-table-methods)
 ---
-### `_numberRecords`
+##### `_numberRecords`
 ```
     def _number_records(self) -> None:
         """Add a numerical index to each record in the dataset and 
@@ -607,9 +516,9 @@ resizeColumns(widthLimit)
         # justification
         self._add_rjust_col_label("#")
 ```
-[️⬆️](#table)
+[️⬆️](#display-table-methods)
 ---
-### `_calculateWidths`
+##### `_calculateWidths`
 ```
     def _calculate_widths(self) -> None:
         """Calculate the width of each column and the total table width 
@@ -627,9 +536,38 @@ resizeColumns(widthLimit)
         self._table_width = (sum(self._column_widths.values()) 
                              + 2 * (len(self._column_widths) - 1))
 ```
-[️⬆️](#table)
+[️⬆️](#display-table-methods)
 ---
-### `getRecord`
+#### Getters
+* [getRecord](#getrecord)
+* [getTitle](#gettitle)
+* [getHeadings](#getheadings)
+* [getTableWidth](#gettablewidth)
+* [getRjustColumns](#getrjustcolumns)
+```mermaid
+graph LR
+    TABL([**Table**])
+        TABL -- index                 --> GRCD
+        GRCD -- record                --> TABL
+        CRCD -- recordsCount          --> TABL
+        GHDG -- headings              --> TABL
+        GCLW -- columnWidths          --> TABL
+        GRJC -- rightJustifiedColumns --> TABL
+        GTBW -- tableWidth            --> TABL
+        GTTL -- title                 --> TABL
+    subgraph g [Getters]
+        CRCD(countRecords)
+        GHDG(getHeadings)
+        GCLW(getColumnWidths)
+        GRCD(getRecord)
+        GRJC(getRjustColumns)
+        GTBW(getTableWidth)
+        GTTL(getTitle)
+    end
+```
+[️⬆️](#method-groups)
+---
+##### `getRecord`
 ```
     def get_record(self, index: int) -> dict[str, str]:
         """Retrieve a specific record from the dataset.
@@ -645,9 +583,9 @@ resizeColumns(widthLimit)
             raise IndexError("Index out of range.")
         return self._dataset[index]
 ```
-[️⬆️](#table)
+[️⬆️](#getters)
 ---
-### `getTitle`
+##### `getTitle`
 ```
     def get_title(self) -> str:
         """Return the title of the table.
@@ -656,9 +594,9 @@ resizeColumns(widthLimit)
         """
         return self._title
 ```
-[️⬆️](#table)
+[️⬆️](#getters)
 ---
-### `getHeadings`
+##### `getHeadings`
 ```
     def get_headings(self) -> dict[str, str]:
         """Return a dictionary of column headings where each key is 
@@ -669,9 +607,9 @@ resizeColumns(widthLimit)
         """
         return {key: key for key in self._dataset[0].keys()}
 ```
-[️⬆️](#table)
+[️⬆️](#getters)
 ---
-### `getTableWidth`
+##### `getTableWidth`
 ```
     def get_table_width(self) -> int:
         """Return the width of the table.
@@ -680,9 +618,9 @@ resizeColumns(widthLimit)
         """
         return self._table_width
 ```
-[️⬆️](#table)
+[️⬆️](#getters)
 ---
-### `getRjustColumns`
+##### `getRjustColumns`
 ```
     def get_rjust_columns(self) -> set[str]:
         """Return a set of column names that are right-justified.
@@ -705,9 +643,9 @@ resizeColumns(widthLimit)
                          if record.get(key.upper(), '').strip()]
         self._records_count = len(self._dataset)
 
-[️⬆️](#table)
+[️⬆️](#getters)
 ---
-### `getColumnWidths`
+##### `getColumnWidths`
 ```
     def get_column_widths(self) -> dict[str, int]:
         """Return a dictionary of column widths.
@@ -717,7 +655,7 @@ resizeColumns(widthLimit)
         """
         return self._column_widths
 ```
-### `countRecords`
+##### `countRecords`
 ```
     def count_records(self) -> int:
         """Return the number of records in the dataset.
