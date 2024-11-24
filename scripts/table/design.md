@@ -53,27 +53,37 @@ graph TB
 ##### `__init__`
 ```mermaid
 flowchart TB
+    classDef fill fill:#555
     STR([start])
+        STR:::fill
         STR --> SRC
     SRC[\"<span style='color:cyan;'>tableSource</span>
           <span style='color:magenta;'>title</span>
           <span style='color:yellow;'>rjustLabel</span>"\]
+        SRC:::fill
         SRC --> DOS
     DOS{"<span style='color:cyan;'>data | string</span>"}
+        DOS:::fill
         DOS -- data  --> CAP
         DOS -- string --> RDT
     CAP[[capitalizeKeys]]
+        CAP:::fill
         CAP --> SET
     RDT[[readTable]]
+        RDT:::fill
         RDT --> SET
     SET[/"<span style='color:magenta;'>title</span>, rjustCols"/]
+        SET:::fill
         SET --> HCL
     HCL{"<span style='color:yellow;'>has</span>"}
+        HCL:::fill
         HCL -- True  --> ACL
         HCL -- False --> END
     ACL[[addRjustColLabel]]
+        ACL:::fill
         ACL --> END
     END([Table])
+        END:::fill
 ```
 ```
 init(tableData, tableString, title, rjustColLabel)
