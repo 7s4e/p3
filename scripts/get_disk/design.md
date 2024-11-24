@@ -29,3 +29,5 @@ flowchart LR
     TBL(Table)
         TBL:::working
 ```
+* [commands](../commands/design.md)
+* [Table](../table/design.md)
