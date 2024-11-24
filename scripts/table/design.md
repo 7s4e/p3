@@ -14,7 +14,7 @@
 * [_findBoundaries](#_findboundaries)
 * [_addRjustColLabel](#_addrjustcollabel)
 ```mermaid
-graph TB
+graph
     TABL([**Table**])
         TABL -- tableData
                 tableString
@@ -52,38 +52,29 @@ graph TB
 ---
 ##### `__init__`
 ```mermaid
-flowchart TB
-    classDef fill fill:#555
-    STR([start])
-        STR:::fill
+flowchart
+    classDef fill fill:#004c4c
+    STR([start]):::fill
         STR --> SRC
     SRC[\"<span style='color:cyan;'>tableSource</span>
           <span style='color:magenta;'>title</span>
-          <span style='color:yellow;'>rjustLabel</span>"\]
-        SRC:::fill
+          <span style='color:yellow;'>rjustLabel</span>"\]:::fill
         SRC --> DOS
-    DOS{"<span style='color:cyan;'>data | string</span>"}
-        DOS:::fill
+    DOS{"<span style='color:cyan;'>data | string</span>"}:::fill
         DOS -- data  --> CAP
         DOS -- string --> RDT
-    CAP[[capitalizeKeys]]
-        CAP:::fill
+    CAP[[capitalizeKeys]]:::fill
         CAP --> SET
-    RDT[[readTable]]
-        RDT:::fill
+    RDT[[readTable]]:::fill
         RDT --> SET
-    SET[/"<span style='color:magenta;'>title</span>, rjustCols"/]
-        SET:::fill
+    SET[/"<span style='color:magenta;'>title</span>, rjustCols"/]:::fill
         SET --> HCL
-    HCL{"<span style='color:yellow;'>has</span>"}
-        HCL:::fill
+    HCL{"<span style='color:yellow;'>has</span>"}:::fill
         HCL -- True  --> ACL
         HCL -- False --> END
-    ACL[[addRjustColLabel]]
-        ACL:::fill
+    ACL[[addRjustColLabel]]:::fill
         ACL --> END
-    END([Table])
-        END:::fill
+    END([Table]):::fill
 ```
 ```
 init(tableData, tableString, title, rjustColLabel)
@@ -104,18 +95,19 @@ END
 ##### `_capitalizeKeys`
 ```mermaid
 flowchart LR
-    STR([init])
+    classDef fill fill:#004c4c
+    STR([init]):::fill
         STR --> DTA
-    DTA[\data\]
+    DTA[\data\]:::fill
         DTA --> DTM
-    DTM{datum}
+    DTM{datum}:::fill
         DTM -- True  --> CAP
         CAP          --> DTM
         DTM -- False --> SET
-    CAP[set KEY:value]
-    SET[/dataset, length/]
+    CAP[set KEY:value]:::fill
+    SET[/dataset, length/]:::fill
         SET --> END
-    END([end])
+    END([end]):::fill
 ```
 ```
 capitalize_keys(data)
@@ -130,31 +122,32 @@ capitalize_keys(data)
 ---
 ##### `_readTable`
 ```mermaid
-flowchart TB
-    STR([init])
+flowchart
+    classDef fill fill:#004c4c
+    STR([init]):::fill
         STR --> TBS
-    TBS[\string\]
+    TBS[\string\]:::fill
         TBS --> SPT
     SPT["split <span style='color:cyan;'>lines</span>
-         set <span style='color:magenta;'>headers</span>"]
+         set <span style='color:magenta;'>headers</span>"]:::fill
         SPT --> FCP
-    FCP[[findColumnPositions]]
+    FCP[[findColumnPositions]]:::fill
         FCP --> LNS
-    LNS{"<span style='color:cyan;'>line</span>"}
+    LNS{"<span style='color:cyan;'>line</span>"}:::fill
         LNS -- True  --> HDR
         SDS          --> LNS
         LNS -- False --> SLN
-    HDR{"<span style='color:magenta;'>header</span>"}
+    HDR{"<span style='color:magenta;'>header</span>"}:::fill
         HDR -- True  --> GSL
         SHV          --> HDR
         HDR -- False --> SDS
-    GSL[[getSlice]]
+    GSL[[getSlice]]:::fill
         GSL --> SHV
-    SDS[/dataset/]
-    SLN[/length/]
+    SDS[/dataset/]:::fill
+    SLN[/length/]:::fill
         SLN --> END
-    SHV[set HEADER:value]
-    END([end])
+    SHV[set HEADER:value]:::fill
+    END([end]):::fill
 ```
 ```
 readTable(string)
@@ -173,18 +166,19 @@ readTable(string)
 ##### `_findColumnPositions`
 ```mermaid
 flowchart LR
-    STR([readTable])
+    classDef fill fill:#004c4c
+    STR([readTable]):::fill
         STR --> INP
     INP[\"<span style='color:cyan;'>headerLine</span>
-         <span style='color:magenta;'>keys</span>"\]
+         <span style='color:magenta;'>keys</span>"\]:::fill
         INP --> KEY
-    KEY{<span style='color:magenta;'>key</span>}
+    KEY{<span style='color:magenta;'>key</span>}:::fill
         KEY -- True  --> POS
         POS          --> KEY
         KEY -- False --> END
     POS["get <span style='color:cyan;'>position</span>
-         append to positions"]
-    END([return positions])
+         append to positions"]:::fill
+    END([return positions]):::fill
 ```
 ```
 findColumnPositions(headerLine, keys)
@@ -199,13 +193,14 @@ findColumnPositions(headerLine, keys)
 ##### `_getSlice`
 ```mermaid
 flowchart LR
-    STR([readTable])
+    classDef fill fill:#004c4c
+    STR([readTable]):::fill
         STR --> FBD
-    FBD[[findBoundaries]]
+    FBD[[findBoundaries]]:::fill
         FBD --> SET
-    SET[set start, end]
+    SET[set start, end]:::fill
         SET --> END
-    END([return line.slice])
+    END([return line.slice]):::fill
 ```
 ```
 getSlice(columnIndex, positionsList, line)
@@ -217,105 +212,109 @@ getSlice(columnIndex, positionsList, line)
 ##### `_findBoundaries`
 ###### Overview
 ```mermaid
-flowchart LR
-    STR([getSlice])
+flowchart
+    classDef fill fill:#004c4c
+    STR([getSlice]):::fill
         STR --> ARG
     ARG[\"<span style='color:cyan;'>columnIndex</span>
           <span style='color:magenta;'>positionsList</span>
-          <span style='color:yellow;'>line</span>"\]
+          <span style='color:yellow;'>line</span>"\]:::fill
         ARG --> INT
-    INT[[initialize start, end]]
+    INT[[initialize start, end]]:::fill
         INT --> AJS
-    AJS[[adjust start]]
+    AJS[[adjust start]]:::fill
         AJS --> AJE
-    AJE[[adjust end]]
+    AJE[[adjust end]]:::fill
         AJE --> END
     END(["return <span style='color:green;'>start</span>, <span style=
-              'color:red;'>end</span>"])
+              'color:red;'>end</span>"]):::fill
 ```
 ###### Initialize Subgraph
 ```mermaid
-flowchart LR
-    INP[\input\]
+flowchart
+    classDef fill fill:#004c4c
+    INP[\input\]:::fill
         INP --> SST
     subgraph init [Initialize start, end]
         SST["<span style='color:green;'>start</span> = <span style=
                  'color:magenta;'>positions</span>.<span style='color:cyan;'
-                 >index</span>"]
+                 >index</span>"]:::fill
             SST --> LST
         LST{"<span style='color:cyan;'>index</span> + 1 < <span style=
-                 'color:magenta;'>positions</span>.length"}
+                 'color:magenta;'>positions</span>.length"}:::fill
             LST -- False --> SE1
             LST -- True  --> SE2
         SE1["<span style='color:red;'>end</span> = <span style=
                  'color:magenta;'>positions</span>.<span style='color:cyan;'
-                 >index</span>+1"]
+                 >index</span>+1"]:::fill
         SE2["<span style='color:red;'>end</span> = <span style=
-                 'color:magenta;'>positions</span>.length"]
+                 'color:magenta;'>positions</span>.length"]:::fill
     end
-    AJS[[adjust start]]
+    AJS[[adjust start]]:::fill
         SE1 --> AJS
         SE2 --> AJS
 ```
 ###### Start Subgraph
 ```mermaid
-flowchart LR
-    INT[[initialize start, end]]
+flowchart
+    classDef fill fill:#004c4c
+    INT[[initialize start, end]]:::fill
         INT --> SIL
     subgraph start [Adjust start]
         SIL{"<span style='color:green;'>start</span> < <span style=
-                 'color:yellow;'>line</span>.length"}
+                 'color:yellow;'>line</span>.length"}:::fill
             SIL -- True --> SIS
             SIL -- False --> SLL
         SIS{"<span style='color:yellow;'>line</span>.<span style=
-                 'color:green;'>start</span> == space"}
+                 'color:green;'>start</span> == space"}:::fill
             SIS -- True --> WIS
             SIS -- False --> WNS
         WIS{"<span style='color:green;'>start</span> < <span style=
                  'color:red;'>end</span> &&
              <span style='color:yellow;'>line</span>.<span style=
-                 'color:green;'>start</span> == space"}
+                 'color:green;'>start</span> == space"}:::fill
             WIS -- True --> MSR
             MSR         --> WIS
         WNS{"<span style='color:yellow;'>line</span>.<span style=
-                 'color:green;'>start</span>-1 != space"}
+                 'color:green;'>start</span>-1 != space"}:::fill
             WNS -- True --> MSL
             MSL         --> WNS
-        MSR["<span style='color:green;'>start</span> += 1"]
-        MSL["<span style='color:green;'>start</span> -= 1"]
+        MSR["<span style='color:green;'>start</span> += 1"]:::fill
+        MSL["<span style='color:green;'>start</span> -= 1"]:::fill
         SLL["<span style='color:green;'>start</span> = <span style=
-                 'color:yellow;'>line</span>.length"]
+                 'color:yellow;'>line</span>.length"]:::fill
     end
-    AJE[[adjust end]]
+    AJE[[adjust end]]:::fill
             WIS -- False --> AJE
             WNS -- False --> AJE
             SLL          --> AJE
 ```
 ###### End Subgraph
 ```mermaid
-flowchart LR
-    AJS[[adjust start]]
+flowchart
+    classDef fill fill:#004c4c
+    AJS[[adjust start]]:::fill
         AJS --> EIL
     subgraph end [Adjust end]
         EIL{"<span style='color:red;'>end</span> < <span style='color:yellow;'
-                 >line</span>.length"}
+                 >line</span>.length"}:::fill
             EIL -- True  --> WNS
             EIL -- False --> ELL
         WNS{"<span style='color:yellow;'>line</span>.<span style=
-                 'color:red;'>end</span> != space"}
+                 'color:red;'>end</span> != space"}:::fill
             WNS -- True  --> ML1
             ML1          --> WNS
             WNS -- False --> WLS
         WLS{"<span style='color:yellow;'>line</span>.<span style=
-                 'color:red;'>end</span>-1 == space"}
+                 'color:red;'>end</span>-1 == space"}:::fill
             WLS -- True --> ML2
             ML2         --> WLS
-        ML1["<span style='color:red;'>end</span> -= 1"]
-        ML2["<span style='color:red;'>end</span> -= 1"]
+        ML1["<span style='color:red;'>end</span> -= 1"]:::fill
+        ML2["<span style='color:red;'>end</span> -= 1"]:::fill
         ELL["<span style='color:red;'>end</span> = <span style=
-                 'color:yellow;'>line</span>.length"]
+                 'color:yellow;'>line</span>.length"]:::fill
     end
-    RTN([return])
+    RTN([return]):::fill
             WLS -- False --> RTN
             ELL --> RTN
 ```
@@ -352,9 +351,10 @@ findBoundaries(columnIndex, positionsList, line)
 ##### `_addRjustColLabel`
 ```mermaid
 flowchart LR
-    STR([start]) -->
-    PRC[update, add labels] -->
-    END([end])
+    classDef fill fill:#004c4c
+    STR([start]):::fill -->
+    PRC[update, add labels]:::fill -->
+    END([end]):::fill
 ```
 ```
 addRjustColLabel(label)
@@ -370,7 +370,7 @@ addRjustColLabel(label)
 * [filterStartswith](#filterstartswith)
 * [resizeColumns](#resizecolumns)
 ```mermaid
-graph TB
+graph
     TABL([**Table**])
         TABL --> FTNE
         TABL --> FTSW
@@ -385,25 +385,26 @@ graph TB
 ---
 ##### `filterNonempty`
 ```mermaid
-flowchart LR
-    STR([Table])
+flowchart
+    classDef fill fill:#004c4c
+    STR([Table]):::fill
         STR --> INP
     INP[\"<span style='color:cyan;'>dataset</span>
-          <span style='color:magenta;'>key</span>"\]
+          <span style='color:magenta;'>key</span>"\]:::fill
         INP --> RCD
-    RCD{"<span style='color:cyan;'>record</span>"}
+    RCD{"<span style='color:cyan;'>record</span>"}:::fill
         RCD -- True  --> KEY
         KEY -- False --> RCD
         ADD          --> RCD
         RCD -- False --> SET
     KEY{"<span style='color:magenta;'>key</span> in <span style=
-             'color:cyan;'>record</span>"}
+             'color:cyan;'>record</span>"}:::fill
         KEY -- True --> ADD
     ADD["add <span style='color:cyan;'>record</span> to <span style=
-             'color:yellow;'>newDataset</span>"]
-    SET[/"<span style='color:yellow;'>newDataset</span>"/]
+             'color:yellow;'>newDataset</span>"]:::fill
+    SET[/"<span style='color:yellow;'>newDataset</span>"/]:::fill
         SET --> END
-    END([end])
+    END([end]):::fill
 ```
 ```
 filterNonempty(key)
@@ -418,26 +419,27 @@ filterNonempty(key)
 ---
 ##### `filterStartswith`
 ```mermaid
-flowchart LR
-    STR([Table])
+flowchart
+    classDef fill fill:#004c4c
+    STR([Table]):::fill
         STR --> INP
     INP[\"<span style='color:cyan;'>dataset</span>
           <span style='color:magenta;'>key</span>
-          <span style='color:yellow;'>prefix</span>"\]
+          <span style='color:yellow;'>prefix</span>"\]:::fill
         INP --> RCD
-    RCD{"<span style='color:cyan;'>record</span>"}
+    RCD{"<span style='color:cyan;'>record</span>"}:::fill
         RCD -- True  --> KEY
         KEY -- False --> RCD
         ADD          --> RCD
         RCD -- False --> SET
     KEY{"<span style='color:magenta;'>key</span> starts with <span style=
-             'color:yellow;'>prefix</span>"}
+             'color:yellow;'>prefix</span>"}:::fill
         KEY -- True --> ADD
     ADD["add <span style='color:cyan;'>record</span> to <span style=
-             'color:yellow;'>newDataset</span>"]
-    SET[/"<span style='color:yellow;'>newDataset</span>"/]
+             'color:yellow;'>newDataset</span>"]:::fill
+    SET[/"<span style='color:yellow;'>newDataset</span>"/]:::fill
         SET --> END
-    END([end])
+    END([end]):::fill
 ```
 ```
 filterStartswith(key, prefix)
@@ -452,27 +454,28 @@ filterStartswith(key, prefix)
 ---
 ##### `resizeColumns`
 ```mermaid
-flowchart TB
-    STR([Table])
+flowchart
+    classDef fill fill:#004c4c
+    STR([Table]):::fill
         STR --> INP
     INP[\"<span style='color:cyan;'>tableWidth</span>
           <span style='color:magenta;'>widthLimit</span>
-          <span style='color:yellow;'>columnWidths</span>"\]
+          <span style='color:yellow;'>columnWidths</span>"\]:::fill
         INP --> TRM
     TRM["trimLength = <span style='color:cyan;'>tableWidth</span> - <span 
-             style='color:magenta;'>widthLimit</span>"]
+             style='color:magenta;'>widthLimit</span>"]:::fill
         TRM --> WHL
-    WHL{trimLength > 0}
+    WHL{trimLength > 0}:::fill
         WHL -- True  --> WTH
         DEC          --> WHL
         WHL -- False --> END
-    WTH["get key of <span style='color:yellow;'>columnWidths</span>.values.max"]
+    WTH["get key of <span style='color:yellow;'>columnWidths</span>.values.max"]:::fill
         WTH --> SET
     SET[/"<span style='color:yellow;'>columnWidths</span>.key -= 1
-         <span style='color:cyan;'>tableWidth</span> -= 1"/]
+         <span style='color:cyan;'>tableWidth</span> -= 1"/]:::fill
         SET --> DEC
-    DEC[trimLength -= 1]
-    END([end])
+    DEC[trimLength -= 1]:::fill
+    END([end]):::fill
 ```
 ```
 resizeColumns(widthLimit)
@@ -517,24 +520,25 @@ graph LR
 ##### `putTable`
 * [ConsoleTable](../console/console_table.py)
 ```mermaid
-flowchart TB
-    STR([Table])
+flowchart
+    classDef fill fill:#004c4c
+    STR([Table]):::fill
         STR --> INP
     INP[\"<span style='color:cyan;'>isMenu</span>
-          <span style='color:magenta;'>console</span>"\]
+          <span style='color:magenta;'>console</span>"\]:::fill
         INP --> IIM
-    IIM{"<span style='color:cyan;'>isMenu</span>"}
+    IIM{"<span style='color:cyan;'>isMenu</span>"}:::fill
         IIM -- True  --> NBR
         IIM -- False --> CWD
-    NBR[[_numberRecords]]
+    NBR[[_numberRecords]]:::fill
         NBR --> CWD
-    CWD[[_calculateWidths]]
+    CWD[[_calculateWidths]]:::fill
         CWD --> CST
-    CST[[ConsoleTable.init]]
+    CST[[ConsoleTable.init]]:::fill
         CST --> DIS
-    DIS[["ConsoleTable.<span style='color:magenta;'>display</span>"]]
+    DIS[["ConsoleTable.<span style='color:magenta;'>display</span>"]]:::fill
         DIS --> END
-    END([end])
+    END([end]):::fill
 ```
 ```
 putTable(console, isMenu)
@@ -548,23 +552,24 @@ putTable(console, isMenu)
 ---
 ##### `_numberRecords`
 ```mermaid
-flowchart TB
-    STR([putTable])
+flowchart
+    classDef fill fill:#004c4c
+    STR([putTable]):::fill
         STR --> INP
-    INP[\"<span style='color:cyan;'>dataset</span>"\]
+    INP[\"<span style='color:cyan;'>dataset</span>"\]:::fill
         INP --> FOR
-    FOR{"<span style='color:cyan;'>record</span>"}
+    FOR{"<span style='color:cyan;'>record</span>"}:::fill
         FOR -- True  --> SKV
         SKV          --> FOR
         FOR -- False --> URC
-    SKV["set No.:<span style='color:cyan;'>index</span>+1"]
-    URC["set <span style='color:magenta;'>updatedRecord</span>"]
+    SKV["set No.:<span style='color:cyan;'>index</span>+1"]:::fill
+    URC["set <span style='color:magenta;'>updatedRecord</span>"]:::fill
         URC --> UDS
-    UDS[/"<span style='color:magenta;'>updatedDataset</span>"/]
+    UDS[/"<span style='color:magenta;'>updatedDataset</span>"/]:::fill
         UDS --> RJC
-    RJC[[_addRjustColLabel]]
+    RJC[[_addRjustColLabel]]:::fill
         RJC --> END
-    END([end])
+    END([end]):::fill
 ```
 ```
 numberRecords()
@@ -579,26 +584,27 @@ END
 ---
 ##### `_calculateWidths`
 ```mermaid
-flowchart TB
-    STR([putTable])
+flowchart
+    classDef fill fill:#004c4c
+    STR([putTable]):::fill
         STR --> INP
-    INP[\"<span style='color:cyan;'>dataset</span>"\]
+    INP[\"<span style='color:cyan;'>dataset</span>"\]:::fill
         INP --> KEY
-    KEY{"<span style='color:cyan;'>key</span>"}
+    KEY{"<span style='color:cyan;'>key</span>"}:::fill
         KEY -- True  --> RCD
         KMX          --> KEY
         KEY -- False --> SCW
-    RCD{"<span style='color:cyan;'>record</span>"}
+    RCD{"<span style='color:cyan;'>record</span>"}:::fill
         RCD -- True  --> RMX
         RMX          --> RCD
         RCD -- False --> KMX
-    RMX["max >= <span style='color:cyan;'>record.key</span>.length"]
-    KMX["max >= <span style='color:cyan;'>key</span>.length"]
-    SCW["columnWidth = <span style='color:cyan;'>key</span>:max"]
+    RMX["max >= <span style='color:cyan;'>record.key</span>.length"]:::fill
+    KMX["max >= <span style='color:cyan;'>key</span>.length"]:::fill
+    SCW["columnWidth = <span style='color:cyan;'>key</span>:max"]:::fill
         SCW --> ACW
-    ACW[/columnWidths <br> tableWidth/]
+    ACW[/columnWidths <br> tableWidth/]:::fill
         ACW --> END
-    END([end])
+    END([end]):::fill
 ```
 ```
 calculateWidths()
