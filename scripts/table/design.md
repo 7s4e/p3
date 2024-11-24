@@ -53,7 +53,7 @@ graph
 ##### `__init__`
 ```mermaid
 flowchart
-    classDef fill fill:#008080
+    classDef fill fill:#4682b4
     STR([start]):::fill
         STR --> SRC
     SRC[\"<span style='color:cyan;'>tableSource</span>
@@ -95,7 +95,7 @@ END
 ##### `_capitalizeKeys`
 ```mermaid
 flowchart LR
-    classDef fill fill:#008080
+    classDef fill fill:#4682b4
     STR([init]):::fill
         STR --> DTA
     DTA[\data\]:::fill
@@ -123,7 +123,7 @@ capitalize_keys(data)
 ##### `_readTable`
 ```mermaid
 flowchart
-    classDef fill fill:#008080
+    classDef fill fill:#4682b4
     STR([init]):::fill
         STR --> TBS
     TBS[\string\]:::fill
@@ -166,7 +166,7 @@ readTable(string)
 ##### `_findColumnPositions`
 ```mermaid
 flowchart LR
-    classDef fill fill:#008080
+    classDef fill fill:#4682b4
     STR([readTable]):::fill
         STR --> INP
     INP[\"<span style='color:cyan;'>headerLine</span>
@@ -193,7 +193,7 @@ findColumnPositions(headerLine, keys)
 ##### `_getSlice`
 ```mermaid
 flowchart LR
-    classDef fill fill:#008080
+    classDef fill fill:#4682b4
     STR([readTable]):::fill
         STR --> FBD
     FBD[[findBoundaries]]:::fill
@@ -213,7 +213,7 @@ getSlice(columnIndex, positionsList, line)
 ###### Overview
 ```mermaid
 flowchart
-    classDef fill fill:#008080
+    classDef fill fill:#4682b4
     STR([getSlice]):::fill
         STR --> ARG
     ARG[\"<span style='color:cyan;'>columnIndex</span>
@@ -232,7 +232,7 @@ flowchart
 ###### Initialize Subgraph
 ```mermaid
 flowchart
-    classDef fill fill:#008080
+    classDef fill fill:#4682b4
     INP[\input\]:::fill
         INP --> SST
     subgraph init [Initialize start, end]
@@ -257,7 +257,7 @@ flowchart
 ###### Start Subgraph
 ```mermaid
 flowchart
-    classDef fill fill:#008080
+    classDef fill fill:#4682b4
     INT[[initialize start, end]]:::fill
         INT --> SIL
     subgraph start [Adjust start]
@@ -292,7 +292,7 @@ flowchart
 ###### End Subgraph
 ```mermaid
 flowchart
-    classDef fill fill:#008080
+    classDef fill fill:#4682b4
     AJS[[adjust start]]:::fill
         AJS --> EIL
     subgraph end [Adjust end]
@@ -351,7 +351,7 @@ findBoundaries(columnIndex, positionsList, line)
 ##### `_addRjustColLabel`
 ```mermaid
 flowchart LR
-    classDef fill fill:#008080
+    classDef fill fill:#4682b4
     STR([start]):::fill -->
     PRC[update, add labels]:::fill -->
     END([end]):::fill
@@ -386,7 +386,7 @@ graph
 ##### `filterNonempty`
 ```mermaid
 flowchart
-    classDef fill fill:#008080
+    classDef fill fill:#4682b4
     STR([Table]):::fill
         STR --> INP
     INP[\"<span style='color:cyan;'>dataset</span>
@@ -420,7 +420,7 @@ filterNonempty(key)
 ##### `filterStartswith`
 ```mermaid
 flowchart
-    classDef fill fill:#008080
+    classDef fill fill:#4682b4
     STR([Table]):::fill
         STR --> INP
     INP[\"<span style='color:cyan;'>dataset</span>
@@ -455,7 +455,7 @@ filterStartswith(key, prefix)
 ##### `resizeColumns`
 ```mermaid
 flowchart
-    classDef fill fill:#008080
+    classDef fill fill:#4682b4
     STR([Table]):::fill
         STR --> INP
     INP[\"<span style='color:cyan;'>tableWidth</span>
@@ -521,7 +521,7 @@ graph LR
 * [ConsoleTable](../console/console_table.py)
 ```mermaid
 flowchart
-    classDef fill fill:#008080
+    classDef fill fill:#4682b4
     STR([Table]):::fill
         STR --> INP
     INP[\"<span style='color:cyan;'>isMenu</span>
@@ -553,7 +553,7 @@ putTable(console, isMenu)
 ##### `_numberRecords`
 ```mermaid
 flowchart
-    classDef fill fill:#008080
+    classDef fill fill:#4682b4
     STR([putTable]):::fill
         STR --> INP
     INP[\"<span style='color:cyan;'>dataset</span>"\]:::fill
@@ -585,7 +585,7 @@ END
 ##### `_calculateWidths`
 ```mermaid
 flowchart
-    classDef fill fill:#008080
+    classDef fill fill:#4682b4
     STR([putTable]):::fill
         STR --> INP
     INP[\"<span style='color:cyan;'>dataset</span>"\]:::fill
