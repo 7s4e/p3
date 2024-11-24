@@ -505,84 +505,120 @@ graph LR
 [️⬆️](#method-groups)
 ---
 ##### `putTable`
+* [ConsoleTable](../console/console_table.py)
+```mermaid
+flowchart TB
+    STR([Table])
+        STR --> INP
+    INP[\"<span style='color:cyan;'>isMenu</span>
+          <span style='color:magenta;'>console</span>"\]
+        INP --> IIM
+    IIM{"<span style='color:cyan;'>isMenu</span>"}
+        IIM -- True  --> NBR
+        IIM -- False --> CWD
+    NBR[[_numberRecords]]
+        NBR --> CWD
+    CWD[[_calculateWidths]]
+        CWD --> CST
+    CST[[ConsoleTable.init]]
+        CST --> DIS
+    DIS[["ConsoleTable.<span style='color:magenta;'>display</span>"]]
+        DIS --> END
+    END([end])
 ```
-    def put_table(self, 
-                  console: Terminal,
-                  is_menu: bool = False) -> None:
-        """Format and display a table with the given dataset.
-        Args:
-            console (Terminal): The Terminal object used for displaying 
-                the table.
-            is_menu (bool, optional): Whether the table is being 
-                displayed as a menu. Defaults to False.
-        """
-        if is_menu:
-            self._number_records()
-        self._calculate_widths()
-        # Create an instance of Console_Table with the current 
-        # instance's data
-        table = Console_Table(self)
-        # Display the table using the provided Terminal object
-        table.display(console)
+```
+putTable(console, isMenu)
+    IF isMenu
+        CALL self.numberRecords
+    CALL self.calculateWidths
+    SET table <- ConsoleTable
+    CALL table.display(console)
 ```
 [️⬆️](#display-table-methods)
 ---
 ##### `_numberRecords`
+```mermaid
+flowchart TB
+    STR([putTable])
+        STR --> INP
+    INP[\"<span style='color:cyan;'>dataset</span>"\]
+        INP --> FOR
+    FOR{"<span style='color:cyan;'>record</span>"}
+        FOR -- True  --> SKV
+        SKV          --> FOR
+        FOR -- False --> URC
+    SKV["set No.:<span style='color:cyan;'>index</span>+1"]
+    URC["set <span style='color:magenta;'>updatedRecord</span>"]
+        URC --> UDS
+    UDS[/"<span style='color:magenta;'>updatedDataset</span>"/]
+        UDS --> RJC
+    RJC[[_addRjustColLabel]]
+        RJC --> END
+    END([end])
 ```
-    def _number_records(self) -> None:
-        """Add a numerical index to each record in the dataset and 
-            update column labels.
-        This method adds a numerical index to each record in the 
-        dataset, with the index starting at 1. It also updates the 
-        column labels to ensure proper right-justification for the index 
-        column.
-        """
-        # Add a numerical index to each record, starting from 1
-        self._dataset = [{"#": i + 1, **record} 
-                         for i, record in enumerate(self._dataset)]
-        # Update the column label for the index to ensure right-
-        # justification
-        self._add_rjust_col_label("#")
+```
+numberRecords()
+    FOR index, record IN dataset
+        SET key, value <- "#", index + 1
+        SET updatedRecord <- key:value + record
+        ADD updatedRecord <- newDataset
+    CALL self.addRjustColLabel("#")
+END
 ```
 [️⬆️](#display-table-methods)
 ---
 ##### `_calculateWidths`
+```mermaid
+flowchart TB
+    STR([putTable])
+        STR --> INP
+    INP[\"<span style='color:cyan;'>dataset</span>"\]
+        INP --> KEY
+    KEY{"<span style='color:cyan;'>key</span>"}
+        KEY -- True  --> RCD
+        KMX          --> KEY
+        KEY -- False --> SCW
+    RCD{"<span style='color:cyan;'>record</span>"}
+        RCD -- True  --> RMX
+        RMX          --> RCD
+        RCD -- False --> KMX
+    RMX["max >= <span style='color:cyan;'>record.key</span>.length"]
+    KMX["max >= <span style='color:cyan;'>key</span>.length"]
+    SCW["columnWidth = <span style='color:cyan;'>key</span>:max"]
+        SCW --> ACW
+    ACW[/columnWidths <br> tableWidth/]
+        ACW --> END
+    END([end])
 ```
-    def _calculate_widths(self) -> None:
-        """Calculate the width of each column and the total table width 
-            based on the dataset.
-        Updates:
-            Updates self._column_widths with the width of each column.
-            Updates self._table_width with the total width of the table 
-                including column separators.
-        """
-        self._column_widths = {
-            key: max(len(key), 
-                     max(len(str(record[key])) for record in self._dataset))
-            for key in self._dataset[0].keys()
-        }
-        self._table_width = (sum(self._column_widths.values()) 
-                             + 2 * (len(self._column_widths) - 1))
+```
+calculateWidths()
+    FOR key IN dataset.keys
+        SET max <- 0
+        FOR record IN dataset
+            IF record[key].length > max
+                max <- record[key].length
+        IF key.length > max
+            max <- key.length
+    SET columnWidth <- key:value
+    ADD columnWidth TO columnWidths
+    SET tableWidth <- columnWidths.values.sum + 2 * (columnWidths.length - 1)
+END
 ```
 [️⬆️](#display-table-methods)
 ---
 #### Getters
-* [getRecord](#getrecord)
-* [getTitle](#gettitle)
+* [countRecors](#countrecords)
+* [getColumnWidts](#getcolumnwidths)
 * [getHeadings](#getheadings)
-* [getTableWidth](#gettablewidth)
+* [getRecord](#getrecord)
 * [getRjustColumns](#getrjustcolumns)
+* [getTableWidth](#gettablewidth)
+* [getTitle](#gettitle)
 ```mermaid
 graph LR
     TABL([**Table**])
-        TABL -- index                 --> GRCD
-        GRCD -- record                --> TABL
-        CRCD -- recordsCount          --> TABL
-        GHDG -- headings              --> TABL
-        GCLW -- columnWidths          --> TABL
-        GRJC -- rightJustifiedColumns --> TABL
-        GTBW -- tableWidth            --> TABL
-        GTTL -- title                 --> TABL
+        TABL --> g
+        g    --> TABL
     subgraph g [Getters]
         CRCD(countRecords)
         GHDG(getHeadings)
@@ -595,101 +631,57 @@ graph LR
 ```
 [️⬆️](#method-groups)
 ---
-##### `getRecord`
+##### `countRecords`
 ```
-    def get_record(self, index: int) -> dict[str, str]:
-        """Retrieve a specific record from the dataset.
-        Args:
-            index (int): The index of the record to retrieve.
-        Returns:
-            dict[str, str]: The record at the specified index.
-    
-        Raises:
-            IndexError: If the index is out of range of the dataset.
-        """
-        if index < 0 or index >= len(self._dataset):
-            raise IndexError("Index out of range.")
-        return self._dataset[index]
+countRecords()
+    RETURN self.recordsCount
 ```
 [️⬆️](#getters)
 ---
-##### `getTitle`
+##### `getColumnWidths`
 ```
-    def get_title(self) -> str:
-        """Return the title of the table.
-        Returns:
-            str: The title of the table.
-        """
-        return self._title
+getColumnWidths()
+    RETURN self.columnWidths
 ```
 [️⬆️](#getters)
 ---
 ##### `getHeadings`
 ```
-    def get_headings(self) -> dict[str, str]:
-        """Return a dictionary of column headings where each key is 
-            mapped to itself.
-        Returns:
-            dict[str, str]: A dictionary with column names as both keys 
-                and values.
-        """
-        return {key: key for key in self._dataset[0].keys()}
+getHeadings()
+    FOR key IN dataset.keys
+        heading <- key:key
+    ADD heading TO headings
+    RETURN headings
 ```
 [️⬆️](#getters)
 ---
-##### `getTableWidth`
+##### `getRecord`
 ```
-    def get_table_width(self) -> int:
-        """Return the width of the table.
-        Returns:
-            int: The width of the table.
-        """
-        return self._table_width
+getRecord(index)
+    IF index < 0 OR index >= self.dataset.length
+        RAISE IndexError
+    RETURN self.dataset[index]
 ```
 [️⬆️](#getters)
 ---
 ##### `getRjustColumns`
 ```
-    def get_rjust_columns(self) -> set[str]:
-        """Return a set of column names that are right-justified.
-        Returns:
-            set[str]: A set of column names that are right-justified.
-        """
-        return self._right_justified_columns
-```    def filter_nonempty(self, key: str) -> None:
-        """Filter records to include only those where the value for the 
-            specified key is non-empty.
-        Args:
-            key (str): The key in the records to check for non-empty 
-                values.
-        Updates:
-            Filters self._dataset in place to include only records where 
-            the value for the specified key is non-empty. Updates 
-            self._records_count to reflect the new number of records.
-        """
-        self._dataset = [record for record in self._dataset 
-                         if record.get(key.upper(), '').strip()]
-        self._records_count = len(self._dataset)
-
+getRjustColumns()
+    RETURN self.rightJustifiedColumns
+```
 [️⬆️](#getters)
 ---
-##### `getColumnWidths`
+##### `getTableWidth`
 ```
-    def get_column_widths(self) -> dict[str, int]:
-        """Return a dictionary of column widths.
-        Returns:
-            dict[str, int]: A dictionary with column names as keys and 
-                their widths as values.
-        """
-        return self._column_widths
+getTableWidth()
+    RETURN self.tableWidth
 ```
-##### `countRecords`
+[️⬆️](#getters)
+---
+##### `getTitle`
 ```
-    def count_records(self) -> int:
-        """Return the number of records in the dataset.
-
-        Returns:
-            int: The count of records.
-        """
-        return self._records_count
+getTitle()
+    RETURN self.Title
 ```
+[️⬆️](#getters)
+---
