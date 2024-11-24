@@ -30,4 +30,5 @@ flowchart LR
         TBL:::working
 ```
 * [commands](../commands/design.md)
+* [console](../console/design.md)
 * [Table](../table/design.md)

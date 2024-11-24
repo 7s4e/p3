@@ -248,10 +248,8 @@ class Table:
             Updates self._dataset with keys converted to uppercase and updates
             self._records_count with the new count of records.
         """
-        self._dataset = [
-            {key.upper(): value for key, value in datum.items()}
-            for datum in data
-        ]
+        self._dataset = [{key.upper(): value for key, value in datum.items()} 
+                         for datum in data]
         self._records_count = len(self._dataset)
 
     def _find_boundaries(self, 

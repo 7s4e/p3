@@ -20,12 +20,36 @@ def mock_table():
         yield table
 
 
+# Test runCommand
 @pytest.mark.parametrize(
-    " command,                capture_output, mock_return,                                       expected_output, should_raise",
-    [("echo 'Hello, World!'", True,           MagicMock(returncode=0, stdout="Hello, World!\n"), "Hello, World!", False),
-     ("exit 1",               True,           MagicMock(returncode=1, stderr="Command failed"),  None,            True),
-     ("echo 'No Capture'",    False,          MagicMock(returncode=0),                           None,            False)])
-
+    "command, capture_output, mock_return, expected_output, should_raise",
+    [
+        # Test case 1: Command success with output.
+        (
+            "echo 'Hello, World!'", 
+            True, 
+            MagicMock(returncode=0, stdout="Hello, World!\n"), 
+            "Hello, World!", 
+            False
+        ), 
+        # Test case 2: Command fail.
+        (
+            "exit 1", 
+            True, 
+            MagicMock(returncode=1, stderr="Command failed"), 
+            None, 
+            True
+        ),
+        # Test case 3: Command success without output.
+        (
+            "echo 'No Capture'", 
+            False, 
+            MagicMock(returncode=0), 
+            None, 
+            False
+        )
+    ]
+)
 def test_run_command(mock_run, command, capture_output, mock_return, 
                      expected_output, should_raise):
     # Setup
@@ -48,14 +72,46 @@ def test_run_command(mock_run, command, capture_output, mock_return,
         stderr=sys.stderr if not capture_output else None)
 
 
-@pytest.mark.parametrize(
-    " disk,  columns,          show_dependents, expected_command",
-    [(None,  [],               True,            "lsblk"),
-     ("sda", [],               True,            "lsblk /dev/sda"),
-     (None,  ["NAME", "SIZE"], True,            "lsblk --output NAME,SIZE"),
-     (None,  [],               False,           "lsblk --nodeps"),
-     ("sda", ["NAME", "TYPE"], False,           "lsblk --nodeps --output NAME,TYPE /dev/sda")])
-
+# Test listBlockDevices
+@pytest.mark.parametrize("disk, columns, show_dependents, expected_command", 
+    [
+        # Test case 1: Command to list block devices
+        (
+            None, 
+            [], 
+            True, 
+            "lsblk"
+        ),
+        # Test case 2: Command to list /dev/sda disk and partitions
+        (
+            "sda", 
+            [], 
+            True, 
+            "lsblk /dev/sda"
+        ),
+        # Test case 3: Command to print specified output columns
+        (
+            None, 
+            ["NAME", "SIZE"], 
+            True, 
+            "lsblk --output NAME,SIZE"
+        ),
+        # Test case 4: Command to not print slaves
+        (
+            None, 
+            [], 
+            False, 
+            "lsblk --nodeps"
+        ),
+        # Test case 5: Command to print with columns and without slaves
+        (
+            "sda", 
+            ["NAME", "TYPE"], 
+            False, 
+            "lsblk --nodeps --output NAME,TYPE /dev/sda"
+        )
+    ]
+)
 def test_list_block_devices(mock_run_command, disk, columns, show_dependents, 
                             expected_command):
     # Setup
@@ -71,24 +127,54 @@ def test_list_block_devices(mock_run_command, disk, columns, show_dependents,
 
 
 @pytest.mark.parametrize(
-    "disk,   non_destructive, capture_output, expected_command,                                                      mock_output,   expected_result",
-    [("sda", True,            True,           "sudo badblocks --non-destructive --show-progress --verbose /dev/sda", "Mock Output", "Mock Output"),
-     ("sda", False,           True,           "sudo badblocks --write-mode --show-progress --verbose /dev/sda",      "Mock Output", "Mock Output"),
-     ("sda", True,            False,          "sudo badblocks --non-destructive --show-progress --verbose /dev/sda", None,           None),
-     ("sda", False,           False,          "sudo badblocks --write-mode --show-progress --verbose /dev/sda",      None,           None)])
-
-def test_run_badblocks(mock_run_command, disk, non_destructive, capture_output, 
-                       expected_command, mock_output, expected_result):
+    "non_destructive, capture_output, exp_command, mock_output, exp_result",
+    [
+        # Test case 1: Non-destructive command with output
+        (
+            True, 
+            True, 
+            "sudo badblocks --non-destructive --show-progress --verbose /dev/sda", 
+            "Mock Output", 
+            "Mock Output"
+        ),
+        # Test case 2: Destructive command with output
+        (
+            False, 
+            True, 
+            "sudo badblocks --write-mode --show-progress --verbose /dev/sda", 
+            "Mock Output", 
+            "Mock Output"
+        ),
+        # Test case 3: Non-destructive commmand without output
+        (
+            True, 
+            False, 
+            "sudo badblocks --non-destructive --show-progress --verbose /dev/sda", 
+            None, 
+            None
+        ),
+        # Test case 4: Destructive command without output
+        (
+            False, 
+            False, 
+            "sudo badblocks --write-mode --show-progress --verbose /dev/sda", 
+            None, 
+            None
+        )
+    ]
+)
+def test_run_badblocks(mock_run_command, non_destructive, capture_output, 
+                       exp_command, mock_output, exp_result):
     # Setup
     mock_run_command.return_value = mock_output
 
     # Execute
-    result = c.run_badblocks(disk, non_destructive, capture_output)
+    result = c.run_badblocks("sda", non_destructive, capture_output)
 
     # Verify
-    mock_run_command.assert_called_once_with(expected_command, 
+    mock_run_command.assert_called_once_with(exp_command, 
                                              capture_output=capture_output)
-    assert result == expected_result
+    assert result == exp_result
 
 
 # def test_unmount_disk(mock_run_command, mock_table):
