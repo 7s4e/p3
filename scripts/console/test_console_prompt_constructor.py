@@ -744,41 +744,42 @@ def mock_console(mocker):
             zip(), 
             TypeError
         ),
+        
+        # Test series 6: ValueError if both 'validate_bool' and 'validate_int' are `True`.")
+        #           validate_bool  validate_int  exception
+        ("", False, True,          False, None,  None), 
+        ("", False, False,         True, None,   None), 
+        ("", False, True,          True, None,   ValueError),
+        ("", False, False,         False, None,  None),
+        
+        # Test series 7: ValueError if 'int_validation' is not `None` and 'validate_int' is `False`
+        #                  validate_int  int_validation  exception
+        ("", False, False, True,         int(),          None), 
+        ("", False, False, False,        int(),          ValueError), 
+        ("", False, False, False,        None,           None), 
+        
+        # Test series 8: ValueError if 'int_validation' is an integer that is negative
+        #                        int_validation  exception
+        ("", False, False, True, 0,              None), 
+        ("", False, False, True, 1,              None), 
+        ("", False, False, True, sys.maxsize,    None), 
+        ("", False, False, True, -1,             ValueError), 
+        ("", False, False, True, -sys.maxsize,   ValueError), 
 
-    # Check value errors
-    # if validate_bool and validate_int: raise ValueError("Both 'validate_bool' and 'validate_int' cannot be `True`.")
-    # prompt                       exp_key             validate_bool                validate_int             int_validation           exception"
-     ("",                          False,                       True,                        False,                       None,                        None), 
-     ("",                          False,                       False,                       True,                        None,                        None), 
-     ("",                          False,                       True,                        True,                        None,                        ValueError),
+        # Test series 9: ValueError if 'int_validation' is a tuple without two elements
+        #                        int_validation  exception
+        ("", False, False, True, (1,),           ValueError), 
+        ("", False, False, True, (1, 2),         None), 
+        ("", False, False, True, (1, 2, 3),      ValueError), 
 
-    # if int_validation is not None:
-    #   if not validate_int: raise ValueError("With 'int_validation', 'validate_int' must be `True`.")
-     ("",                          False,                       False,                       True,                        int(),                       None),
-     ("",                          False,                       False,                       False,                       int(),                       ValueError),
-
-    #   if isinstance(int_validation, int):
-    #       if int_validation < 0: raise ValueError("Range for 'int_validation' must be positive.")
-     ("",                          False,                       False,                       True,                        0,                       None),
-     ("",                          False,                       False,                       True,                        1,                       None),
-     ("",                          False,                       False,                       True,                        sys.maxsize,             None),
-     ("",                          False,                       False,                       True,                        -1,                      ValueError),
-     ("",                          False,                       False,                       True,                        -sys.maxsize,            ValueError),
-
-    #   else:
-    #       if len(int_validation) != 2: raise ValueError("The 'int_validation' `tuple` must have two elements.")
-     ("",                          False,                       False,                       True,                        (1,),                    ValueError),
-     ("",                          False,                       False,                       True,                        (1, 2),                  None),
-     ("",                          False,                       False,                       True,                        (1, 2, 3),               ValueError),
-
-    #       if int_validation[0] > int_validation[1]: 
-    #           raise ValueError("The second value of the 'int_validation' `tuple` cannot be less than the first.")
-     ("",                          False,                       False,                       True,                        (0, 0),                  None),
-     ("",                          False,                       False,                       True,                        (1, 2),                  None),
-     ("",                          False,                       False,                       True,                        (-2, -1),                None),
-     ("",                          False,                       False,                       True,                        (1, 0),                  ValueError)]
-    )
-
+        # Test series 10: ValueError is second tuple value less than the first
+        #                        int_validation  exception
+        ("", False, False, True, (0, 0),         None), 
+        ("", False, False, True, (1, 2),         None), 
+        ("", False, False, True, (-2, -1),       None), 
+        ("", False, False, True, (1, 0),         ValueError)
+    ]
+)
 def test_constructor(mock_console, prompt, exp_key, validate_bool, validate_int, int_validation, exception):
     """Test the constructor of ConsolePrompt for with various parameters."""
     if exception:
