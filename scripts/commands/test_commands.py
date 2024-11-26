@@ -126,6 +126,7 @@ def test_list_block_devices(mock_run_command, disk, columns, show_dependents,
     assert result == "Mock Output"
 
 
+# Test runBadblocks
 @pytest.mark.parametrize(
     "non_destructive, capture_output, exp_command, mock_output, exp_result",
     [
@@ -177,6 +178,7 @@ def test_run_badblocks(mock_run_command, non_destructive, capture_output,
     assert result == exp_result
 
 
+# Test unmountDisk
 # def test_unmount_disk(mock_run_command, mock_table):
 #     # Setup
 #     mock_lsblk_output = ("PATH       MOUNTPOINT\n"
