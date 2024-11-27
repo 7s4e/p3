@@ -107,29 +107,29 @@ def test_find_column_positions(mock_table, header_line, keys, exp_positions,
 @pytest.mark.parametrize(
     "column_idx, positions_list, line, exp_start, exp_end",
     [
-        # Test case 1: No whitespace adjustment needed
-        (0, [0, 5, 9], "Name Age Location", 0, 4), 
+        # Test case 1: Left-justified column
+        (0, [0, 11, 15], "Name       Age Location", 0, 4), 
 
         # Test case 2: Last column boundary case
-        (2, [0, 5, 9], "Name Age Location", 9, 17), 
+        (2, [0, 11, 15], "Name       Age Location", 15, 23), 
 
         # Test case 3: Positions applied to truncated line
-        (2, [0, 5, 9], "Name", 4, 4), 
+        (2, [0, 11, 15], "Name", 4, 4), 
 
-        # Test case 4: Whitespace at the start of the column ('Age')
-        (1, [0, 5, 11], "Name   Age Location", 7, 10), 
+        # Test case 4: Whitespace at start on right-justified column
+        (1, [0, 11, 15], "Baby        6w Nursery", 12, 14), 
 
-        # Test case 4: Column with trailing whitespace
-        # (0, [0, 5, 10], "   Name Age Location", 3, 7),  # 'Name' column, leading whitespace adjusted
+        # Test case 5: No whitespace before start
+        (1, [0, 11, 15], "Methusela 969y Genesis", 10, 14), 
 
-        # Test case 5: No whitespace adjustment needed, column index is last in list
-        # (1, [0, 6, 12], "ID Name Location", 6, 10),  # 'Name' column
+        # Test case 6: No whitespace before end
+        (0, [0, 11, 15], "Baby        6w Nursery", 0, 4), 
 
-        # Test case 6: Column with no characters
-        # (0, [0, 5, 10], "    ", 0, 0),  # 'ID' column (no content)
+        # Test case 7: Column with no content
+        (0, [0, 11, 15], "                       ", 11, 11), 
 
-        # Test case 7: Edge case with empty line
-        (0, [0, 5], "", 0, 0),  # Empty line, no columns
+        # Test case 8: Edge case with empty line
+        (0, [0, 11, 15], "", 0, 0),
     ]
 )
 def test_find_boundaries(mock_table, column_idx, positions_list, line, 
