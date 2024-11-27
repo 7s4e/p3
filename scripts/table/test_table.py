@@ -1,10 +1,11 @@
 import pytest
 from unittest.mock import MagicMock
+from functools import partial
 from table import Table
 
 
 @pytest.fixture
-def mock_table():
+def mock_instance():
     return MagicMock(spec=Table)
 
 
@@ -43,18 +44,19 @@ def mock_table():
         ),
     ],
 )
-def test_capitalize_keys(mock_table, data_input, exp_dataset, exp_count):
+def test_capitalize_keys(mock_instance, data_input, exp_dataset, exp_count):
     # Setup
-    mock_table._dataset = []
-    mock_table._records_count = 0
-    mock_table._capitalize_keys.side_effect = Table._capitalize_keys
+    mock_instance._dataset = []
+    mock_instance._records_count = 0
+    mock_instance._capitalize_keys.side_effect = partial(
+        Table._capitalize_keys, mock_instance)
 
     # Execute
-    mock_table._capitalize_keys(mock_table, data_input)
+    mock_instance._capitalize_keys(data_input)
 
     # Verify
-    assert mock_table._dataset == exp_dataset
-    assert mock_table._records_count == exp_count
+    assert mock_instance._dataset == exp_dataset
+    assert mock_instance._records_count == exp_count
 
 
 # Test findColumnPositions
@@ -86,63 +88,77 @@ def test_capitalize_keys(mock_table, data_input, exp_dataset, exp_count):
         ("", ["Column"], None, ValueError)
     ]
 )
-def test_find_column_positions(mock_table, header_line, keys, exp_positions, 
-                               exception):
+def test_find_column_positions(mock_instance, header_line, keys, 
+                               exp_positions, exception):
     # Setup
-    mock_table._find_column_positions.side_effect = Table._find_column_positions
+    mock_instance._find_column_positions.side_effect = partial(
+        Table._find_column_positions, mock_instance)
 
     # Execute and Verify
     if exception:
         with pytest.raises(exception, 
                            match="Column '.*' not found in header line."):
-               mock_table._find_column_positions(mock_table, header_line, 
-                                                 keys)
+            mock_instance._find_column_positions(header_line, keys)
     else:
-        result = mock_table._find_column_positions(mock_table, header_line, 
-                                                   keys)
+        result = mock_instance._find_column_positions(header_line, keys)
         assert result == exp_positions
 
 
+# Tests parameters for findBoundaries and getSlice
+params = [
+    # Test case 1: Left-justified column
+    (0, [0, 11, 15], "Name       Age Location", (0, 4), "Name"), 
+
+    # Test case 2: Last column boundary case
+    (2, [0, 11, 15], "Name       Age Location", (15, 23), "Location"), 
+
+    # Test case 3: Positions applied to truncated line
+    (2, [0, 11, 15], "Name", (4, 4), ""), 
+    
+    # Test case 4: Whitespace at start
+    (1, [0, 11, 15], "Baby        6w Nursery", (12, 14), "6w"), 
+    
+    # Test case 5: No whitespace before start
+    (1, [0, 11, 15], "Methusela 969y Genesis", (10, 14), "969y"), 
+    
+    # Test case 6: No whitespace before end
+    (0, [0, 11, 15], "Methusela 969y Genesis", (0, 9), "Methusela"), 
+    
+    # Test case 7: Column with no content
+    (0, [0, 11, 15], "                       ", (11, 11), ""), 
+    
+    # Test case 8: Edge case with empty line
+    (0, [0, 11, 15], "", (0, 0), "")
+]
+
 # Test findBoundaries
-@pytest.mark.parametrize(
-    "column_idx, positions_list, line, exp_start, exp_end",
-    [
-        # Test case 1: Left-justified column
-        (0, [0, 11, 15], "Name       Age Location", 0, 4), 
-
-        # Test case 2: Last column boundary case
-        (2, [0, 11, 15], "Name       Age Location", 15, 23), 
-
-        # Test case 3: Positions applied to truncated line
-        (2, [0, 11, 15], "Name", 4, 4), 
-
-        # Test case 4: Whitespace at start on right-justified column
-        (1, [0, 11, 15], "Baby        6w Nursery", 12, 14), 
-
-        # Test case 5: No whitespace before start
-        (1, [0, 11, 15], "Methusela 969y Genesis", 10, 14), 
-
-        # Test case 6: No whitespace before end
-        (0, [0, 11, 15], "Baby        6w Nursery", 0, 4), 
-
-        # Test case 7: Column with no content
-        (0, [0, 11, 15], "                       ", 11, 11), 
-
-        # Test case 8: Edge case with empty line
-        (0, [0, 11, 15], "", 0, 0),
-    ]
-)
-def test_find_boundaries(mock_table, column_idx, positions_list, line, 
-                         exp_start, exp_end):
+@pytest.mark.parametrize("col_idx, pos_list, line, exp_boundaries, _", 
+                         params)
+def test_find_boundaries(mock_instance, col_idx, pos_list, line, 
+                         exp_boundaries, _):
     # Setup
-    mock_table._find_boundaries.side_effect = Table._find_boundaries
+    mock_instance._find_boundaries.side_effect = partial(
+        Table._find_boundaries, mock_instance)
 
     # Execute
-    result_start, result_end = mock_table._find_boundaries(mock_table, 
-                                                           column_idx, 
-                                                           positions_list, 
-                                                           line)
+    result_start, result_end = mock_instance._find_boundaries(col_idx, 
+                                                              pos_list, line)
 
     # Verify
-    assert result_start == exp_start
-    assert result_end == exp_end
+    assert result_start == exp_boundaries[0]
+    assert result_end == exp_boundaries[1]
+
+# Test getSlice
+@pytest.mark.parametrize("col_idx, pos_list, line, _, exp_slice", params)
+def test_get_slice(mock_instance, col_idx, pos_list, line, _, exp_slice):
+    # Setup
+    mock_instance._find_boundaries.side_effect = partial(
+        Table._find_boundaries, mock_instance)
+    mock_instance._get_slice.side_effect = partial(Table._get_slice, 
+                                                   mock_instance)
+
+    # Execute
+    result = mock_instance._get_slice(col_idx, pos_list, line)
+
+    # Verify
+    assert result == exp_slice
