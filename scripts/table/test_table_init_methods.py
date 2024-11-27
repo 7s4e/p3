@@ -1,12 +1,20 @@
 import pytest
 from unittest.mock import MagicMock
-from functools import partial
-from table import Table
+from functools import partial as p
+from table import Table as T
 
 
 @pytest.fixture
 def mock_instance():
-    return MagicMock(spec=Table)
+    mock = MagicMock(spec=T)
+    mock._capitalize_keys.side_effect = p(T._capitalize_keys, mock)
+    mock._find_column_positions.side_effect = p(T._find_column_positions, 
+                                                mock)
+    mock._find_boundaries.side_effect = p(T._find_boundaries, mock)
+    mock._get_slice.side_effect = p(T._get_slice, mock)
+    mock._read_table.side_effect = p(T._read_table, mock)
+    mock._add_rjust_col_label.side_effect = p(T._add_rjust_col_label, mock)
+    return mock
 
 
 # Test capitalizeKeys
@@ -45,16 +53,7 @@ def mock_instance():
     ],
 )
 def test_capitalize_keys(mock_instance, data_input, exp_dataset, exp_count):
-    # Setup
-    mock_instance._dataset = []
-    mock_instance._records_count = 0
-    mock_instance._capitalize_keys.side_effect = partial(
-        Table._capitalize_keys, mock_instance)
-
-    # Execute
     mock_instance._capitalize_keys(data_input)
-
-    # Verify
     assert mock_instance._dataset == exp_dataset
     assert mock_instance._records_count == exp_count
 
@@ -90,11 +89,6 @@ def test_capitalize_keys(mock_instance, data_input, exp_dataset, exp_count):
 )
 def test_find_column_positions(mock_instance, header_line, keys, 
                                exp_positions, exception):
-    # Setup
-    mock_instance._find_column_positions.side_effect = partial(
-        Table._find_column_positions, mock_instance)
-
-    # Execute and Verify
     if exception:
         with pytest.raises(exception, 
                            match="Column '.*' not found in header line."):
@@ -136,29 +130,80 @@ params = [
                          params)
 def test_find_boundaries(mock_instance, col_idx, pos_list, line, 
                          exp_boundaries, _):
-    # Setup
-    mock_instance._find_boundaries.side_effect = partial(
-        Table._find_boundaries, mock_instance)
-
-    # Execute
     result_start, result_end = mock_instance._find_boundaries(col_idx, 
                                                               pos_list, line)
-
-    # Verify
     assert result_start == exp_boundaries[0]
     assert result_end == exp_boundaries[1]
 
 # Test getSlice
 @pytest.mark.parametrize("col_idx, pos_list, line, _, exp_slice", params)
 def test_get_slice(mock_instance, col_idx, pos_list, line, _, exp_slice):
-    # Setup
-    mock_instance._find_boundaries.side_effect = partial(
-        Table._find_boundaries, mock_instance)
-    mock_instance._get_slice.side_effect = partial(Table._get_slice, 
-                                                   mock_instance)
-
-    # Execute
     result = mock_instance._get_slice(col_idx, pos_list, line)
-
-    # Verify
     assert result == exp_slice
+
+
+# Test readTable
+@pytest.mark.parametrize(
+    "table_string, exp_dataset, exp_count",
+    [
+        # Test case 1: Simple table with two columns
+        (
+            "Name Age\nJohn 25\nJane 30\n", 
+            [{'NAME': 'John', 'AGE': '25'}, {'NAME': 'Jane', 'AGE': '30'}], 
+            2
+        ),
+
+        # Test case 2: Table with multiple columns and different lengths of data
+        (
+            "Name Age Location\nJohn 25 USA\nJane 30 Canada\n", 
+            [{'NAME': 'John', 'AGE': '25', 'LOCATION': 'USA'}, 
+             {'NAME': 'Jane', 'AGE': '30', 'LOCATION': 'Canada'}], 
+            2
+        ),
+    
+        # Test case 3: Empty table
+        (
+            "Name Age\n", 
+            [], 
+            0
+        ),
+    
+        # Test case 4: Table with extra spaces
+        (
+            "Name    Age\nJohn   25\nJane    30\n", 
+            [{'NAME': 'John', 'AGE': '25'}, {'NAME': 'Jane', 'AGE': '30'}], 
+            2
+        )
+    ]
+)
+def test_read_table(mock_instance, table_string, exp_dataset, exp_count):
+    mock_instance._read_table(table_string)
+    assert mock_instance._dataset == exp_dataset
+    assert mock_instance._records_count == exp_count
+
+
+# Test addRjustColLabel
+@pytest.mark.parametrize(
+    "initial_set, label_input, exp_labels", 
+    [
+        # Test case 1: Single string label
+        (set(), "Column1", {"Column1"}), 
+
+        # Test case 2: Adding a list of labels
+        (set(), ["Column1", "Column2"], {"Column1", "Column2"}), 
+        
+        # Test case 3: Adding a set of labels
+        (set(), {"Column1", "Column3"}, {"Column1", "Column3"}), 
+        
+        # Test case 4: Adding a label that already exists
+        ({"Column1"}, "Column1", {"Column1"}), 
+        
+        # Test case 5: Adding a mix of existing and new labels
+        ({"Column1"}, ["Column1", "Column4"], {"Column1", "Column4"}), 
+    ]
+)
+def test_add_rjust_col_label(mock_instance, initial_set, label_input, 
+                             exp_labels):
+    mock_instance._right_justified_columns = initial_set
+    mock_instance._add_rjust_col_label(label_input)
+    assert mock_instance._right_justified_columns == exp_labels
