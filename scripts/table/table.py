@@ -241,9 +241,9 @@ class Table:
             label: A string, list, or set of labels to add.
         """
         if isinstance(label, (list, set)):
-            self._right_justified_columns.update(label)
+            self._right_justified_columns.update(l.upper() for l in label)
         else:
-            self._right_justified_columns.add(label)
+            self._right_justified_columns.add(label.upper())
 
     def _calculate_widths(self) -> None:
         """Calculate the width of each column and the total table width 
