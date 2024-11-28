@@ -82,88 +82,32 @@ def test_filter_startswith(mock_table, filter_key, value_prefix, exp_dataset,
     assert mock_table._records_count == exp_count
 
 
-# # Tests parameters for findBoundaries and getSlice
-# params = [
-#     # Test case 1: Left-justified column
-#     (0, [0, 11, 15], "Name       Age Location", (0, 4), "Name"), 
+# Test resizeColumns
+@pytest.mark.parametrize(
+    "width_limit, exp_col_widths, exp_tbl_width",
+    [
+        # Test case 1: Trim table width by 1
+        (12, {"FIRST": 5, "SECOND": 5}, 12),
 
-#     # Test case 2: Last column boundary case
-#     (2, [0, 11, 15], "Name       Age Location", (15, 23), "Location"), 
+        # Test case 2: Trim table width by 2
+        (11, {"FIRST": 4, "SECOND": 5}, 11),
+    
+        # Test case 3: Trim table width by 3
+        (10, {"FIRST": 4, "SECOND": 4}, 10),
+    
+        # Test case 4: Trim table width by 4
+        (9, {"FIRST": 3, "SECOND": 4}, 9),
 
-#     # Test case 3: Positions applied to truncated line
-#     (2, [0, 11, 15], "Name", (4, 4), ""), 
-    
-#     # Test case 4: Whitespace at start
-#     (1, [0, 11, 15], "Baby        6w Nursery", (12, 14), "6w"), 
-    
-#     # Test case 5: No whitespace before start
-#     (1, [0, 11, 15], "Methusela 969y Genesis", (10, 14), "969y"), 
-    
-#     # Test case 6: No whitespace before end
-#     (0, [0, 11, 15], "Methusela 969y Genesis", (0, 9), "Methusela"), 
-    
-#     # Test case 7: Column with no content
-#     (0, [0, 11, 15], "                       ", (11, 11), ""), 
-    
-#     # Test case 8: Edge case with empty line
-#     (0, [0, 11, 15], "", (0, 0), "")
-# ]
-
-# # Test findBoundaries
-# @pytest.mark.parametrize("col_idx, pos_list, line, exp_boundaries, _", 
-#                          params)
-# def test_find_boundaries(mock_table, col_idx, pos_list, line, 
-#                          exp_boundaries, _):
-#     result_start, result_end = mock_table._find_boundaries(col_idx, 
-#                                                               pos_list, line)
-#     assert result_start == exp_boundaries[0]
-#     assert result_end == exp_boundaries[1]
-
-# # Test getSlice
-# @pytest.mark.parametrize("col_idx, pos_list, line, _, exp_slice", params)
-# def test_get_slice(mock_table, col_idx, pos_list, line, _, exp_slice):
-#     result = mock_table._get_slice(col_idx, pos_list, line)
-#     assert result == exp_slice
-
-
-# # Test readTable
-# @pytest.mark.parametrize(
-#     "table_string, exp_dataset, exp_count",
-#     [
-#         # Test case 1: Simple table with two columns
-#         (
-#             "Name Age\nJohn 25\nJane 30\n", 
-#             [{'NAME': 'John', 'AGE': '25'}, {'NAME': 'Jane', 'AGE': '30'}], 
-#             2
-#         ),
-
-#         # Test case 2: Table with multiple columns and different lengths of data
-#         (
-#             "Name Age Location\nJohn 25 USA\nJane 30 Canada\n", 
-#             [{'NAME': 'John', 'AGE': '25', 'LOCATION': 'USA'}, 
-#              {'NAME': 'Jane', 'AGE': '30', 'LOCATION': 'Canada'}], 
-#             2
-#         ),
-    
-#         # Test case 3: Empty table
-#         (
-#             "Name Age\n", 
-#             [], 
-#             0
-#         ),
-    
-#         # Test case 4: Table with extra spaces
-#         (
-#             "Name    Age\nJohn   25\nJane    30\n", 
-#             [{'NAME': 'John', 'AGE': '25'}, {'NAME': 'Jane', 'AGE': '30'}], 
-#             2
-#         )
-#     ]
-# )
-# def test_read_table(mock_table, table_string, exp_dataset, exp_count):
-#     mock_table._read_table(table_string)
-#     assert mock_table._dataset == exp_dataset
-#     assert mock_table._records_count == exp_count
+        # Test case 5: Trim table width by 5
+        (8, {"FIRST": 3, "SECOND": 3}, 8)
+    ]
+)
+def test_resize_columns(mock_table, width_limit, exp_col_widths, exp_tbl_width):
+    mock_table._column_widths = {"FIRST": 5, "SECOND": 6}
+    mock_table._table_width = 13
+    mock_table.resize_columns(width_limit)
+    assert mock_table._column_widths == exp_col_widths
+    assert mock_table._table_width == exp_tbl_width
 
 
 # # Test addRjustColLabel

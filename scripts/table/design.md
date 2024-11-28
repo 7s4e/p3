@@ -20,7 +20,9 @@ graph
                 tableString
                 title
                 rjustColumns --> INIT
+        TABL                 --> PTBL
     subgraph i [Initialize Table Methods]
+        style i fill:#4682b4,color:#0ff
         INIT(*init*)
             INIT -- tableData   --> CAPK
             INIT -- tableString --> READ
@@ -42,6 +44,9 @@ graph
         FNDB(_findBoundaries)
     end
     subgraph d [Display Table Methods]
+        style d fill:#4682b4
+        PTBL(putTable)
+            PTBL --> NUMR
         NUMR(_numberRecords)
     end
     ARJC(_addRjustColLabel)
@@ -374,11 +379,24 @@ graph
     TABL([**Table**])
         TABL --> FTNE
         TABL --> FTSW
-        TABL -- widthLimit --> RSZC
+        TABL --> PTBL
     subgraph m [Modify Table Methods]
+        style m fill:#4682b4,color:#0ff
         FTNE(filterNonempty)
         FTSW(filterStartswith)
         RSZC(resizeColumns)
+    end
+    subgraph d [Display Table Methods]
+        style d fill:#4682b4
+        PTBL(puttable)
+    end
+    subgraph C [**ConsoleTable**]
+        style C fill:#b97d4b
+        DPLY(display)
+            PTBL -- Table --> DPLY
+            DPLY --> SDMN
+        SDMN(setDemensions)
+            SDMN -- widthLimit --> RSZC
     end
 ```
 [️⬆️](#method-groups)
@@ -498,18 +516,33 @@ resizeColumns(widthLimit)
 * [_addRjustColLabel](#_addrjustcollabel) (see Initialize Table Methods)
 ```mermaid
 graph LR
+    
     TABL([**Table**])
         TABL -- console
                 isMenu  --> PTBL
     subgraph i [Initialize Table Methods]
+        style i fill:#4682b4
         INIT(*init*)
     end
     subgraph d [Display Table Methods]
+        style d fill:#4682b4,color:#0ff
         PTBL(putTable)
             PTBL --> NUMR
             PTBL --> CALW
         NUMR(_numberRecords)
         CALW(_calculateWidths)
+    end
+    subgraph C [**ConsoleTable**]
+        style C fill:#b97d4b
+        DPLY(display)
+            PTBL -- Table --> DPLY
+            DPLY --> SDMN
+        SDMN(setDemensions)
+    end
+    subgraph m [Modify Table Methods]
+        style m fill:#4682b4
+        RSZC(resizeColumns)
+            SDMN -- widthLimit --> RSZC
     end
     ARJC(_addRjustColLabel)
         INIT        --> ARJC
