@@ -55,62 +55,39 @@ graph TB
                 expectKeystroke
                 validateBool
                 validateInteger
-                integerValidation 
-             --> INIT
-        MAIN -- console --> CALL
-    INIT("<b><u><i>init</i></u></b>
-          <div style='text-align:left;'>SET prompt
-                                        SET expectKeystroke
-                                        SET validateBool
-                                        SET validateInteger
-                                        SET integerValidation</div>")
-    CALL("<b><u>call</u></b>
-          <div style='text-align:left;'>SET console
-                                        GET validatedResponse</div>")
-        CALL --> GR
-        CALL --> VR
-        CALL -- response --> MAIN
-    CBV("<b><u>_checkBoolValidation</u></b>
-         <div style='text-align:left;'>GET userResponse
-                                       SET validatedResponse</div>")
-        CBV -- alert --> PA
-        CBV -- valid --> VR
-    CIV("<b><u>_checkIntegerValitation</u></b>
-         <div style='text-align:left;'>GET userResponse
-                                       SET validatedResponse</div>")
-        CIV -- alert --> PA
-        CIV -- valid --> VR
-    GR("<b><u>_getResponse</u></b>
-        <div style='text-align:left;'>GET expectKeystroke
-                                      SET userResponse</div>")
-        GR -- leaveCursorInline --> PP
-        GR --> RK
-        GR --> RS
-    PA("<b><u>_putAlert</u></b>
-        <div style='text-align:left;'>GET console</div>")
-        PA -- formattedAlert
-              leaveCursorInline
-           --> PM
-    PM(**_printMessage**)
-    PP("<b><u>_putPrompt</u>
-        </b><div style='text-align:left;'>GET_console
-                                          GET_prompt</div>")
-        PP -- formattedPrompt
-              leaveCursorInline
-           --> PM
-    RK("<b><u>_readKeystroke</u></b>
-        <div style='text-align:left;'>GET console</div>")
-        RK -- key --> GR
-    RS("<b><u>_readString</u></b>
-        <div style='text-align:left;'>GET console</div>")
-        RS -- leaveCursorInline --> PP
-        RS -- string --> GR
-    VR("<b><u>_validateResponse</u></b>
-        <div style='text-align:left;'>GET_validateBool
-                                      GET_validateInteger</div>")
-        VR --> CBV
-        VR --> CIV
-        VR -- valid --> CALL
+                integerValidation --> INIT
+        MAIN -- console           --> CALL
+        CALL -- response          --> MAIN
+    INIT(*init*)
+    CALL(call)
+        CALL          --> GRSP
+        CALL          --> VRSP
+        VRSP -- valid --> CALL
+    GRSP(_getResponse)
+        GRSP                      --> RDKY
+        RDKY -- key               --> GRSP
+        GRSP                      --> RDST
+        RDST -- string            --> GRSP
+        GRSP -- leaveCursorInline --> PUTP
+    RDKY(_readKeystroke)
+    RDST(_readString)
+        RDST -- leaveCursorInline --> PUTP
+    VRSP(_validateResponse)
+        VRSP          --> CBOL
+        CBOL -- valid --> VRSP
+        VRSP          --> CINT
+        CINT -- valid --> VRSP
+    CBOL(_checkBoolValidation)
+        CBOL -- alert --> PUTA
+    CINT(_checkIntegerValitation)
+        CINT -- alert --> PUTA
+    PUTP(_putPrompt)
+        PUTP -- formattedPrompt
+                leaveCursorInline --> PRNT
+    PUTA(_putAlert)
+        PUTA -- formattedAlert
+                leaveCursorInline --> PRNT
+    PRNT(_printMessage)
 ```
 [️⬆️](#console-module)
 ---
