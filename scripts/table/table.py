@@ -120,7 +120,8 @@ class Table:
             self._records_count to reflect the new number of records.
         """
         self._dataset = [record for record in self._dataset 
-                         if record.get(key.upper(), '').strip()]
+                         if (key.upper() not in record or 
+                             record.get(key.upper(), '').strip())]
         self._records_count = len(self._dataset)
 
     def filter_startswith(self, key: str, prefix: str) -> None:

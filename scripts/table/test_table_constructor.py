@@ -130,8 +130,8 @@ def mock_table(mocker):
         ([{"k": "v"}], "s", None, None, ValueError)
     ]
 )
-def test_constructor(mock_table, table_data, table_string, title, 
-                     rjust_columns, exception):
+def test_constructor(table_data, table_string, title, rjust_columns, 
+                     exception):
     if exception:
         with pytest.raises(exception):
             Table(table_data, table_string, title, rjust_columns)

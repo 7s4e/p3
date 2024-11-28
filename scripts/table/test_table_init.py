@@ -24,33 +24,33 @@ def mock_instance(mocker):
         (
             [{"key1": "value1", "key2": "value2"}],
             [{"KEY1": "value1", "KEY2": "value2"}],
-            1,
+            1
         ),
         # Test case 2: Multiple dictionaries with mixed keys
         (
             [{"key1": "value1"}, {"Key2": "value2"}],
             [{"KEY1": "value1"}, {"KEY2": "value2"}],
-            2,
+            2
         ),
         # Test case 3: Empty list
         (
             [],
             [],
-            0,
+            0
         ),
         # Test case 4: Empty dictionaries
         (
             [{}],
             [{}],
-            1,
+            1
         ),
         # Test case 5: Special characters and numbers in keys
         (
             [{"k3y!": "v@lue", "123": "456"}],
             [{"K3Y!": "v@lue", "123": "456"}],
-            1,
-        ),
-    ],
+            1
+        )
+    ]
 )
 def test_capitalize_keys(mock_instance, data_input, exp_dataset, exp_count):
     mock_instance._capitalize_keys(data_input)
