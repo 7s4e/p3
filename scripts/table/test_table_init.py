@@ -187,19 +187,19 @@ def test_read_table(mock_instance, table_string, exp_dataset, exp_count):
     "initial_set, label_input, exp_labels", 
     [
         # Test case 1: Single string label
-        (set(), "Column1", {"Column1"}), 
+        (set(), "Column1", {"COLUMN1"}), 
 
         # Test case 2: Adding a list of labels
-        (set(), ["Column1", "Column2"], {"Column1", "Column2"}), 
+        (set(), ["Column1", "Column2"], {"COLUMN1", "COLUMN2"}), 
         
         # Test case 3: Adding a set of labels
-        (set(), {"Column1", "Column3"}, {"Column1", "Column3"}), 
+        (set(), {"Column1", "Column3"}, {"COLUMN1", "COLUMN3"}), 
         
         # Test case 4: Adding a label that already exists
-        ({"Column1"}, "Column1", {"Column1"}), 
+        ({"COLUMN1"}, "Column1", {"COLUMN1"}), 
         
         # Test case 5: Adding a mix of existing and new labels
-        ({"Column1"}, ["Column1", "Column4"], {"Column1", "Column4"}), 
+        ({"COLUMN1"}, ["Column1", "Column4"], {"COLUMN1", "COLUMN4"}), 
     ]
 )
 def test_add_rjust_col_label(mock_instance, initial_set, label_input, 
