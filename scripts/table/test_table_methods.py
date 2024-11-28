@@ -14,18 +14,19 @@ def mock_table(mocker):
 
 """Modify Table Methods"""
 # Test filterNonempty
-@pytest.mark.parametrize("filter_key, exp_dataset, exp_count",
+@pytest.mark.parametrize(
+    "filter_key, exp_dataset, exp_count",
     [
         # Test case 1: Key present, record filtered
         (
-            "First",
+            "First", 
             [{"FIRST": "abc", "SECOND": "123"}, 
              {"FIRST": "xyz", "SECOND": "789"}], 
             2
         ),
         # Test case 2: Key present, no record filtered
         (
-            "Second",
+            "Second", 
             [{"FIRST": "abc", "SECOND": "123"}, 
              {"FIRST": "", "SECOND": "456"}, 
              {"FIRST": "xyz", "SECOND": "789"}], 
@@ -33,7 +34,7 @@ def mock_table(mocker):
         ),
         # Test case 3: Key not present
         (
-            "Third",
+            "Third", 
             [{"FIRST": "abc", "SECOND": "123"}, 
              {"FIRST": "", "SECOND": "456"}, 
              {"FIRST": "xyz", "SECOND": "789"}], 
@@ -47,44 +48,38 @@ def test_filter_nonempty(mock_table, filter_key, exp_dataset, exp_count):
     assert mock_table._records_count == exp_count
 
 
-# # Test findColumnPositions
-# @pytest.mark.parametrize(
-#     "header_line, keys, exp_positions, exception",
-#     [
-#         # Test case 1: All keys found
-#         ("Name Age Location", ["Name", "Age", "Location"], [0, 5, 9], None),
-
-#         # Test case 2: Keys with varying positions
-#         ("ID Name Dept", ["ID", "Name"], [0, 3], None),
-
-#         # Test case 3: Single key
-#         ("Header1 Header2 Header3", ["Header2"], [8], None),
-
-#         # Test case 4: No keys to search
-#         ("Column1 Column2 Column3", [], [], None),
-
-#         # Test case 5: Duplicate keys
-#         ("A B A C", ["A", "C"], [0, 6], None),
-
-#         # Test case 6: Key not found
-#         ("Col1 Col2 Col3", ["Col4"], None, ValueError),
-
-#         # Test case 7: Mixed valid and invalid keys
-#         ("X Y Z", ["X", "W"], None, ValueError),
-
-#         # Test case 8: Empty header line
-#         ("", ["Column"], None, ValueError)
-#     ]
-# )
-# def test_find_column_positions(mock_table, header_line, keys, 
-#                                exp_positions, exception):
-#     if exception:
-#         with pytest.raises(exception, 
-#                            match="Column '.*' not found in header line."):
-#             mock_table._find_column_positions(header_line, keys)
-#     else:
-#         result = mock_table._find_column_positions(header_line, keys)
-#         assert result == exp_positions
+# Test filterStartwith
+@pytest.mark.parametrize(
+    "filter_key, value_prefix, exp_dataset, exp_count",
+    [
+        # Test case 1: Key and prefix present
+        (
+            "First", 
+            "xy", 
+            [{"FIRST": "xyz", "SECOND": "789"}], 
+            1
+        ),
+        # Test case 2: Key present but no prefix match
+        (
+            "First", 
+            "qr", 
+            [], 
+            0
+        ),
+        # Test case 3: Key not present
+        (
+            "Third", 
+            "no", 
+            [], 
+            0
+        )
+    ]
+)
+def test_filter_startswith(mock_table, filter_key, value_prefix, exp_dataset, 
+                           exp_count):
+    mock_table.filter_startswith(filter_key, value_prefix)
+    assert mock_table._dataset == exp_dataset
+    assert mock_table._records_count == exp_count
 
 
 # # Tests parameters for findBoundaries and getSlice

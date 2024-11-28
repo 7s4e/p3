@@ -136,10 +136,9 @@ class Table:
             prefix. Updates self._records_count to reflect the new 
             number of records.
         """
-        self._dataset = [
-            record for record in self._dataset
-            if record.get(key.upper(), '').startswith(prefix)
-        ]
+        self._dataset = [record for record in self._dataset 
+                         if (key.upper() in record and 
+                             record.get(key.upper(), '').startswith(prefix))]
         self._records_count = len(self._dataset)
 
     def get_column_widths(self) -> dict[str, int]:
