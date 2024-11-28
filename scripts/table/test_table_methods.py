@@ -121,3 +121,10 @@ def test_number_records(mock_table):
                                    {"#": 2, "FIRST": "", "SECOND": "456"}, 
                                    {"#": 3, "FIRST": "xyz", "SECOND": "789"}]
     assert mock_table._right_justified_columns == {"#", "SECOND"}
+
+
+# Test calculateWidths
+def test_calculate_widths(mock_table):
+    mock_table._calculate_widths()
+    assert mock_table._column_widths == {"FIRST": 5, "SECOND": 6}
+    assert mock_table._table_width == 13
