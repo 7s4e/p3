@@ -27,7 +27,7 @@ flowchart LR
         CMD:::working
         CMD --> TBL
     TBL(Table)
-        TBL:::working
+        TBL:::complete
 ```
 * [commands](../commands/design.md)
 * [console](../console/design.md)
