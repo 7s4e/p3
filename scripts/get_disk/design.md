@@ -7,27 +7,22 @@ flowchart LR
     IF([start])
         IF --> TRM
         IF --> MAIN
-    TRM(blessed.Terminal)
-        TRM:::library
+    TRM(blessed.Terminal):::library
     MAIN[main]
         MAIN --> CON
         MAIN --> GD
-    CON(console)
-        CON:::complete
-    GD[getDisk]
-        GD:::working
+    CON(console):::complete
+    GD[getDisk]:::working
         GD --> INSP
         GD --> GDS
-    INSP(inspect)
-        INSP:::library
-    GDS[getDisks]
-        GDS:::working
+        GD --> CCP
+    INSP(inspect):::library
+    GDS[getDisks]:::complete
         GDS --> CMD
-    CMD(commands)
-        CMD:::working
-        CMD --> TBL
-    TBL(Table)
-        TBL:::complete
+        GDS --> TBL
+    CMD(commands):::complete
+    TBL(Table):::complete
+    CCP(ConsolePrompt):::working
 ```
 * [commands](../commands/design.md)
 * [console](../console/design.md)

@@ -41,8 +41,7 @@ def get_disks() -> Table:
     """
     output = cmd.list_block_devices(columns=["NAME", "VENDOR", "SIZE"], 
                                     show_dependents=False)
-    disks = Table(title="connected devices", 
-                  table_string=output, 
+    disks = Table(title="connected devices", table_string=output, 
                   rjust_columns="SIZE")
     disks.filter_startswith("NAME", "sd")
     return disks
