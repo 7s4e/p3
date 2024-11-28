@@ -1,8 +1,9 @@
 """Commands module: Contains functions to run system commands."""
 
 # Standard library imports
-from subprocess import run
-from sys import stdout, stderr
+import subprocess as sub
+import sys
+
 
 # Local module imports
 from table import Table
@@ -90,11 +91,11 @@ def run_command(command: str,
             the error message.
     """
     if capture_output:
-        result = run(command, capture_output=True, stdout=None, stderr=None, 
-                     shell=use_shell, text=True)
+        result = sub.run(command, capture_output=True, stdout=None, 
+                         stderr=None, shell=use_shell, text=True)
     else:
-        result = run(command, capture_output=False, stdout=stdout, 
-                     stderr=stderr, shell=use_shell, text=True)
+        result = sub.run(command, capture_output=False, stdout=sys.stdout, 
+                         stderr=sys.stderr, shell=use_shell, text=True)
 
     # Check for command failure and raise an error with the appropriate message.
     if result.returncode != 0:

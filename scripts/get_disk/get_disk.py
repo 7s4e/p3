@@ -7,7 +7,7 @@ from blessed import Terminal
 
 # Local module imports
 # from menu import Menu
-from commands import list_block_devices, unmount_disk
+import commands as cmd
 from console import clear_stdscr, put_script_banner, ConsolePrompt
 from table import Table
 
@@ -22,9 +22,9 @@ def confirm_disk(console: Terminal, disk: str) -> bool:
         True if the user confirms, False otherwise.
     """
     prompt = f"Are you sure you want to select the disk '{disk}'? (y/n) "
-    output = list_block_devices(disk, 
-                                columns=["NAME", "TYPE", "FSTYPE", "LABEL", 
-                                         "MOUNTPOINTS"])
+    output = cmd.list_block_devices(disk, 
+                                    columns=["NAME", "TYPE", "FSTYPE", "LABEL", 
+                                             "MOUNTPOINTS"])
     partitions = Table(title="selected device", table_string=output)
     partitions.put_table(console)
     disk_confirmation = ConsolePrompt(prompt,
@@ -39,8 +39,8 @@ def get_disks() -> Table:
     Returns:
         A list of dictionaries containing disk information.
     """
-    output = list_block_devices(columns=["NAME", "VENDOR", "SIZE"], 
-                                show_dependents=False)
+    output = cmd.list_block_devices(columns=["NAME", "VENDOR", "SIZE"], 
+                                    show_dependents=False)
     disks = Table(title="connected devices", table_string=output, 
                   rjust_columns="SIZE")
     disks.filter_startswith("NAME", "sd")

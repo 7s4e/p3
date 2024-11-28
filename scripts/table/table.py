@@ -193,9 +193,7 @@ class Table:
         """
         return self._title
 
-    def put_table(self, 
-                  console: Terminal,
-                  is_menu: bool = False) -> None:
+    def put_table(self, console: Terminal, is_menu: bool = False) -> None:
         """Format and display a table with the given dataset.
         Args:
             console (Terminal): The Terminal object used for displaying 

@@ -1,11 +1,11 @@
 import pytest
-import commands
-from sys import stdout, stderr
+import sys
+import commands as cmd
 
 
 @pytest.fixture
 def mock_run(mocker):
-    return mocker.patch("commands.run")
+    return mocker.patch("commands.sub.run")
 
 @pytest.fixture
 def mock_command_run(mocker):
@@ -54,9 +54,9 @@ def test_run_command(mocker, mock_run, command, mock_return, capture_output,
     # Execute
     if should_raise:
         with pytest.raises(RuntimeError, match=mock_return.get("stderr", "")):
-            commands.run_command(command, capture_output, use_shell=True)
+            cmd.run_command(command, capture_output, use_shell=True)
     else:
-        result = commands.run_command(command, capture_output, use_shell=True)
+        result = cmd.run_command(command, capture_output, use_shell=True)
         
         # Verify method output
         assert result == exp_output
@@ -64,9 +64,9 @@ def test_run_command(mocker, mock_run, command, mock_return, capture_output,
     # Verify method process
     mock_run.assert_called_once_with(command, capture_output=capture_output, 
                                      shell=True, text=True, 
-                                     stdout=stdout 
+                                     stdout=sys.stdout 
                                      if not capture_output else None,
-                                     stderr=stderr 
+                                     stderr=sys.stderr 
                                      if not capture_output else None)
 
 
@@ -116,7 +116,7 @@ def test_list_block_devices(mock_command_run, disk, columns, show_dependents,
     mock_command_run.return_value = "Mock Block Devices List"
 
     # Execute
-    result = commands.list_block_devices(disk, columns, show_dependents)
+    result = cmd.list_block_devices(disk, columns, show_dependents)
 
     # Verify
     mock_command_run.assert_called_once_with(exp_command)
@@ -163,7 +163,7 @@ def test_run_badblocks(mock_command_run, non_destructive, capture_output,
     mock_command_run.return_value = mock_output
 
     # Execute
-    result = commands.run_badblocks("sda", non_destructive, capture_output)
+    result = cmd.run_badblocks("sda", non_destructive, capture_output)
 
     # Verify
     mock_command_run.assert_called_once_with(exp_command, 
@@ -189,7 +189,7 @@ def test_unmount_disk(mock_command_run, mock_table):
                                                    "MOUNTPOINT": "/mnt/point2"}]
 
     # Execute
-    commands.unmount_disk("sda")
+    cmd.unmount_disk("sda")
 
     # Verify
     mock_command_run.assert_any_call("lsblk --output PATH,MOUNTPOINT /dev/sda")
