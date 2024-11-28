@@ -1,9 +1,10 @@
 import pytest
 from table import Table
+from blessed import Terminal
 
 
 @pytest.fixture
-def mock_table(mocker):
+def mock_table():
     tbl_data = [{"First": "abc", "Second": "123"}, 
                 {"First": "", "Second": "456"}, 
                 {"First": "xyz", "Second": "789"}]
@@ -11,6 +12,9 @@ def mock_table(mocker):
     rj_col = "Second"
     return Table(table_data=tbl_data, title=title, rjust_columns=rj_col)
 
+@pytest.fixture
+def mock_console():
+    return Terminal()
 
 """Modify Table Methods"""
 
@@ -128,3 +132,34 @@ def test_calculate_widths(mock_table):
     mock_table._calculate_widths()
     assert mock_table._column_widths == {"FIRST": 5, "SECOND": 6}
     assert mock_table._table_width == 13
+
+
+# Test putTable
+@pytest.mark.parametrize(
+    "menu_flag, record_number",
+    [
+        # Test case 1: Table is a menu
+        (True, 3),
+
+        # Test case 2: Table is not a menu
+        (False, "")
+    ]
+)
+def test_put_table(mocker, mock_table, mock_console, menu_flag, record_number):
+    # Setup
+    mock_console_table = mocker.patch("table.ConsoleTable")
+    mock_display = mock_console_table.return_value.display
+
+    # Execute
+    mock_table.put_table(console=mock_console, is_menu=menu_flag)
+    
+    # Verify numberRecords called, pending menuFlag
+    assert mock_table._dataset[2].get("#", "") == record_number
+
+    # Verify calculateWidth called
+    assert hasattr(mock_table, "_column_widths")
+    assert hasattr(mock_table, "_table_width")
+
+    # Verify ConsoleTable called
+    mock_console_table.assert_called_once_with(mock_table)
+    mock_display.assert_called_once_with(mock_console)

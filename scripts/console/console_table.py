@@ -232,7 +232,7 @@ class ConsoleTable:
                     cell = f"{self._con.underline(value.center(width))}"
                 else:
                     # Right-justify or left-justify based on column key.
-                    cell = (f"{value.rjust(width)}" if key in rjust_col 
+                    cell = (f"{str(value).rjust(width)}" if key in rjust_col 
                             else f"{value.ljust(width)}")
                 cells.append(cell)
         
