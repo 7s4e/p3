@@ -62,15 +62,36 @@ class Table:
             ValueError: If neither or both 'table_data' and 
                 'table_string' are provided.
         """
+        # Type validation
+        if not (table_data is None or 
+                (isinstance(table_data, list) and 
+                 all(isinstance(d, dict) and 
+                     all(isinstance(k, str) and isinstance(v, str) 
+                         for k, v in d.items()) 
+                     for d in table_data))):
+            raise TypeError("expected 'list[dict[str, str]]' or 'None' for " + 
+                            f"`table_data`, not {type(table_data).__name__}")
+        if not (table_string is None or isinstance(table_string, str)):
+            raise TypeError("expected 'str' or 'None' for `table_string`")
+        if not (title is None or isinstance(title, str)):
+            raise TypeError("expected 'str' or 'None' for `title`")
+        if not (rjust_columns is None or isinstance(rjust_columns, str) or 
+                ((isinstance(rjust_columns, list) or 
+                  isinstance(rjust_columns, set)) 
+                 and all(isinstance(i, str) for i in rjust_columns))):
+            raise TypeError("expected 'str', 'list[str]', 'set[str]', or " + 
+                            "'None' for `rjust_columns`")
+
+        # Value validation
         if (table_data is None) == (table_string is None):
-            raise ValueError(
-                "Provide exactly one of 'table_data' or 'table_string'."
-            )
+            raise ValueError("Provide exactly one of 'table_data' or " +
+                             "'table_string'.")
         
-        if title is not None:
-            self._title = title.upper()
-        else:
+        # Assign validated attributes        
+        if table_data:
             self._capitalize_keys(table_data)
+        else:
+            self._read_table(table_string)
         
         self._title = title.upper() if title else None
         self._right_justified_columns = set()
@@ -362,19 +383,26 @@ class Table:
         """
         # Split the input string into lines
         lines = table_string.splitlines()
-    
-        # Extract column headers from the first line
-        headers = lines[0].split()
-    
-        # Find the positions of each column in the header line
-        column_positions = self._find_column_positions(lines[0], headers)
-    
-        # Parse each subsequent line into a dictionary with header keys
-        self._dataset = [{header.upper(): self._get_slice(index, 
-                                                          column_positions, 
-                                                          line) 
-                          for index, header in enumerate(headers)} 
-                         for line in lines[1:]]
+
+        # Non-empty string
+        if len(lines) > 0:
+            
+            # Extract column headers from the first line
+            headers = lines[0].split()
+            
+            # Find the positions of each column in the header line
+            col_positions = self._find_column_positions(lines[0], headers)
+
+            # Parse each subsequent line into a dictionary with header keys
+            self._dataset = [{header.upper(): self._get_slice(index, 
+                                                              col_positions, 
+                                                              line) 
+                              for index, header in enumerate(headers)} 
+                             for line in lines[1:]]
+        
+        # Empty string
+        else:
+            self._dataset = []
     
         # Update the count of records in the dataset
         self._records_count = len(self._dataset)

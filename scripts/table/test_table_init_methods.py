@@ -1,19 +1,19 @@
 import pytest
-from unittest.mock import MagicMock
-from functools import partial as p
-from table import Table as T
+from functools import partial
+from table import Table
 
 
 @pytest.fixture
-def mock_instance():
-    mock = MagicMock(spec=T)
-    mock._capitalize_keys.side_effect = p(T._capitalize_keys, mock)
-    mock._find_column_positions.side_effect = p(T._find_column_positions, 
-                                                mock)
-    mock._find_boundaries.side_effect = p(T._find_boundaries, mock)
-    mock._get_slice.side_effect = p(T._get_slice, mock)
-    mock._read_table.side_effect = p(T._read_table, mock)
-    mock._add_rjust_col_label.side_effect = p(T._add_rjust_col_label, mock)
+def mock_instance(mocker):
+    mock = mocker.Mock(spec=Table)
+    for method_name in ["_capitalize_keys", 
+                        "_find_column_positions", 
+                        "_find_boundaries", 
+                        "_get_slice", 
+                        "_read_table", 
+                        "_add_rjust_col_label"]:
+        method = getattr(mock, method_name)
+        method.side_effect = partial(getattr(Table, method_name), mock)
     return mock
 
 
