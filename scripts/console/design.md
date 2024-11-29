@@ -189,6 +189,37 @@ END
 ```
 [️⬆️](#consoleprompt)
 ---
+### `_validateResponse`
+```mermaid
+flowchart TB
+    CALL([call])
+        CALL --> RDBI
+    RDBI[\validateBool
+          validateInt\]
+        RDBI --> VBOL
+    VBOL{validateBool}
+        VBOL -- True  --> CBOL
+        VBOL -- False --> VINT
+    VINT{validateInteger}
+        VINT -- True  --> CINT
+        VINT -- False --> RTRN
+    CBOL[[checkBoolValidity]]
+        CBOL --> RTRN
+    CINT[[checkIntValidity]]
+        CINT --> RTRN
+    RTRN([valid])
+```
+```
+validateResponse()
+    IF self.validateBool
+        RETURN checkBoolValidation()
+    IF self.validateInteger
+        RETURN checkIntegerValidation()
+    RETURN True
+END
+```
+[️⬆️](#consoleprompt)
+---
 ### `_readKeystroke`
 ```mermaid
 flowchart LR
@@ -264,36 +295,6 @@ flowchart LR
 ```
 putPrompt(leaveCursorInline)
     printMessage(console.brightYellow + prompt, leaveCursorInline)
-END
-```
-[️⬆️](#consoleprompt)
----
-### `_validateResponse`
-```mermaid
-flowchart TB
-    STR([start])
-        STR --> VB
-    CBV[call checkBoolValidation]
-        CBV --> RTN
-    CIV[call checkIntegerValidation]
-        CIV --> RTN
-    RTN[/return validation status/]
-        RTN --> END
-    VB{validateBool}
-        VB -- True --> CBV
-        VB -- False --> VI
-    VI{validateInteger}
-        VI -- True --> CIV
-        VI -- False --> RTN
-    END([end])
-```
-```
-validateResponse()
-    IF self.validateBool
-        RETURN checkBoolValidation()
-    IF self.validateInteger
-        RETURN checkIntegerValidation()
-    RETURN True
 END
 ```
 [️⬆️](#consoleprompt)
