@@ -166,9 +166,9 @@ flowchart LR
     EXPK{expectKeystroke}
         EXPK -- True  --> PPFA
         EXPK -- False --> PPTR
-    PPFA[[putPrompt"False"]]
+    PPFA[[putPrompt-False]]
         PPFA --> RKEY
-    PPTR[[putPrompt"True"]]
+    PPTR[[putPrompt-True]]
         PPTR --> RSTR
     RKEY[[readKeystroke]]
         RKEY --> TEND
