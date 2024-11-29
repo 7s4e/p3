@@ -324,7 +324,7 @@ flowchart TB
         RNAN -- False --> TYPE
     TYPE{integerValidation.type}
         TYPE -- int   --> OOFR
-        TYPE -- tuple --> BLMT
+        TYPE -- tuple --> BYND
         TYPE -- None -->  WRES
     OOFR{out of range}
         OOFR -- True  --> PUTA
@@ -363,9 +363,15 @@ checkIntegerValidation()
 ### `_putPrompt`
 ```mermaid
 flowchart LR
-    STR([start]) --> CALL
-    CALL[call printMessage] --> END
-    END([end])
+    GRRS([getResponse
+          readString])
+        GRRS --> LCIP
+    LCIP[\prompt
+          leaveCursorInline\]
+        LCIP --> PRNT
+    PRNT[[printMessage]]
+        PRNT --> TEND
+    TEND([end])
 ```
 ```
 putPrompt(leaveCursorInline)
