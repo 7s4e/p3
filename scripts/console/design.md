@@ -291,7 +291,7 @@ flowchart LR
         VRES --> RRES
     RRES[\userResponse\]
         RRES --> YSNO
-    YSNO{*y|n*}
+    YSNO{*y* or *n*}
         YSNO -- True  --> WRES
         YSNO -- False --> PUTA
     WRES[/validatedResponse/]
