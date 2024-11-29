@@ -44,8 +44,8 @@ END
 * [_validateResponse](#_validateresponse)
 * [_readKeystroke](#_readkeystroke)
 * [_readString](#_readstring)
-* [_checkBoolValidation](#_checkboolvalidation)
-* [_checkIntegerValidation](#_checkintegervalidation)
+* [_checkBoolValidity](#_checkboolvalidity)
+* [_checkIntegerValidity](#_checkintegervalidity)
 * [_putPrompt](#_putprompt)
 * [_putAlert](#_putalert)
 * [_printMessage](#_printmessage)
@@ -284,35 +284,22 @@ END
 ```
 [️⬆️](#consoleprompt)
 ---
-### `_putPrompt`
+### `_checkBoolValidity`
 ```mermaid
 flowchart LR
-    STR([start]) --> CALL
-    CALL[call printMessage] --> END
-    END([end])
-```
-```
-putPrompt(leaveCursorInline)
-    printMessage(console.brightYellow + prompt, leaveCursorInline)
-END
-```
-[️⬆️](#consoleprompt)
----
-### `_checkBoolValidation`
-```mermaid
-flowchart LR
-    STR([start])
-        STR --> UR
-    PUT[/put alert/]
-        PUT --> RTN
-    RTN[return validation status]
-        RTN --> END
-    SET[set validatedResponse]
-        SET --> RTN
-    UR{userResponse}
-        UR -- y | n --> SET
-        UR -- invalid --> PUT
-    END([end])
+    VRES([validateResponse])
+        VRES --> RRES
+    RRES[\userResponse\]
+        RRES --> YSNO
+    YSNO{*y|n*}
+        YSNO -- True  --> WRES
+        YSNO -- False --> PUTA
+    WRES[/validatedResponse/]
+        WRES --> RTNT
+    PUTA[[putAlert]]
+        PUTA --> RTNF
+    RTNF([False])
+    RTNT([True])
 ```
 ```
 checkBoolValidation()
@@ -324,7 +311,7 @@ checkBoolValidation()
 ```
 [️⬆️](#consoleprompt)
 ---
-### `_checkIntegerValidation`
+### `_checkIntegerValidity`
 ```mermaid
 flowchart TB
     STR([start])
@@ -368,6 +355,20 @@ checkIntegerValidation()
         CASE None
             BREAK
     SET self.validatedResponse <- userResponse
+```
+[️⬆️](#consoleprompt)
+---
+### `_putPrompt`
+```mermaid
+flowchart LR
+    STR([start]) --> CALL
+    CALL[call printMessage] --> END
+    END([end])
+```
+```
+putPrompt(leaveCursorInline)
+    printMessage(console.brightYellow + prompt, leaveCursorInline)
+END
 ```
 [️⬆️](#consoleprompt)
 ---
