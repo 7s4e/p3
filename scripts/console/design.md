@@ -314,28 +314,30 @@ checkBoolValidation()
 ### `_checkIntegerValidity`
 ```mermaid
 flowchart TB
-    STR([start])
-        STR --> UR
-    INT{0 <= userResponse < integerValitation}
-        INT -- True --> SET
-        INT -- False --> PUT
-    IVT{integerValidation Type}
-        IVT -- None --> SET
-        IVT -- int --> INT
-        IVT -- tuple --> TPL
-    PUT[/put alert/]
-        PUT --> RTN
-    RTN[return validation status]
-        RTN --> END
-    SET[set validatedResponse]
-        SET --> RTN
-    TPL{integerValidation.0 <= userResponse <= integerValidation.1}
-        TPL -- True --> SET
-        TPL -- False --> PUT
-    UR{userReponse Type int}
-        UR -- True --> IVT
-        UR -- False --> PUT
-    END([end])
+    VRES([validateResponse])
+        VRES --> URIV
+    URIV[\userResponse
+          intValidation\]
+        URIV --> RNAN
+    RNAN{userResponse NAN}
+        RNAN -- True  --> PUTA
+        RNAN -- False --> TYPE
+    TYPE{integerValidation.type}
+        TYPE -- int   --> OOFR
+        TYPE -- tuple --> BLMT
+        TYPE -- None -->  WRES
+    OOFR{out of range}
+        OOFR -- True  --> PUTA
+        OOFR -- False --> WRES
+    BYND{beyond limits}
+        BYND -- True  --> PUTA
+        BYND -- False --> WRES
+    WRES[/validatedResponse/]
+        WRES --> RTNT
+    PUTA[[putAlert]]
+        PUTA --> RTNF
+    RTNF([False])
+    RTNT([True])
 ```
 ```
 checkIntegerValidation()
