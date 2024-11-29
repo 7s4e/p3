@@ -383,9 +383,14 @@ END
 ### `_putAlert`
 ```mermaid
 flowchart LR
-    STR([start]) --> CALL
-    CALL[call printMessage] --> END
-    END([end])
+    CBCI([checkBoolValidity
+          checkIntValidity])
+        CBCI --> ALRT
+    ALRT[\alert\]
+        ALRT --> PRNT
+    PRNT[[printMessage]]
+        PRNT --> TEND
+    TEND([end])
 ```
 ```
 putAlert(alert, leaveCursorInline)
