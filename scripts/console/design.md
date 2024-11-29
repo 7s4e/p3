@@ -226,10 +226,10 @@ flowchart LR
     GRES([getResponse])
         GRES --> GKEY
     GKEY[\keystroke\]
-        GKEY          --> NRNG
-        NRNG -- False --> GKEY
-    NRNG{in range}
-        NRNG -- True --> WRES
+        GKEY          --> PRNT
+        PRNT -- False --> GKEY
+    PRNT{printable}
+        PRNT -- True --> WRES
     WRES[/userResponse/]
         WRES --> TEND
     TEND([end])
@@ -245,30 +245,26 @@ END
 ### `_readString`
 ```mermaid
 flowchart TB
-    STR([start])
-        STR --> GET
-    ADD[append key to string]
-        ADD --> PUTK
-    BCK{Backspace}
-        BCK -- True --> POP
-        BCK -- False --> PNT
-    ENT{Enter}
-        ENT -- True --> SET
-        ENT -- False --> BCK
-    GET[/get keystroke/]
-        GET --> ENT
-    PNT{printable}
-        PNT -- True --> ADD
-        PNT -- False --> GET
-    POP[pop from string]
-        POP --> PUTP
-    PUTK[/put key/]
-        PUTK --> GET
-    PUTP[/put back-space-back/]
-        PUTP --> GET
-    SET[set userResponse]
-        SET --> END
-    END([end])
+    GRES([getResponse])
+        GRES --> GKEY
+    GKEY[\keystroke\]
+        GKEY          --> ENTR
+        PRNT -- False --> GKEY
+        RPOP          --> GKEY
+        RADD          --> GKEY
+    ENTR{*Enter*}
+        ENTR -- True  --> WRES
+        ENTR -- False --> BKSP
+    BKSP{*Backspace*}
+        BKSP -- True  --> RPOP
+        BKSP -- False --> PRNT
+    PRNT{printable}
+        PRNT -- True --> RADD
+    RPOP[response.pop]
+    RADD[response.append]
+    WRES[/userResponse/]
+        WRES --> TEND
+    TEND([end])
 ```
 ```
 readString()
