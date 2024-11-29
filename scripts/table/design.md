@@ -15,12 +15,11 @@
 * [_addRjustColLabel](#_addrjustcollabel)
 ```mermaid
 graph
-    TABL([**Table**])
-        TABL -- tableData
+    STRT([start])
+        STRT -- tableData
                 tableString
                 title
                 rjustColumns --> INIT
-        TABL                 --> PTBL
     subgraph i [Initialize Table Methods]
         style i fill:#4682b4,color:#0ff
         INIT(*init*)
@@ -43,6 +42,9 @@ graph
             FNDB -- boundaries    --> GETS
         FNDB(_findBoundaries)
     end
+    TABL([**Table**])
+        INIT --> TABL
+        TABL --> PTBL
     subgraph d [Display Table Methods]
         style d fill:#4682b4
         PTBL(putTable)
