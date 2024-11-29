@@ -159,20 +159,22 @@ END
 ### `_getResponse`
 ```mermaid
 flowchart LR
-    STR([start])
-        STR --> KEY
-    KEY{expectKeystroke}
-        KEY -- True --> CALLF
-        KEY -- False --> CALLT
-    CALLF[call putPrompt <br> cursor left on new line]
-        CALLF --> READK
-    CALLT[call putPrompt <br> cursor left inline]
-        CALLT --> READS
-    READK[call readKeystroke]
-        READK --> END
-    READS[call readString]
-        READS --> END
-    END([end])
+    CALL([call])
+        CALL --> GETK
+    GETK[\expectKeystroke\]
+        GETK --> EXPK
+    EXPK{expectKeystroke}
+        EXPK -- True  --> PPFA
+        EXPK -- False --> PPTR
+    PPFA[[putPrompt"False"]]
+        PPFA --> RKEY
+    PPTR[[putPrompt"True"]]
+        PPTR --> RSTR
+    RKEY[[readKeystroke]]
+        RKEY --> TEND
+    RSTR[[readString]]
+        RSTR --> TEND
+    TEND([end])
 ```
 ```
 getResponse()
