@@ -38,14 +38,15 @@ END
 ---
 ---
 ## `ConsolePrompt`
+* [\_\_init__](#__init_)
 * [call](#call)
 * [_getResponse](#_getresponse)
+* [_validateResponse](#_validateresponse)
 * [_readKeystroke](#_readkeystroke)
 * [_readString](#_readstring)
-* [_putPrompt](#_putprompt)
-* [_validateResponse](#_validateresponse)
 * [_checkBoolValidation](#_checkboolvalidation)
 * [_checkIntegerValidation](#_checkintegervalidation)
+* [_putPrompt](#_putprompt)
 * [_putAlert](#_putalert)
 * [_printMessage](#_printmessage)
 ```mermaid
@@ -92,6 +93,36 @@ graph TB
     PRNT(_printMessage)
 ```
 [️⬆️](#console-module)
+---
+### `__init__`
+```mermaid
+flowchart LR
+    STR([start])
+        STR --> GET
+    GET[\prompt
+         expectKeystroke
+         validateBool
+         validateInt
+         intValidation\]
+        GET --> SET
+    SET[/prompt
+         expectKeystroke
+         validateBool
+         validateInt
+         intValidation/]
+        SET --> END
+    END([**ConsolePrompt**])
+```
+```
+init(prompt, expectKeystroke, validateBool, validateInt, intValidation)
+    SET self.prompt <- prompt
+    SET self.expectKeystroke <- expectKeystroke
+    SET self.validateBool <- validateBool
+    SET self.validateInt <- validateInt
+    SET self.intValidation <- intValidation
+END
+```
+ [️⬆️](#consoleprompt)
 ---
 ### `call`
 ```mermaid
