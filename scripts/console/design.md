@@ -38,7 +38,7 @@ END
 ---
 ---
 ## `ConsolePrompt`
-* [\_\_init__](#__init_)
+* [\_\_init__](#__init__)
 * [call](#call)
 * [_getResponse](#_getresponse)
 * [_validateResponse](#_validateresponse)
@@ -50,7 +50,7 @@ END
 * [_putAlert](#_putalert)
 * [_printMessage](#_printmessage)
 ```mermaid
-graph TB
+graph
     STRT([start])
         STRT -- prompt
                 expectKeystroke
@@ -126,7 +126,7 @@ END
 ---
 ### `call`
 ```mermaid
-flowchart LR
+flowchart
     CONP([**ConsolePrompt**])
         CONP --> RCON
     RCON[\console\]
@@ -158,7 +158,7 @@ END
 ---
 ### `_getResponse`
 ```mermaid
-flowchart LR
+flowchart
     CALL([call])
         CALL --> GETK
     GETK[\expectKeystroke\]
@@ -166,9 +166,9 @@ flowchart LR
     EXPK{expectKeystroke}
         EXPK -- True  --> PPFA
         EXPK -- False --> PPTR
-    PPFA[[putPrompt-False]]
+    PPFA[[putPrompt *False*]]
         PPFA --> RKEY
-    PPTR[[putPrompt-True]]
+    PPTR[[putPrompt *True*]]
         PPTR --> RSTR
     RKEY[[readKeystroke]]
         RKEY --> TEND
@@ -286,7 +286,7 @@ END
 ---
 ### `_checkBoolValidity`
 ```mermaid
-flowchart LR
+flowchart
     VRES([validateResponse])
         VRES --> RRES
     RRES[\userResponse\]
@@ -313,7 +313,7 @@ checkBoolValidation()
 ---
 ### `_checkIntegerValidity`
 ```mermaid
-flowchart TB
+flowchart
     VRES([validateResponse])
         VRES --> URIV
     URIV[\userResponse
@@ -401,7 +401,7 @@ END
 ---
 ### `_printMessage`
 ```mermaid
-flowchart LR
+flowchart
     PPPA([putPrompt
           putAlert])
         PPPA --> CMLC

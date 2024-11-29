@@ -6,14 +6,21 @@
 ---
 ### `listBlockDevices`
 ```mermaid
-flowchart LR
-    STR([start])
-        STR --> PRCS
-    PRCS[set path, output, deps]
-        PRCS --> RTN
-    RTN[return runCommand]
-        RTN --> END
-    END([end])
+flowchart
+    classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
+    STRT([start]):::shape
+        STRT --> ARGS
+    ARGS[\"<span style='color:cyan;'>disk</span>
+           <span style='color:magenta;'>columns</span>
+           <span style='color:yellow;'>showDependents</span>"\]:::shape
+        ARGS --> SPOD
+    SPOD["<span style='color:cyan;'>path</span>
+           <span style='color:magenta;'>output</span>
+           <span style='color:yellow;'>deps</span>"]:::shape
+        SPOD --> RCMD
+    RCMD[[runCommand]]:::shape
+        RCMD --> RTRN
+    RTRN([result]):::shape
 ```
 ```
 listBlockDevices(disk, columns, showDependents)
@@ -36,21 +43,26 @@ END
 ---
 ### `runBadblocks`
 ```mermaid
-flowchart LR
-    STR([start])
-        STR --> PRCS
-    PRCS[set mode, command]
-        PRCS --> CAPT
-    CAPT{captureOutput}
-        CAPT -- True --> RTNC
-        CAPT -- False --> CALL
-    RTNC[return runCommand]
-        RTNC --> END
-    CALL[call runCommand]
-        CALL --> RTNN
-    RTNN[return None]
-        RTNN --> END
-    END([end])
+flowchart
+    classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
+    STRT([start]):::shape
+        STRT --> ARGS
+    ARGS[\"<span style='color:cyan;'>disk</span>
+           <span style='color:magenta;'>nonDestructive</span>
+           <span style='color:yellow;'>captureOutput</span>"\]:::shape
+        ARGS --> STMC
+    STMC[\"<span style='color:magenta;'>mode</span>
+           <span style='color:cyan;'>command</span>"\]:::shape
+        STMC --> CAPT
+    CAPT{"<span style='color:yellow;'>captureOutput</span>"}:::shape
+        CAPT -- True  --> GETR
+        CAPT -- False --> IGNR
+    GETR[[runCommand]]:::shape
+        GETR --> RTNR
+    IGNR[[call runCommand]]:::shape
+        IGNR --> RTNN
+    RTNR([result]):::shape
+    RTNN([None]):::shape
 ```
 ```
 runBadblocks(disk, nonDestructive, captureOutput)
@@ -68,24 +80,27 @@ END
 ---
 ### `runCommand`
 ```mermaid
-flowchart LR
-    STR([start])
-        STR --> PRCS
-    PRCS[set result]
-        PRCS --> ERR
-    ERR{error}
-        ERR -- True --> RSE
-        ERR -- False --> CAPT
-    RSE[raise error]
-        RSE --> END
-    CAPT{captureOutput}
-        CAPT -- True --> RTNR
+flowchart
+    classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
+    STRT([start]):::shape
+        STRT --> ARGS
+    ARGS[\command
+          captureOutput
+          useShell\]:::shape
+        ARGS --> SETR
+    SETR[set result]:::shape
+        SETR --> ERRR
+    ERRR{error}:::shape
+        ERRR -- True  --> RASE
+        ERRR -- False --> CAPT
+    RASE[/error/]:::shape
+        RASE --> TEND
+    CAPT{captureOutput}:::shape
+        CAPT -- True  --> RTNR
         CAPT -- False --> RTNN
-    RTNR[return result]
-        RTNR --> END
-    RTNN[return None]
-        RTNN --> END
-    END([end])
+    RTNR([result]):::shape
+    RTNN([None]):::shape
+    TEND([end]):::shape
 ```
 ```
 runCommand(command, captureOutput, useShell)
@@ -105,21 +120,25 @@ END
 ---
 ### `unmountDisk`
 ```mermaid
-flowchart LR
-    STR([start])
-        STR --> SET1
-    SET1[set output, diskPaths]
-        SET1 --> FLTR
-    FLTR[filter diskPaths]
-        FLTR --> FOR
-    FOR{for diskPaths record}
-        FOR -- True --> SET2
-        FOR -- False --> END
-    SET2[set cmdStr]
-        SET2 --> CALL
-    CALL[call runCommand]
-        CALL --> FOR
-    END([end])
+flowchart
+    classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
+    classDef alt fill:#b97d4b,stroke:#4682b4,stroke-width:2px
+    STRT([start]):::shape
+        STRT --> SOUT
+    SOUT[output]:::shape
+        SOUT --> STDP
+    STDP(diskPaths):::alt
+        STDP --> FLTR
+    FLTR[filter]:::alt
+        FLTR --> FRLP
+    FRLP{diskPaths.record}:::shape
+        FRLP -- True  --> SCMS
+        RCMD          --> FRLP
+        FRLP -- False --> TEND
+    SCMS[cmdStr]:::shape
+        SCMS --> RCMD
+    RCMD[[call runCommand]]:::shape
+    TEND([end]):::shape
 ```
 ```
 unmountDisk(disk)
