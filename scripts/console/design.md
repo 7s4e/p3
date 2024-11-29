@@ -402,10 +402,20 @@ END
 ### `_printMessage`
 ```mermaid
 flowchart LR
-    STR([start]) --> SET
-    SET[compute displayWidth, padding, lineEnd] --> PUT
-    PUT[/print/] --> END
-    END([end])
+    PPPA([putPrompt
+          putAlert])
+        PPPA --> CMLC
+    CMLC[\console
+          message
+          leaveCursorInline\]
+        CMLC --> SDPE
+    SDPE[displayWidth
+         padding
+         lineEnd]
+        SDPE --> PRNT
+    PRNT[/padding + message + end/]
+        PRNT --> TEND
+    TEND([end])
 ```
 ```
 printMessage(message, leaveCursorInline)
