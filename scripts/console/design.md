@@ -223,13 +223,16 @@ END
 ### `_readKeystroke`
 ```mermaid
 flowchart LR
-    STR([start])
-        STR --> GET
-    GET[/get keystroke/]
-        GET --> SET
-    SET[set userResponse]
-        SET --> END
-    END([end])
+    GRES([getResponse])
+        GRES --> GKEY
+    GKEY[\keystroke\]
+        GKEY          --> NRNG
+        NRNG -- False --> GKEY
+    NRNG{in range}
+        NRNG -- True --> WRES
+    WRES[/userResponse/]
+        WRES --> TEND
+    TEND([end])
 ```
 ```
 _readKeystroke()
