@@ -50,15 +50,17 @@ END
 * [_printMessage](#_printmessage)
 ```mermaid
 graph TB
-    MAIN([**ConsolePrompt**])
-        MAIN -- prompt
+    STRT([start])
+        STRT -- prompt
                 expectKeystroke
                 validateBool
                 validateInteger
                 integerValidation --> INIT
-        MAIN -- console           --> CALL
-        CALL -- response          --> MAIN
     INIT(*init*)
+        INIT --> MAIN
+    MAIN([**ConsolePrompt**])
+        MAIN -- console  --> CALL
+        CALL -- response --> MAIN
     CALL(call)
         CALL          --> GRSP
         CALL          --> VRSP
