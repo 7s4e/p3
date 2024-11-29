@@ -127,18 +127,22 @@ END
 ### `call`
 ```mermaid
 flowchart LR
-    STR([start])
-        STR --> SET
-    SET[/set console/]
-        SET --> GR
-    GR[call getResponse]
-        GR --> VR
-    RTN{valid}
-        RTN -- True --> END
-        RTN -- False --> GR
-    VR[call validateResponse]
-        VR --> RTN
-    END([end])
+    CONP([**ConsolePrompt**])
+        CONP --> RCON
+    RCON[\console\]
+        RCON --> WCON
+    WCON[/console/]
+        WCON --> VALD
+    VALD{valid}
+        VALD -- True  --> GETR
+        VALD -- False --> GRES
+        VRES          --> VALD
+    GRES[[getResponse]]
+        GRES --> VRES
+    VRES[[validateResponse]]
+    GETR[\validatedResponse\]
+        GETR --> RTRN
+    RTRN([validatedResponse])
 ```
 ```
 call(console)
