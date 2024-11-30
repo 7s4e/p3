@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 # Standard library imports
-from inspect import currentframe
+import inspect
 
 # Third-party imports
 from blessed import Terminal
 
 # Local module imports
-# from menu import Menu
 import commands as cmd
-from console import clear_stdscr, put_script_banner, ConsolePrompt
+import console as con
+from console import ConsolePrompt
+from menu import Menu
 from table import Table
 
 
@@ -27,7 +28,7 @@ def confirm_disk(console: Terminal, disk: str) -> bool:
                                              "MOUNTPOINTS"])
     partitions = Table(title="selected device", table_string=output)
     partitions.put_table(console)
-    disk_confirmation = ConsolePrompt(prompt,
+    disk_confirmation = con.ConsolePrompt(prompt,
                                           expect_keystroke=True, 
                                           validate_bool=True)
     return disk_confirmation.call(console)
@@ -47,19 +48,19 @@ def get_disks() -> Table:
     return disks
 
 
-# def select_disk(console: Terminal, disks: Table) -> str:
-#     """Prompt the user to select a disk from a list of disks.
+def select_disk(console: Terminal, disks: Table) -> str:
+    """Prompt the user to select a disk from a list of disks.
 
-#     Args:
-#         disks: A list of dictionaries containing disk information.
-#         count: The number of disks available for selection.
+    Args:
+        disks: A list of dictionaries containing disk information.
+        count: The number of disks available for selection.
 
-#     Returns:
-#         The name of the selected disk.
-#     """
-#     disk_selection = Menu(disks)
-#     disk_selection.run(console)
-#     return disk_selection.get_selection("NAME")
+    Returns:
+        The name of the selected disk.
+    """
+    disk_selection = Menu(disks)
+    disk_selection.run(console)
+    return disk_selection.get_selection("NAME")
 
 
 def get_disk(console: Terminal) -> str:
@@ -71,7 +72,7 @@ def get_disk(console: Terminal) -> str:
     Returns:
         The name of the confirmed disk.
     """
-    put_script_banner(console, currentframe().f_code.co_name)
+    con.put_script_banner(console, inspect.currentframe().f_code.co_name)
 
     while True:
         disks = get_disks()
@@ -83,8 +84,8 @@ def get_disk(console: Terminal) -> str:
             no_disk_alert.call(console)
             continue
 
-    #     disk = (disks.get_record(0)["NAME"] 
-    #             if count == 1 else select_disk(console, disks))
+        disk = (disks.get_record(0)["NAME"] 
+                if count == 1 else select_disk(console, disks))
 
     #     if confirm_disk(console, disk):
     #         break
@@ -98,7 +99,7 @@ def get_disk(console: Terminal) -> str:
 
 
 def main(console: Terminal) -> str:
-    clear_stdscr(console)
+    con.clear_stdscr(console)
     disk = get_disk(console)
     return disk
 

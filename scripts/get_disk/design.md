@@ -16,13 +16,17 @@ flowchart LR
         GD --> INSP
         GD --> GDS
         GD --> CCP
+        GD --> SD
     INSP(inspect):::library
     GDS[getDisks]:::complete
         GDS --> CMD
         GDS --> TBL
+    CCP(ConsolePrompt):::complete
+    SD[selectDisk]:::working
+        SD --> MNU
     CMD(commands):::complete
     TBL(Table):::complete
-    CCP(ConsolePrompt):::complete
+    MNU(Menu):::working
 ```
 * [commands](../commands/design.md)
 * [console](../console/design.md)
