@@ -94,9 +94,10 @@ END
 ### `setPrompt`
 ```mermaid
 flowchart
+    classDef this fill:#4682b4,stroke:#b97d4b,stroke-width:2px
     classDef that fill:#b97d4b,stroke:#4682b4,stroke-width:2px
     MNYU([*init*
-          *Menu*])
+          *Menu*]):::this
         MNYU --> GPCT
     GPCT[\prompt
           count\]
@@ -123,12 +124,35 @@ setPrompt(prompt)
     SET integerValidation <- (1, self.count)
     SET self.prompt <- ConsolePrompt(prompt, expectKeystroke, 
                                      validateInteger=True, integerValidation)
+END
 ```
 [️⬆️](#menu)
 ---
 ### `run`
+```mermaid
+flowchart LR
+    classDef this fill:#4682b4,stroke:#b97d4b,stroke-width:2px
+    classDef that fill:#b97d4b,stroke:#4682b4,stroke-width:2px
+    MNYU([**Menu**]):::this
+        MNYU --> PTBL
+    PTBL[[putTable]]:::that
+        PTBL --> CPMT
+    CPMT[[call]]:::that
+        CPMT --> SIDX
+    SIDX[index]
+        SIDX --> GREC
+    GREC[[getRecord]]:::that
+        GREC --> SLCT
+    SLCT[/selection/]
+        SLCT --> THEE
+    THEE([end])
 ```
-content
+```
+run(console)
+    self.options.putTable(console, isMenu=True)
+    SET index <- self.prompt.call(console) - 1
+    SET self.selection <- self.options.getRecord(index)
+END
 ```
 [️⬆️](#menu)
 ---
