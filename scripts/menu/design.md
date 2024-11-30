@@ -157,8 +157,20 @@ END
 [️⬆️](#menu)
 ---
 ### `getSelection`
+```mermaid
+flowchart LR
+    classDef this fill:#4682b4,stroke:#b97d4b,stroke-width:2px
+    MNYU([**Menu**]):::this
+        MNYU --> GSLC
+    GSLC[\key
+          selection\]
+        GSLC --> RSLC
+    RSLC([selection.key])
 ```
-content
+```
+getSelection(key)
+    RETURN self.selection[key]
+END
 ```
 [️⬆️](#menu)
 ---
