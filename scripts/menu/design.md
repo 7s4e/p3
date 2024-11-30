@@ -47,8 +47,47 @@ graph
 ```
 ---
 ### `__init__`
+```mermaid
+flowchart 
+    classDef this fill:#4682b4,stroke:#b97d4b,stroke-width:2px
+    classDef that fill:#b97d4b,stroke:#4682b4,stroke-width:2px
+    STRT([start])
+        STRT --> ROTP
+    ROTP[\options
+          title
+          prompt\]
+        ROTP --> OTYP
+    OTYP{options.type}
+        OTYP -- Table --> SOPT
+        OTYP -- list  --> FOPT
+    SOPT[/options/]
+        SOPT --> CREC
+    FOPT{option}
+        FOPT -- True  --> SDTA
+        SDTA          --> FOPT
+        FOPT -- False --> CTBL
+    SDTA[OPTION: option]
+    CTBL[[Table]]:::that
+        CTBL --> SOPT
+    CREC[[countRecords]]:::that
+        CREC --> SCNT
+    SCNT[/count/]
+        SCNT --> SPMT
+    SPMT[[setPrompt]]:::this
+        SPMT --> THEE
+    THEE([**Menu**]):::this
 ```
-content
+```
+init(options, title, prompt)
+    IF options.type IS Table
+        SET self.options <- options
+    ELSE
+        FOR option IN options
+            SET data["OPTION"] <- option
+        SET self.options <- Table(title, data)
+    SET self.count <- self.options.countRecords()
+    self.setPrompt(prompt)
+END
 ```
 [️⬆️](#menu)
 ---
