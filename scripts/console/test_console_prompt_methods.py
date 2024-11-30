@@ -1,5 +1,4 @@
 import pytest
-from unittest.mock import patch, MagicMock
 from blessed import keyboard, Terminal
 from console import ConsolePrompt
 
