@@ -6,20 +6,21 @@ from typing import Any
 from blessed import Terminal
 
 # Local module import
-from console import ConsolePrompt
+from console_prompt import ConsolePrompt
 from table import Table
 
 class Menu:
     def __init__(self, 
                  options: Table | list, 
-                 title: str | None = None) -> None:
+                 title: str | None = None,
+                 prompt: str | None = None) -> None:
         self._options = (options
                          if isinstance(options, Table) 
                          else Table(title=title, 
                                     table_data=[{"OPTION": option} 
                                                  for option in options]))
         self._count = self._options.count_records()
-        self.set_prompt()
+        self.set_prompt(prompt)
     
     def get_selection(self, key: str = "OPTION") -> Any:
         return self._selection[key.upper()]
@@ -37,13 +38,3 @@ class Menu:
                                      expect_keystroke=count < 10, 
                                      validate_integer=True, 
                                      integer_validation=(1, count))
-
-    def _prompt_selection(self) -> int:
-        while True:
-            try:
-                selection = int(input(self._prompt))
-                if 1 <= selection <= self._count:
-                    return selection
-                print(f"Enter a number between 1 and {self._count}.")
-            except ValueError:
-                print("Enter a valid number.")

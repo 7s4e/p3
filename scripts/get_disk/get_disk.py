@@ -8,7 +8,7 @@ from blessed import Terminal
 # Local module imports
 import commands as cmd
 import console as con
-from console import ConsolePrompt
+from console_prompt import ConsolePrompt
 from menu import Menu
 from table import Table
 
@@ -28,9 +28,9 @@ def confirm_disk(console: Terminal, disk: str) -> bool:
                                              "MOUNTPOINTS"])
     partitions = Table(title="selected device", table_string=output)
     partitions.put_table(console)
-    disk_confirmation = con.ConsolePrompt(prompt,
-                                          expect_keystroke=True, 
-                                          validate_bool=True)
+    disk_confirmation = ConsolePrompt(prompt,
+                                      expect_keystroke=True, 
+                                      validate_bool=True)
     return disk_confirmation.call(console)
 
 

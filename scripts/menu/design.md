@@ -1,38 +1,72 @@
 # Menu Module
 ## `Menu`
-### Method Groups
-* [Initialize Table Methods](#initialize-table-methods)
-#### Initialize Table Methods
 * [\_\_init__](#__init__)
+* [setPrompt](#setprompt)
+* [run](#run)
+* [getSelection](#getselection)
+* [Table](../table/design.md)
+* [ConsolePrompt](../console/design.md)
 ```mermaid
 graph
+    style MNYU fill:#4682b4,stroke:#b97d4b,stroke-width:2px,color:#0ff
+    style T fill:#b97d4b,stroke:#4682b4,stroke-width:2px
+    style CP fill:#b97d4b,stroke:#4682b4,stroke-width:2px
+    classDef method fill:#4682b4,stroke:#b97d4b,stroke-width:2px
     STRT([start])
-        STRT -- tableData
-                tableString
+        STRT -- options
                 title
-                rjustColumns --> INIT
-    subgraph i [Initialize Table Methods]
-        style i fill:#4682b4,stroke:#b97d4b,stroke-width:2px,color:#0ff
-        INIT(*init*)
+                prompt  --> INIT
+    INIT(*init*):::method
+        INIT -- options
+                title   --> TBLE
+        INIT            --> CREC
+        INIT -- prompt  --> SPMT
+        INIT            --> MNYU
+    MNYU([**Menu**])
+        MNYU -- prompt  --> SPMT
+        MNYU -- key     --> GSLC
+        MNYU -- console --> RNMN
+    SPMT(setPrompt):::method
+        SPMT -- prompt --> CPMT
+    RNMN(run):::method
+        RNMN -- console
+                isMenu  --> PTBL
+        RNMN -- console --> CLLP
+        RNMN -- index   --> GREC
+    GSLC(getSelection):::method
+    subgraph T [**Table**]
+        TBLE(Table)
+        CREC(countRecords)
+        PTBL(putTable)
+        GREC(getRecord)
     end
-    TABL([**Table**])
-        INIT --> TABL
+    subgraph CP [**ConsolePrompt**]
+        CPMT(ConsolePrompt)
+        CLLP(call)
+    end
 ```
-[️⬆️](#method-groups)
 ---
-##### `__init__`
-```mermaid
-flowchart
-    classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
-    STR([start]):::shape
-        STR --> SRC
-    SRC[\"<span style='color:cyan;'>tableSource</span>
-          <span style='color:magenta;'>title</span>
-          <span style='color:yellow;'>rjustLabel</span>"\]:::shape
+### `__init__`
 ```
+content
 ```
-init(tableData, tableString, title, rjustColLabel)
-END
+[️⬆️](#menu)
+---
+### `setPrompt`
 ```
-[️⬆️](#initialize-table-methods)
+content
+```
+[️⬆️](#menu)
+---
+### `run`
+```
+content
+```
+[️⬆️](#menu)
+---
+### `getSelection`
+```
+content
+```
+[️⬆️](#menu)
 ---
