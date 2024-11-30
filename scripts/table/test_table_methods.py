@@ -16,8 +16,8 @@ def mock_table():
 def mock_console():
     return Terminal()
 
-"""Modify Table Methods"""
 
+"""Modify Table Methods"""
 # Test filterNonempty
 @pytest.mark.parametrize(
     "filter_key, exp_dataset, exp_count",
@@ -117,7 +117,6 @@ def test_resize_columns(mock_table, width_limit, exp_col_widths,
 
 
 """Display Table Methods"""
-
 # Test numberRecords
 def test_number_records(mock_table):
     mock_table._number_records()

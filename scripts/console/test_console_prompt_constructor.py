@@ -3,10 +3,11 @@ import sys
 from blessed import Terminal
 from console import ConsolePrompt
 
+
 @pytest.fixture
 def mock_console(mocker):
-    """Fixture to create a mock Terminal object."""
     return mocker.Mock(spec=Terminal)
+
 
 @pytest.mark.parametrize(
     "prompt, exp_key, validate_bool, validate_int, int_validation, exception",
@@ -197,7 +198,8 @@ def mock_console(mocker):
         ("", False, False, True, (1, 0),         ValueError)
     ]
 )
-def test_constructor(mock_console, prompt, exp_key, validate_bool, validate_int, int_validation, exception):
+def test_constructor(prompt, exp_key, validate_bool, validate_int, 
+                     int_validation, exception):
     """Test the constructor of ConsolePrompt for with various parameters."""
     if exception:
         with pytest.raises(exception):

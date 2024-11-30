@@ -43,9 +43,9 @@ class ConsolePrompt:
             specified criteria.
         _read_string(): Capture a string input from the user.
         _read_keystroke(): Capture a single keystroke from the user.
-        _check_integer_validation(): Validate the user's integer 
+        _check_integer_validity(): Validate the user's integer 
             response.
-        _check_bool_validation(): Validate the user's boolean response.
+        _check_bool_validity(): Validate the user's boolean response.
         _put_prompt(leave_cursor_inline): Display the prompt message.
         _put_alert(alert): Display an alert message.
         _align_message(message): Align the message to the left for 
@@ -131,7 +131,7 @@ class ConsolePrompt:
         return self._validated_response
 
     # Private Methods
-    def _check_bool_validation(self) -> bool:
+    def _check_bool_validity(self) -> bool:
         """Validate the user's boolean response based on 'y' or 'n' 
             input.
 
@@ -152,7 +152,7 @@ class ConsolePrompt:
         self._put_alert("Respond with 'y' or 'n'.")
         return False
 
-    def _check_integer_validation(self) -> bool:
+    def _check_integer_validity(self) -> bool:
         """Validate the user's integer response based on the expected 
             criteria.
 
@@ -327,7 +327,7 @@ class ConsolePrompt:
             validation is required.
         """
         if self._validate_bool:
-            return self._check_bool_validation()
+            return self._check_bool_validity()
         if self._validate_integer:
-            return self._check_integer_validation()
+            return self._check_integer_validity()
         return True

@@ -69,7 +69,6 @@ def test_run_command(mocker, mock_run, command, mock_return, capture_output,
                                      stderr=sys.stderr 
                                      if not capture_output else None)
 
-
 # Test listBlockDevices
 @pytest.mark.parametrize("disk, columns, show_dependents, exp_command", 
     [
@@ -122,7 +121,6 @@ def test_list_block_devices(mock_command_run, disk, columns, show_dependents,
     mock_command_run.assert_called_once_with(exp_command)
     assert result == "Mock Block Devices List"
 
-
 # Test runBadblocks
 @pytest.mark.parametrize(
     "non_destructive, capture_output, exp_command, mock_output",
@@ -169,7 +167,6 @@ def test_run_badblocks(mock_command_run, non_destructive, capture_output,
     mock_command_run.assert_called_once_with(exp_command, 
                                              capture_output=capture_output)
     assert result == mock_output
-
 
 # Test unmountDisk
 def test_unmount_disk(mock_command_run, mock_table):
