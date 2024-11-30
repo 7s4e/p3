@@ -7,7 +7,7 @@
 * [Table](../table/design.md)
 * [ConsolePrompt](../console/design.md)
 ```mermaid
-graph
+graph LR
     style MNYU fill:#4682b4,stroke:#b97d4b,stroke-width:2px,color:#0ff
     style T fill:#b97d4b,stroke:#4682b4,stroke-width:2px
     style CP fill:#b97d4b,stroke:#4682b4,stroke-width:2px
@@ -48,7 +48,7 @@ graph
 ---
 ### `__init__`
 ```mermaid
-flowchart 
+flowchart
     classDef this fill:#4682b4,stroke:#b97d4b,stroke-width:2px
     classDef that fill:#b97d4b,stroke:#4682b4,stroke-width:2px
     STRT([start])
@@ -92,8 +92,37 @@ END
 [️⬆️](#menu)
 ---
 ### `setPrompt`
+```mermaid
+flowchart
+    classDef that fill:#b97d4b,stroke:#4682b4,stroke-width:2px
+    MNYU([*init*
+          *Menu*])
+        MNYU --> GPCT
+    GPCT[\prompt
+          count\]
+        GPCT --> IFPT
+    IFPT{prompt}
+        IFPT -- True  --> EKIV
+        IFPT -- False --> SPMT
+    SPMT[prompt]
+        SPMT --> EKIV
+    EKIV[expectKeystroke
+         integerValidation]
+        EKIV --> CONP
+    CONP[[ConsolePrompt]]:::that
+        CONP --> SLFP
+    SLFP[/prompt/]
+        SLFP --> THEE
+    THEE([end])
 ```
-content
+```
+setPrompt(prompt)
+    IF NOT prompt
+        SET prompt
+    SET expectKeystroke <- self.count < 10
+    SET integerValidation <- (1, self.count)
+    SET self.prompt <- ConsolePrompt(prompt, expectKeystroke, 
+                                     validateInteger=True, integerValidation)
 ```
 [️⬆️](#menu)
 ---

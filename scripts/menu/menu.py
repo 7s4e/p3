@@ -32,7 +32,7 @@ class Menu:
 
     def set_prompt(self, prompt: str | None = None) -> None:
         count = self._count
-        prompt = (f"Enter number (1-{self._count}) for selection:" 
+        prompt = (f"Enter number (1-{count}) for selection:" 
                   if prompt is None else prompt)
         self._prompt = ConsolePrompt(prompt, 
                                      expect_keystroke=count < 10, 
