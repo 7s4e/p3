@@ -296,7 +296,6 @@ class ConsolePrompt:
         """
         key = None
         response = []
-        terminal_output = []
 
         with self._con.cbreak():
             while key is None or key.code != 10:  # Wait New Line/Enter
@@ -305,13 +304,11 @@ class ConsolePrompt:
                 if key.code == 8:  # Handle Backspace
                     if response:
                         response.pop()
-                        terminal_output.pop()
-                        print("\b \b" * len(self._con.green("x")), end="", 
-                              flush=True)
+                        bckspce_sequence = "\b \b" * len(self._con.green("x"))
+                        print(bckspce_sequence, end="", flush=True)
                 elif 32 <= key.code <= 126:  # Handle printable chars
                     response.append(str(key))
                     formatted_char = self._con.green(str(key))
-                    terminal_output.append(formatted_char)
                     print(formatted_char, end="", flush=True)
 
             print()  # Move to next line after Enter

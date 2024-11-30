@@ -182,23 +182,16 @@ def test_read_string(mock_prompt, cbreak_mock, input_sequence, exp_result,
     mock_prompt._read_string()
     out, err = capfd.readouterr()
 
-    # Verify the final response captured in _user_response
+    # Verify
     assert mock_prompt._user_response == exp_result
-
-    # Build expected printed output with proper handling of backspace
     exp_stdout = []
     for key in input_sequence:
-        if key.code == 8:  # Backspace
+        if key.code == 8:
             if exp_stdout:
-                # Simulate the backspace visual effect in terminal (\b \b)
-                exp_stdout.pop()  # Remove the last character from the visible output
-        elif 32 <= key.code <= 126:  # Printable characters
-            exp_stdout.append(f"[green]{str(key)}[/green]")  # Add colored char
-
-    # Join expected printed output with color and backspace handling
+                exp_stdout.pop()
+        elif 32 <= key.code <= 126:
+            exp_stdout.append(f"[green]{str(key)}[/green]")
     exp_stdout = ''.join(exp_stdout) + '\n'
-
-    # Verify captured stdout matches the expected printed output with color
     assert out == exp_stdout, f"Expected: {exp_stdout}, Got: {out}"
     assert err == ""
 
