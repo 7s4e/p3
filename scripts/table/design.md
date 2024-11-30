@@ -233,7 +233,7 @@ flowchart
         AJS --> AJE
     AJE[[adjust end]]:::shape
         AJE --> END
-    END(["return <span style='color:green;'>start</span>, <span style=
+    END(["return <span style='color:#0f0;'>start</span>, <span style=
               'color:red;'>end</span>"]):::shape
 ```
 ###### Initialize Subgraph
@@ -243,7 +243,7 @@ flowchart
     INP[\input\]:::shape
         INP --> SST
     subgraph init [Initialize start, end]
-        SST["<span style='color:green;'>start</span> = <span style=
+        SST["<span style='color:#0f0;'>start</span> = <span style=
                  'color:magenta;'>positions</span>.<span style='color:cyan;'
                  >index</span>"]:::shape
             SST --> LST
@@ -268,27 +268,27 @@ flowchart
     INT[[initialize start, end]]:::shape
         INT --> SIL
     subgraph start [Adjust start]
-        SIL{"<span style='color:green;'>start</span> < <span style=
+        SIL{"<span style='color:#0f0;'>start</span> < <span style=
                  'color:yellow;'>line</span>.length"}:::shape
             SIL -- True --> SIS
             SIL -- False --> SLL
         SIS{"<span style='color:yellow;'>line</span>.<span style=
-                 'color:green;'>start</span> == space"}:::shape
+                 'color:#0f0;'>start</span> == space"}:::shape
             SIS -- True --> WIS
             SIS -- False --> WNS
-        WIS{"<span style='color:green;'>start</span> < <span style=
+        WIS{"<span style='color:#0f0;'>start</span> < <span style=
                  'color:red;'>end</span> &&
              <span style='color:yellow;'>line</span>.<span style=
-                 'color:green;'>start</span> == space"}:::shape
+                 'color:#0f0;'>start</span> == space"}:::shape
             WIS -- True --> MSR
             MSR         --> WIS
         WNS{"<span style='color:yellow;'>line</span>.<span style=
-                 'color:green;'>start</span>-1 != space"}:::shape
+                 'color:#0f0;'>start</span>-1 != space"}:::shape
             WNS -- True --> MSL
             MSL         --> WNS
-        MSR["<span style='color:green;'>start</span> += 1"]:::shape
-        MSL["<span style='color:green;'>start</span> -= 1"]:::shape
-        SLL["<span style='color:green;'>start</span> = <span style=
+        MSR["<span style='color:#0f0;'>start</span> += 1"]:::shape
+        MSL["<span style='color:#0f0;'>start</span> -= 1"]:::shape
+        SLL["<span style='color:#0f0;'>start</span> = <span style=
                  'color:yellow;'>line</span>.length"]:::shape
     end
     AJE[[adjust end]]:::shape

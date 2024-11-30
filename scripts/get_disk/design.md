@@ -22,7 +22,7 @@ flowchart LR
         GDS --> TBL
     CMD(commands):::complete
     TBL(Table):::complete
-    CCP(ConsolePrompt):::working
+    CCP(ConsolePrompt):::complete
 ```
 * [commands](../commands/design.md)
 * [console](../console/design.md)
