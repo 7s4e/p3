@@ -1,6 +1,6 @@
 import pytest
 from blessed import Terminal
-import console as c
+import console as con
 
 
 @pytest.fixture
@@ -13,24 +13,24 @@ def mock_console(mocker):
     return terminal_mock
 
 
-def test_clear_stdscr(mock_console, mocker):
+def test_clear_stdscr(mocker, mock_console):
     # Setup
     mock_print = mocker.patch("builtins.print")
 
     # Execute
-    c.clear_stdscr(mock_console)
+    con.clear_stdscr(mock_console)
 
     # Verify
     mock_print.assert_called_once_with("home_position" + "clear_screen")
 
 
-def test_put_script_banner(mock_console, mocker):
+def test_put_script_banner(mocker, mock_console):
     # Setup
     mock_print = mocker.patch("builtins.print")
     script_name = "test_script"
 
     # Execute
-    c.put_script_banner(mock_console, script_name)
+    con.put_script_banner(mock_console, script_name)
 
     # Verify
     expected_output = "<reverse>Running test_script...              </reverse>"
