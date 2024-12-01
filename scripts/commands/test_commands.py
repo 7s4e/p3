@@ -8,6 +8,86 @@ def run_command_mock(mocker):
     return mocker.patch("commands.run_command")
 
 
+# Test listBlockDevices
+@pytest.mark.parametrize("disk, cols, shw_deps, exp_cmnd", 
+    [
+        # Test case 1: Command to list block devices
+        (None, [], True, "lsblk"),
+
+        # Test case 2: Command to list /dev/sda disk and partitions
+        ("sda", [], True, "lsblk /dev/sda"), 
+
+        # Test case 3: Command to print specified output columns
+        (None, ["NAME", "SIZE"], True, "lsblk --output NAME,SIZE"), 
+
+        # Test case 4: Command to not print slaves
+        (None, [], False, "lsblk --nodeps"), 
+
+        # Test case 5: Command to print with columns and without slaves
+        ("sda", ["NAME", "TYPE"], False, 
+         "lsblk --nodeps --output NAME,TYPE /dev/sda")
+    ]
+)
+def test_list_block_devices(run_command_mock, disk, cols, shw_deps, exp_cmnd):
+    # Setup
+    run_command_mock.return_value = "Mock Block Devices List"
+
+    # Execute
+    result = cmds.list_block_devices(disk, cols, shw_deps)
+
+    # Verify
+    run_command_mock.assert_called_once_with(exp_cmnd)
+    assert result == "Mock Block Devices List"
+
+
+# Test runBadblocks
+@pytest.mark.parametrize(
+    "non_destruct, capture_out, exp_cmnd, mock_out",
+    [
+        # Test case 1: Non-destructive command with output
+        (
+            True, 
+            True, 
+            "sudo badblocks --non-destructive --show-progress --verbose /dev/sda", 
+            "Mock Badblocks Report", 
+        ),
+        # Test case 2: Destructive command with output
+        (
+            False, 
+            True, 
+            "sudo badblocks --write-mode --show-progress --verbose /dev/sda", 
+            "Mock Badblocks Report", 
+        ),
+        # Test case 3: Non-destructive commmand without output
+        (
+            True, 
+            False, 
+            "sudo badblocks --non-destructive --show-progress --verbose /dev/sda", 
+            None
+        ),
+        # Test case 4: Destructive command without output
+        (
+            False, 
+            False, 
+            "sudo badblocks --write-mode --show-progress --verbose /dev/sda", 
+            None
+        )
+    ]
+)
+def test_run_badblocks(run_command_mock, non_destruct, capture_out, exp_cmnd, 
+                       mock_out):
+    # Setup
+    run_command_mock.return_value = mock_out
+
+    # Execute
+    result = cmds.run_badblocks("sda", non_destruct, capture_out)
+
+    # Verify
+    run_command_mock.assert_called_once_with(exp_cmnd, 
+                                             capture_output=capture_out)
+    assert result == mock_out
+
+
 # Test runCommand
 @pytest.mark.parametrize(
     "cmnd, capture_out, mock_rtn, exp_output, should_raise",
@@ -64,83 +144,6 @@ def test_run_command(mocker, cmnd, mock_rtn, capture_out, exp_output,
                                      stderr=sys.stderr 
                                      if not capture_out else None)
 
-# Test listBlockDevices
-@pytest.mark.parametrize("disk, cols, shw_deps, exp_cmnd", 
-    [
-        # Test case 1: Command to list block devices
-        (None, [], True, "lsblk"),
-
-        # Test case 2: Command to list /dev/sda disk and partitions
-        ("sda", [], True, "lsblk /dev/sda"), 
-
-        # Test case 3: Command to print specified output columns
-        (None, ["NAME", "SIZE"], True, "lsblk --output NAME,SIZE"), 
-
-        # Test case 4: Command to not print slaves
-        (None, [], False, "lsblk --nodeps"), 
-
-        # Test case 5: Command to print with columns and without slaves
-        ("sda", ["NAME", "TYPE"], False, 
-         "lsblk --nodeps --output NAME,TYPE /dev/sda")
-    ]
-)
-def test_list_block_devices(run_command_mock, disk, cols, shw_deps, exp_cmnd):
-    # Setup
-    run_command_mock.return_value = "Mock Block Devices List"
-
-    # Execute
-    result = cmds.list_block_devices(disk, cols, shw_deps)
-
-    # Verify
-    run_command_mock.assert_called_once_with(exp_cmnd)
-    assert result == "Mock Block Devices List"
-
-# Test runBadblocks
-@pytest.mark.parametrize(
-    "non_destruct, capture_out, exp_cmnd, mock_out",
-    [
-        # Test case 1: Non-destructive command with output
-        (
-            True, 
-            True, 
-            "sudo badblocks --non-destructive --show-progress --verbose /dev/sda", 
-            "Mock Badblocks Report", 
-        ),
-        # Test case 2: Destructive command with output
-        (
-            False, 
-            True, 
-            "sudo badblocks --write-mode --show-progress --verbose /dev/sda", 
-            "Mock Badblocks Report", 
-        ),
-        # Test case 3: Non-destructive commmand without output
-        (
-            True, 
-            False, 
-            "sudo badblocks --non-destructive --show-progress --verbose /dev/sda", 
-            None
-        ),
-        # Test case 4: Destructive command without output
-        (
-            False, 
-            False, 
-            "sudo badblocks --write-mode --show-progress --verbose /dev/sda", 
-            None
-        )
-    ]
-)
-def test_run_badblocks(run_command_mock, non_destruct, capture_out, exp_cmnd, 
-                       mock_out):
-    # Setup
-    run_command_mock.return_value = mock_out
-
-    # Execute
-    result = cmds.run_badblocks("sda", non_destruct, capture_out)
-
-    # Verify
-    run_command_mock.assert_called_once_with(exp_cmnd, 
-                                             capture_output=capture_out)
-    assert result == mock_out
 
 # Test unmountDisk
 def test_unmount_disk(mocker, run_command_mock):

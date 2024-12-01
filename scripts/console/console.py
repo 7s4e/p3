@@ -2,9 +2,6 @@
 # Third-party imports
 from blessed import Terminal
 
-# Local module import
-from console_prompt import ConsolePrompt
-from console_table import ConsoleTable
 
 def clear_stdscr(console: Terminal) -> None:
     """Clear terminal screen and reset cursor to the home position.

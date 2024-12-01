@@ -3,7 +3,7 @@
 # Third-party imports
 from blessed import Terminal
 # Local module imports
-from console import ConsoleTable
+from console_table import ConsoleTable
 
 class Table:
     """
