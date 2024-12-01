@@ -12,10 +12,6 @@ def mock_table():
     rj_col = "Second"
     return Table(table_data=tbl_data, title=title, rjust_columns=rj_col)
 
-@pytest.fixture
-def mock_console():
-    return Terminal()
-
 
 """Modify Table Methods"""
 # Test filterNonempty
@@ -144,10 +140,11 @@ def test_calculate_widths(mock_table):
         (False, "")
     ]
 )
-def test_put_table(mocker, mock_table, mock_console, menu_flag, record_number):
-    # Setup
+def test_put_table(mocker, mock_table, menu_flag, record_number):
+    # Setup console mocks
+    mock_console = mocker.Mock(spec=Terminal)
     mock_console_table = mocker.patch("table.ConsoleTable")
-    mock_display = mock_console_table.return_value.display
+    display_mock = mock_console_table.return_value.display
 
     # Execute
     mock_table.put_table(console=mock_console, is_menu=menu_flag)
@@ -161,4 +158,4 @@ def test_put_table(mocker, mock_table, mock_console, menu_flag, record_number):
 
     # Verify ConsoleTable called
     mock_console_table.assert_called_once_with(mock_table)
-    mock_display.assert_called_once_with(mock_console)
+    display_mock.assert_called_once_with(mock_console)
