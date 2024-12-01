@@ -1,24 +1,16 @@
 import pytest
 import sys
-import commands as cmd
+import commands as cmds
 
 
 @pytest.fixture
-def mock_run(mocker):
-    return mocker.patch("commands.sub.run")
-
-@pytest.fixture
-def mock_command_run(mocker):
+def run_command_mock(mocker):
     return mocker.patch("commands.run_command")
-
-@pytest.fixture
-def mock_table(mocker):
-    return mocker.patch("commands.Table")
 
 
 # Test runCommand
 @pytest.mark.parametrize(
-    "command, capture_output, mock_return, exp_output, should_raise",
+    "cmnd, capture_out, mock_rtn, exp_output, should_raise",
     [
         # Test case 1: Command success with output.
         (
@@ -46,84 +38,66 @@ def mock_table(mocker):
         )
     ]
 )
-def test_run_command(mocker, mock_run, command, mock_return, capture_output, 
-                     exp_output, should_raise):
+def test_run_command(mocker, cmnd, mock_rtn, capture_out, exp_output, 
+                     should_raise):
     # Setup
-    mock_run.return_value = mocker.MagicMock(**mock_return)
+    run_mock = mocker.patch("commands.sub.run")
+    run_mock.return_value = mocker.MagicMock(**mock_rtn)
 
-    # Execute
+    # Execute exception
     if should_raise:
-        with pytest.raises(RuntimeError, match=mock_return.get("stderr", "")):
-            cmd.run_command(command, capture_output, use_shell=True)
+        with pytest.raises(RuntimeError, match=mock_rtn.get("stderr", "")):
+            cmds.run_command(cmnd, capture_out, use_shell=True)
+    
+    # Execute without exception
     else:
-        result = cmd.run_command(command, capture_output, use_shell=True)
+        result = cmds.run_command(cmnd, capture_out, use_shell=True)
         
         # Verify method output
         assert result == exp_output
     
     # Verify method process
-    mock_run.assert_called_once_with(command, capture_output=capture_output, 
+    run_mock.assert_called_once_with(cmnd, capture_output=capture_out, 
                                      shell=True, text=True, 
                                      stdout=sys.stdout 
-                                     if not capture_output else None,
+                                     if not capture_out else None,
                                      stderr=sys.stderr 
-                                     if not capture_output else None)
+                                     if not capture_out else None)
 
 # Test listBlockDevices
-@pytest.mark.parametrize("disk, columns, show_dependents, exp_command", 
+@pytest.mark.parametrize("disk, cols, shw_deps, exp_cmnd", 
     [
         # Test case 1: Command to list block devices
-        (
-            None, 
-            [], 
-            True, 
-            "lsblk"
-        ),
+        (None, [], True, "lsblk"),
+
         # Test case 2: Command to list /dev/sda disk and partitions
-        (
-            "sda", 
-            [], 
-            True, 
-            "lsblk /dev/sda"
-        ),
+        ("sda", [], True, "lsblk /dev/sda"), 
+
         # Test case 3: Command to print specified output columns
-        (
-            None, 
-            ["NAME", "SIZE"], 
-            True, 
-            "lsblk --output NAME,SIZE"
-        ),
+        (None, ["NAME", "SIZE"], True, "lsblk --output NAME,SIZE"), 
+
         # Test case 4: Command to not print slaves
-        (
-            None, 
-            [], 
-            False, 
-            "lsblk --nodeps"
-        ),
+        (None, [], False, "lsblk --nodeps"), 
+
         # Test case 5: Command to print with columns and without slaves
-        (
-            "sda", 
-            ["NAME", "TYPE"], 
-            False, 
-            "lsblk --nodeps --output NAME,TYPE /dev/sda"
-        )
+        ("sda", ["NAME", "TYPE"], False, 
+         "lsblk --nodeps --output NAME,TYPE /dev/sda")
     ]
 )
-def test_list_block_devices(mock_command_run, disk, columns, show_dependents, 
-                            exp_command):
+def test_list_block_devices(run_command_mock, disk, cols, shw_deps, exp_cmnd):
     # Setup
-    mock_command_run.return_value = "Mock Block Devices List"
+    run_command_mock.return_value = "Mock Block Devices List"
 
     # Execute
-    result = cmd.list_block_devices(disk, columns, show_dependents)
+    result = cmds.list_block_devices(disk, cols, shw_deps)
 
     # Verify
-    mock_command_run.assert_called_once_with(exp_command)
+    run_command_mock.assert_called_once_with(exp_cmnd)
     assert result == "Mock Block Devices List"
 
 # Test runBadblocks
 @pytest.mark.parametrize(
-    "non_destructive, capture_output, exp_command, mock_output",
+    "non_destruct, capture_out, exp_cmnd, mock_out",
     [
         # Test case 1: Non-destructive command with output
         (
@@ -155,45 +129,50 @@ def test_list_block_devices(mock_command_run, disk, columns, show_dependents,
         )
     ]
 )
-def test_run_badblocks(mock_command_run, non_destructive, capture_output, 
-                       exp_command, mock_output):
+def test_run_badblocks(run_command_mock, non_destruct, capture_out, exp_cmnd, 
+                       mock_out):
     # Setup
-    mock_command_run.return_value = mock_output
+    run_command_mock.return_value = mock_out
 
     # Execute
-    result = cmd.run_badblocks("sda", non_destructive, capture_output)
+    result = cmds.run_badblocks("sda", non_destruct, capture_out)
 
     # Verify
-    mock_command_run.assert_called_once_with(exp_command, 
-                                             capture_output=capture_output)
-    assert result == mock_output
+    run_command_mock.assert_called_once_with(exp_cmnd, 
+                                             capture_output=capture_out)
+    assert result == mock_out
 
 # Test unmountDisk
-def test_unmount_disk(mock_command_run, mock_table):
-    # Setup
-    mock_lsblk_output = ("PATH       MOUNTPOINT\n"
-                         "/dev/sda1  /mnt/point1\n"
-                         "/dev/sda2  /mnt/point2\n")
-    mock_command_run.side_effect = [mock_lsblk_output,  # First call for lsblk
-                                    None,               # Second call for umount
-                                    None]               # Third call for umount
-    mock_table_instance = mock_table.return_value
-    mock_table_instance.filter_nonempty.return_value = None
-    mock_table_instance.count_records.return_value = 2
-    mock_table_instance.get_record.side_effect = [{"PATH": "/dev/sda1", 
-                                                   "MOUNTPOINT": "/mnt/point1"},
-                                                  {"PATH": "/dev/sda2", 
-                                                   "MOUNTPOINT": "/mnt/point2"}]
+def test_unmount_disk(mocker, run_command_mock):
+    # Setup runCommand mock
+    mock_lsblk_out = ("PATH       MOUNTPOINT\n"
+                      "/dev/sda1  /mnt/point1\n"
+                      "/dev/sda2  /mnt/point2\n")
+    run_command_mock.side_effect = [mock_lsblk_out,  # First call for lsblk
+                                    None,            # Second call for umount
+                                    None]            # Third call for umount
+    
+    # Setup mock Table
+    mock_table = mocker.patch("commands.Table")
+    mock_table_inst = mock_table.return_value
+    mock_table_inst.filter_nonempty.return_value = None
+    mock_table_inst.count_records.return_value = 2
+    mock_table_inst.get_record.side_effect = [{"PATH": "/dev/sda1", 
+                                               "MOUNTPOINT": "/mnt/point1"}, 
+                                               {"PATH": "/dev/sda2", 
+                                                "MOUNTPOINT": "/mnt/point2"}]
 
     # Execute
-    cmd.unmount_disk("sda")
+    cmds.unmount_disk("sda")
 
-    # Verify
-    mock_command_run.assert_any_call("lsblk --output PATH,MOUNTPOINT /dev/sda")
-    mock_command_run.assert_any_call("sudo umount --verbose /dev/sda1", 
+    # Verify runCommand calls
+    run_command_mock.assert_any_call("lsblk --output PATH,MOUNTPOINT /dev/sda")
+    run_command_mock.assert_any_call("sudo umount --verbose /dev/sda1", 
                                      capture_output=False)
-    mock_command_run.assert_any_call("sudo umount --verbose /dev/sda2", 
+    run_command_mock.assert_any_call("sudo umount --verbose /dev/sda2", 
                                      capture_output=False)
-    assert mock_command_run.call_count == 3
-    mock_table.assert_called_once_with(table_string=mock_lsblk_output)
-    mock_table_instance.filter_nonempty.assert_called_once_with("MOUNTPOINT")
+    assert run_command_mock.call_count == 3
+
+    # Verify Table method calls
+    mock_table.assert_called_once_with(table_string=mock_lsblk_out)
+    mock_table_inst.filter_nonempty.assert_called_once_with("MOUNTPOINT")
