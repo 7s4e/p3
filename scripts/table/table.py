@@ -1,9 +1,9 @@
 """Module for handling table formatting and display."""
-
 # Third-party imports
 from blessed import Terminal
 # Local module imports
 from console_table import ConsoleTable
+
 
 class Table:
     """
