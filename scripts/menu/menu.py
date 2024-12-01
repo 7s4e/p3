@@ -11,14 +11,25 @@ from table import Table
 
 class Menu:
     def __init__(self, 
-                 options: Table | list, 
+                 options: list | Table, 
                  title: str | None = None,
                  prompt: str | None = None) -> None:
-        self._options = (options
-                         if isinstance(options, Table) 
-                         else Table(title=title, 
-                                    table_data=[{"OPTION": option} 
-                                                 for option in options]))
+
+        # Parameter validation
+        if not isinstance(options, (list, Table)):
+            raise TypeError("Expected `Table` or `list` for 'options'")
+        if isinstance(options, list) and options == []:
+            raise ValueError("'options' cannot be an empty list")
+        if not (title is None or isinstance(title, str)):
+            raise TypeError("Expected `str` or `None` for 'title'")
+        if not (prompt is None or isinstance(prompt, str)):
+            raise TypeError("Expected `str` or `None` for 'prompt'")
+
+        # Assign validated attributes
+        self._options = (Table(title=title, 
+                               table_data=[{"OPTION": option} 
+                                           for option in options]) 
+                         if isinstance(options, list) else options)
         self._count = self._options.count_records()
         self.set_prompt(prompt)
     

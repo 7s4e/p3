@@ -62,40 +62,40 @@ class ConsolePrompt:
 
         # Type validation
         if not isinstance(prompt, str):
-            raise TypeError("Expected `str` for 'prompt'.")
+            raise TypeError("Expected `str` for 'prompt'")
         if not isinstance(expect_keystroke, bool):
-            raise TypeError("Expected `bool` for 'expect_keystroke'.")
+            raise TypeError("Expected `bool` for 'expect_keystroke'")
         if not isinstance(validate_bool, bool):
-            raise TypeError("Expected `bool` for 'validate_bool'.")
+            raise TypeError("Expected `bool` for 'validate_bool'")
         if not isinstance(validate_integer, bool):
-            raise TypeError("Expected `bool` for 'validate_integer'.")
+            raise TypeError("Expected `bool` for 'validate_integer'")
         if (integer_validation is not None 
             and not (isinstance(integer_validation, int) 
                      and not isinstance(integer_validation, bool)
                      or isinstance(integer_validation, tuple))):
             raise TypeError("Expected `int`, `tuple[int, int]`, or `None` " +
-                            "for 'integer_validation'.")
+                            "for 'integer_validation'")
 
         # Value validation
         if validate_bool and validate_integer:
             raise ValueError("Both 'validate_bool' and 'validate_integer' " +
-                             "cannot be `True`.")
+                             "cannot be `True`")
         if integer_validation is not None:
             if not validate_integer:
                 raise ValueError("With 'integer_validation', " +
-                                 "'validate_integer' must be `True`.")
+                                 "'validate_integer' must be `True`")
             if isinstance(integer_validation, int):
                 if integer_validation < 0:
                     raise ValueError("Range for 'integer_validation' must " +
-                                     "be positive.")
+                                     "be positive")
             else:
                 if len(integer_validation) != 2:
                     raise ValueError("The 'integer_validation' `tuple` must " +
-                                     "have two elements.")
+                                     "have two elements")
                 if integer_validation[0] > integer_validation[1]:
                     raise ValueError("The second value of the " +
                                      "'integer_validation' `tuple` cannot " +
-                                     "be less than the first.")
+                                     "be less than the first")
 
         # Assign validated attributes
         self._prompt = prompt
@@ -149,7 +149,7 @@ class ConsolePrompt:
             self._user_response = self._user_response.lower() == "y"
             return True
 
-        self._put_alert("Respond with 'y' or 'n'.")
+        self._put_alert("Respond with 'y' or 'n'")
         return False
 
     def _check_integer_validity(self) -> bool:
@@ -168,19 +168,19 @@ class ConsolePrompt:
             bool: True if the response is valid, False otherwise.
         """
         if not bool(re.fullmatch(r'-?[0-9]+', self._user_response)):
-            self._put_alert("Enter a valid number.")
+            self._put_alert("Enter a valid number")
             return False
         response = int(self._user_response)
         match self._integer_validation:
             case int() as range:
                 if response < 0 or response >= range:
-                    self._put_alert("Response is out of range.")
+                    self._put_alert("Response is out of range")
                     return False
             case tuple() as limits:
                 low, high = limits
                 if response < low or response > high:
                     self._put_alert(f"Enter a number between {low} and " +
-                                        f"{high}.")
+                                        f"{high}")
                     return False
             case None: pass
         self._validated_response = str(response)
