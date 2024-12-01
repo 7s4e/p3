@@ -34,46 +34,159 @@ def put_alert_mock(mocker, mock_prompt):
     return mocker.patch.object(mock_prompt, "_put_alert")
 
 
+# Test call
+def test_call(mocker, mock_console):
+    # Setup instance and method and attribue mocks
+    mock_prompt = ConsolePrompt("Mocked prompt")
+    get_response_mock = mocker.patch.object(mock_prompt, "_get_response")
+    validate_response_mock = mocker.patch.object(mock_prompt, 
+                                                 "_validate_response", 
+                                                 side_effect=[False, True])
+    mock_prompt._validated_response = "mocked response"
+    
+    # Execute
+    result = mock_prompt.call(mock_console)
+
+    # Verify assignment and result
+    assert mock_prompt._con == mock_console
+    assert result == "mocked response"
+
+    # Verify method calls
+    assert get_response_mock.call_count == 2
+    assert validate_response_mock.call_count == 2
+
+
+# Test checkBoolValidity
+@pytest.mark.parametrize(
+    "response, exp_result", 
+    [
+        # Test series 1: Invalid
+        ('!', False), ('1', False), ('a', False), ('A', False), 
+
+        # Test series 2: Valid
+        ('y', True), ('Y', True), ('n', True), ('N', True)
+    ]
+)
+def test_check_bool_validity(mock_prompt, put_alert_mock, response, 
+                             exp_result):
+    # Setup
+    mock_prompt._user_response = response
+
+    # Execute
+    result = mock_prompt._check_bool_validity()
+
+    # Verify
+    assert result == exp_result
+    if not exp_result:
+        put_alert_mock.assert_called_once_with("Respond with 'y' or 'n'")
+    else:
+        put_alert_mock.assert_not_called()
+
+
+# Test checkIntegerValidity
+@pytest.mark.parametrize(
+    "int_validation, response, exp_result, alert", 
+    [
+        # Test series 1: No extra validation of integer
+        (None, "123", True, ""), 
+        (None, "-123", True, ""), 
+        (None, "1.23", False, "Enter a valid number"), 
+        (None, "abc", False, "Enter a valid number"), 
+
+        # Test series 2: Valid range defined by single integer
+        (9, "0", True, ""), 
+        (9, "9", False, "Response is out of range"), 
+        (9, "-1", False, "Response is out of range"), 
+
+        # Test series 3: Valid range defined by tuple
+        ((-7, 7), "0", True, ""), 
+        ((-7, 7), "7", True, ""), 
+        ((-7, 7), "9", False, "Enter a number between -7 and 7"), 
+        ((-7, 7), "-7", True, ""), 
+        ((-7, 7), "-9", False, "Enter a number between -7 and 7")
+    ]
+)
+def test_check_integer_validity(mock_prompt, put_alert_mock, int_validation, 
+                                response, exp_result, alert):
+    # Setup
+    mock_prompt._integer_validation = int_validation
+    mock_prompt._user_response = response
+
+    # Execute
+    result = mock_prompt._check_integer_validity()
+
+    # Verify
+    assert result == exp_result
+    if exp_result == True:
+        assert mock_prompt._validated_response == response
+    else:
+        put_alert_mock.assert_called_once_with(alert)
+
+
+#Test _get_response
+@pytest.mark.parametrize(
+    "keystroke, leave_crsr", 
+    [(True, False),  # Test case 1: readKeystroke path
+     (False, True)]  # Test case 2: readString path
+)
+def test_get_response(mocker, mock_prompt, keystroke, leave_crsr):
+    # Setup method mocks
+    put_prompt_mock = mocker.patch.object(mock_prompt, "_put_prompt")
+    read_keystroke_mock = mocker.patch.object(mock_prompt, "_read_keystroke")
+    read_string_mock = mocker.patch.object(mock_prompt, "_read_string")
+    
+    # Setup expKeystroke attribute
+    mock_prompt._expect_keystroke = keystroke
+
+    # Execute
+    mock_prompt._get_response()
+
+    # Verify method calls
+    put_prompt_mock.assert_called_once_with(leave_cursor_inline=leave_crsr)
+    if keystroke:
+        read_keystroke_mock.assert_called_once()
+        read_string_mock.assert_not_called()
+    else:
+        read_keystroke_mock.assert_not_called()
+        read_string_mock.assert_called_once()
+
+
 # Test printMessage
 @pytest.mark.parametrize(
     "width, padding, is_inline, message", 
     [
         # Test case 1: Minimum width
-        (
-            1, " " * 0, False, 
-            "Lorem ipsum odor amet, consectetuer adipiscing elit."
-        ), 
+        (1, " " * 0, False, 
+         "Lorem ipsum odor amet, consectetuer adipiscing elit."), 
+        
         # Test case 2: Standard width
-        (
-            79, " " * 0, False, 
-            "Lorem ipsum odor amet, consectetuer adipiscing elit."
-        ), 
+        (79, " " * 0, False, 
+         "Lorem ipsum odor amet, consectetuer adipiscing elit."), 
+        
         # Test case 3: Large width
-        (
-            99, " " * 10, False, 
-            "Lorem ipsum odor amet, consectetuer adipiscing elit."
-        ), 
+        (99, " " * 10, False, 
+         "Lorem ipsum odor amet, consectetuer adipiscing elit."), 
+        
         # Test case 4: Standard width, inline
-        (
-            79," " * 0, True, 
-            "Lorem ipsum odor amet, consectetuer adipiscing elit."
-        ), 
+        (79," " * 0, True, 
+         "Lorem ipsum odor amet, consectetuer adipiscing elit."), 
+        
         # Test case 5: Standard width, text
-        (
-            79," " * 0, True, 
-            "Lorem ipsum odor amet, consectetuer adipiscing elit. Torquent leo consectetur sodales etiam ex gravida eleifend interdum."
-        )
+        (79," " * 0, True, 
+         "Lorem ipsum odor amet, consectetuer adipiscing elit. Torquent " + 
+         "leo consectetur sodales etiam ex gravida eleifend interdum.")
     ]
 )
-def test_print_message(mock_prompt, capfd, width, padding, message, is_inline):
-    # Setup
+def test_print_message(mock_prompt, width, padding, message, is_inline, 
+                       capfd):
+    # Setup display width
     mock_prompt._con.width = width
 
-    # Execute
+    # Execute and capture
     mock_prompt._print_message(message, leave_cursor_inline=is_inline)
     out, err = capfd.readouterr()
 
-    # Verify
+    # Verify padding and line break
     text = padding + message
     ln_break = text.rfind(" ", 0, min(width, 79))
     assert out.startswith(text[:ln_break if ln_break > 0 else width])
@@ -81,41 +194,41 @@ def test_print_message(mock_prompt, capfd, width, padding, message, is_inline):
     assert err == ""
 
 
+# Test putAlert
+def test_put_alert(mock_prompt, capfd):
+    # Setup terminal color
+    mock_prompt._con.red = lambda x: f"[red]{x}[/red]"
+
+    # Execute and capture
+    mock_prompt._put_alert("Alert message")
+    out, err = capfd.readouterr()
+
+    # Verify capture
+    assert out == "[red]Alert message[/red]\n"
+    assert err == ""
+
+
 # Test putPrompt
 @pytest.mark.parametrize("is_inline, end", 
                          [(True, " "),     # Test case 1: Inline
                           (False, "\n")])  # Test case 2: New line
-def test_put_prompt(mock_prompt, capfd, is_inline, end):
-    # Setup
+def test_put_prompt(mock_prompt, is_inline, end, capfd):
+    # Setup terminal color
     mock_prompt._con.bright_yellow = lambda x: f"[yellow]{x}[/yellow]"
 
-    # Execute
+    # Execute and capture
     mock_prompt._put_prompt(leave_cursor_inline=is_inline)
     out, err = capfd.readouterr()
 
-    # Verify
+    # Verify capture
     assert out.startswith("[yellow]Test prompt[/yellow]")
     assert out.endswith(end)
     assert err == ""
 
 
-# Test putAlert
-def test_put_alert(mock_prompt, capfd):
-    # Setup
-    mock_prompt._con.red = lambda x: f"[red]{x}[/red]"
-
-    # Execute
-    mock_prompt._put_alert("Alert message")
-    out, err = capfd.readouterr()
-
-    # Verify
-    assert out == "[red]Alert message[/red]\n"
-    assert err == ""
-
-
 # Test readKeystroke
 @pytest.mark.parametrize(
-    "exp_result, input_sequence", 
+    "exp_result, sequence_in", 
     [
         ('', [keyboard.Keystroke('\n', 10)]),   # Test case 1
         (' ', [keyboard.Keystroke(' ', 32)]),   # Test case 2
@@ -131,21 +244,21 @@ def test_put_alert(mock_prompt, capfd):
     ]
 )
 def test_read_keystroke(mocker, mock_prompt, cbreak_mock, hidden_cursor_mock, 
-                        input_sequence, exp_result):
-    # Setup
-    key_iterator = iter(input_sequence)
+                        sequence_in, exp_result):
+    # Setup key iterator; cbreak and hiddenCursor mocks required
+    key_iterator = iter(sequence_in)
     mocker.patch.object(mock_prompt._con, "inkey", lambda: next(key_iterator))
 
     # Execute
     mock_prompt._read_keystroke()
 
-    # Verify
+    # Verify result
     assert mock_prompt._user_response == exp_result
 
 
 # Test readString
 @pytest.mark.parametrize(
-    "exp_result, input_sequence", 
+    "exp_result, sequence_in", 
     [
         # Test case 1: No use of 'Backspace'
         ("abc", [keyboard.Keystroke('a', 97), keyboard.Keystroke('b', 98), 
@@ -172,20 +285,22 @@ def test_read_keystroke(mocker, mock_prompt, cbreak_mock, hidden_cursor_mock,
         # """
     ]
 )
-def test_read_string(mock_prompt, cbreak_mock, input_sequence, exp_result, 
+def test_read_string(mock_prompt, cbreak_mock, sequence_in, exp_result, 
                      capfd):
     # Setup
-    mock_prompt._con.inkey.side_effect = input_sequence
+    mock_prompt._con.inkey.side_effect = sequence_in
     mock_prompt._con.green = lambda x: f"[green]{x}[/green]"
 
-    # Execute
+    # Execute and capture
     mock_prompt._read_string()
     out, err = capfd.readouterr()
 
-    # Verify
+    # Verify result
     assert mock_prompt._user_response == exp_result
+    
+    # Verify capture
     exp_stdout = []
-    for key in input_sequence:
+    for key in sequence_in:
         if key.code == 8:
             if exp_stdout:
                 exp_stdout.pop()
@@ -194,98 +309,6 @@ def test_read_string(mock_prompt, cbreak_mock, input_sequence, exp_result,
     exp_stdout = ''.join(exp_stdout) + '\n'
     assert out == exp_stdout, f"Expected: {exp_stdout}, Got: {out}"
     assert err == ""
-
-
-# # Test checkBoolValidity
-# @pytest.mark.parametrize(
-#     "response, expected", 
-#     [
-#         # Test series 1: Invalid
-#         ('!', False), ('1', False), ('a', False), ('A', False), 
-
-#         # Test series 2: Valid
-#         ('y', True), ('Y', True), ('n', True), ('N', True)
-#     ]
-# )
-# def test_check_bool_validity(mock_prompt, put_alert_mock, response, expected):
-#     # Setup
-#     mock_prompt._user_response = response
-
-#     # Execute
-#     result = mock_prompt._check_bool_validity()
-
-#     # Verify
-#     assert result == expected
-#     if not expected:
-#         put_alert_mock.assert_called_once_with("Respond with 'y' or 'n'.")
-#     else:
-#         put_alert_mock.assert_not_called()
-
-
-# # Test checkIntegerValidity
-# @pytest.mark.parametrize(
-#     "validation, response, expected, alert", 
-#     [
-#         # Test series 1: No extra validation of integer
-#         (None, "123", True, ""), 
-#         (None, "-123", True, ""), 
-#         (None, "1.23", False, "Enter a valid number."), 
-#         (None, "abc", False, "Enter a valid number."), 
-
-#         # Test series 2: Valid range defined by single integer
-#         (9, "0", True, ""), 
-#         (9, "9", False, "Response is out of range."), 
-#         (9, "-1", False, "Response is out of range."), 
-
-#         # Test series 3: Valid range defined by tuple
-#         ((-7, 7), "0", True, ""), 
-#         ((-7, 7), "7", True, ""), 
-#         ((-7, 7), "9", False, "Enter a number between -7 and 7."), 
-#         ((-7, 7), "-7", True, ""), 
-#         ((-7, 7), "-9", False, "Enter a number between -7 and 7.")
-#     ]
-# )
-# def test_check_integer_validity(mock_prompt, put_alert_mock, validation, 
-#                                 response, expected, alert):
-#     # Setup
-#     mock_prompt._integer_validation = validation
-#     mock_prompt._user_response = response
-
-#     # Execute
-#     result = mock_prompt._check_integer_validity()
-
-#     # Verify
-#     assert result == expected
-#     if expected == True:
-#         assert mock_prompt._validated_response == response
-#     else:
-#         put_alert_mock.assert_called_once_with(alert)
-
-
-#Test _get_response
-@pytest.mark.parametrize(
-    "keystroke, cursor", 
-    [(True, False),  # Test case 1: readKeystroke path
-     (False, True)]  # Test case 2: readString path
-)
-def test_get_response(mocker, mock_prompt, keystroke, cursor):
-    # Setup
-    put_prompt_mock = mocker.patch.object(mock_prompt, "_put_prompt")
-    read_keystroke_mock = mocker.patch.object(mock_prompt, "_read_keystroke")
-    read_string_mock = mocker.patch.object(mock_prompt, "_read_string")
-    mock_prompt._expect_keystroke = keystroke
-
-    # Execute
-    mock_prompt._get_response()
-
-    # Verify
-    put_prompt_mock.assert_called_once_with(leave_cursor_inline=cursor)
-    if keystroke:
-        read_keystroke_mock.assert_called_once()
-        read_string_mock.assert_not_called()
-    else:
-        read_keystroke_mock.assert_not_called()
-        read_string_mock.assert_called_once()
 
 
 # Test _validate_response
@@ -309,21 +332,25 @@ def test_get_response(mocker, mock_prompt, keystroke, cursor):
 )
 def test_get_validate_reponse(mocker, mock_prompt, bool_path, int_path, 
                               bool_rtn, int_rtn, exp_result):
-    # Setup
+    # Setup method mocks
     check_bool_validity_mock = mocker.patch.object(mock_prompt, 
                                                    "_check_bool_validity", 
                                                    return_value=bool_rtn)
     check_int_validity_mock = mocker.patch.object(mock_prompt, 
                                                   "_check_integer_validity", 
                                                   return_value=int_rtn)
+    
+    # Setup instance attributes
     mock_prompt._validate_bool = bool_path
     mock_prompt._validate_integer = int_path
 
     # Execute
     result = mock_prompt._validate_response()
 
-    # Verify
+    # Verify result
     assert result == exp_result
+
+    # Verify method calls
     if bool_path:
         check_bool_validity_mock.assert_called_once()
         check_int_validity_mock.assert_not_called()
@@ -333,23 +360,3 @@ def test_get_validate_reponse(mocker, mock_prompt, bool_path, int_path,
     else:
         check_bool_validity_mock.assert_not_called()
         check_int_validity_mock.assert_not_called()
-
-
-# Test call
-def test_call(mocker, mock_console):
-    # Setup
-    mock_prompt = ConsolePrompt("Mocked prompt")
-    get_response_mock = mocker.patch.object(mock_prompt, "_get_response")
-    validate_response_mock = mocker.patch.object(mock_prompt, 
-                                                 "_validate_response", 
-                                                 side_effect=[False, True])
-    mock_prompt._validated_response = "mocked response"
-    
-    # Execute
-    result = mock_prompt.call(mock_console)
-
-    # Verify
-    assert mock_prompt._con == mock_console
-    assert get_response_mock.call_count == 2
-    assert validate_response_mock.call_count == 2
-    assert result == "mocked response"
