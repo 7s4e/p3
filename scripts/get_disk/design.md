@@ -30,4 +30,6 @@ flowchart LR
 ```
 * [commands](../commands/design.md)
 * [console](../console/design.md)
+* [ConsolePrompt](../console/design.md)
+* [Menu](../menu/design.md)
 * [Table](../table/design.md)
