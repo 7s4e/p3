@@ -21,7 +21,7 @@ flowchart LR
     GDS[getDisks]:::complete
         GDS --> CMD
         GDS --> TBL
-    CCP(ConsolePrompt):::complete
+    CCP(console.ConsolePrompt):::complete
     SD[selectDisk]:::working
         SD --> MNU
     CMD(commands):::complete
@@ -30,6 +30,5 @@ flowchart LR
 ```
 * [commands](../commands/design.md)
 * [console](../console/design.md)
-* [ConsolePrompt](../console/design.md)
 * [Menu](../menu/design.md)
 * [Table](../table/design.md)
