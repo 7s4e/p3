@@ -26,7 +26,8 @@ from menu import Menu
         (False, ["a", "b", "c", "d", "e"], None), 
 
         # Test case 7: Isolated method on long menu with prompt
-        (False, ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"], "Mock prompt?"), 
+        (False, 
+         ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"], "Mock prompt?"), 
 
         # Test case 4: Isolated method on long menu without prompt
         (False, ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"], None), 
