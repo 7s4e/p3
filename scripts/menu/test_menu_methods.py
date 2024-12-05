@@ -1,46 +1,60 @@
-# import pytest
-# from menu import Menu
+import pytest
+from functools import partial
+from menu import Menu
 
 
-# # @pytest.fixture
-# # def mock_run(mocker):
-# #     return mocker.patch("commands.sub.run")
+# Test setPrompt
+@pytest.mark.parametrize(
+    "mock_menu, options, prompt_param", 
+    [
+        # Test case 1: Isolated method on short menu with prompt
+        (True, 7, "Mock prompt?"), 
 
+        # Test case 2: Isolated method on short menu without prompt
+        (True, 7, None), 
 
-# # Test runCommand
-# # @pytest.mark.parametrize(
-# #     "command, capture_output, mock_return, exp_output, should_raise",
-# #     [
-# #         # Test case 1: Command success with output.
-# #         (
-# #             "echo 'No Capture'", 
-# #             False, 
-# #             {"returncode": 0}, 
-# #             None, 
-# #             False
-# #         )
-# #     ]
-# # )
-# # def test_run_command(mocker, mock_run, command, mock_return, capture_output, 
-# #                      exp_output, should_raise):
-# #     # Setup
-# #     mock_run.return_value = mocker.MagicMock(**mock_return)
+        # Test case 3: Isolated method on long menu with prompt
+        (True, 55, "Mock prompt?"), 
 
-# #     # Execute
-# #     if should_raise:
-# #         with pytest.raises(RuntimeError, match=mock_return.get("stderr", "")):
-# #             cmd.run_command(command, capture_output, use_shell=True)
-# #     else:
-# #         result = cmd.run_command(command, capture_output, use_shell=True)
-        
-# #         # Verify method output
-# #         assert result == exp_output
+        # Test case 4: Isolated method on long menu without prompt
+        (True, 55, None), 
+
+        # Test case 5: Isolated method on short menu with prompt
+        (False, ["a", "b", "c", "d", "e"], "Mock prompt?"), 
+
+        # Test case 6: Isolated method on short menu without prompt
+        (False, ["a", "b", "c", "d", "e"], None), 
+
+        # Test case 7: Isolated method on long menu with prompt
+        (False, ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"], "Mock prompt?"), 
+
+        # Test case 4: Isolated method on long menu without prompt
+        (False, ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"], None), 
+    ]
+)
+def test_set_prompt(mocker, mock_menu, options, prompt_param):
+    # Setup method isolating instance
+    if mock_menu:
+        menu = mocker.Mock(spec=Menu)
+        menu._count = options
+        method = getattr(menu, "set_prompt")
+        method.side_effect = partial(getattr(Menu, "set_prompt"), menu)
     
-# #     # Verify method process
-# #     mock_run.assert_called_once_with(command, capture_output=capture_output, 
-# #                                      shell=True, text=True, 
-# #                                      stdout=sys.stdout 
-# #                                      if not capture_output else None,
-# #                                      stderr=sys.stderr 
-# #                                      if not capture_output else None)
+    # Setup method integrated instance
+    else:
+        menu = Menu(options)
+    
+    # Setup ConsolePrompt mock and its prompt argument
+    mock_console_prompt = mocker.patch("menu.ConsolePrompt")
+    prompt_arg = (prompt_param if prompt_param is not None 
+                  else f"Enter number (1-{options}) for selection:")
 
+    # Execute
+    menu.set_prompt(prompt_arg)
+    
+    # Verify
+    count = menu._count
+    mock_console_prompt.assert_called_once_with(prompt_arg, 
+                                                expect_keystroke=count<10, 
+                                                validate_integer=True, 
+                                                integer_validation=(1, count))
