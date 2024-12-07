@@ -30,7 +30,7 @@ def test_confirm_disk(mocker, lsblk_mock, table_mocks):
     table_class, table_instance = table_mocks
     console_prompt_class = mocker.patch("get_disk.ConsolePrompt")
     console_prompt_instance = console_prompt_class.return_value
-    console_prompt_instance.call.return_value = "y"
+    console_prompt_instance.call.return_value = True
 
     # Execute
     result = gd.confirm_disk(mock_console, "sda")
@@ -52,7 +52,12 @@ def test_confirm_disk(mocker, lsblk_mock, table_mocks):
     console_prompt_instance.call.assert_called_once_with(mock_console)
 
     # Verify method return    
-    assert result == "y"
+    assert result == True
+
+
+# Test getDisk
+def test_get_disk():
+    pass
 
 
 # Test getDisks

@@ -18,12 +18,13 @@ flowchart LR
         GD --> CCP
         GD --> SD
         GD --> CD
+        GD --> CMD
     GDS[getDisks]:::complete
         GDS --> CMD
         GDS --> TBL
     SD[selectDisk]:::complete
         SD --> MNU
-    CD[confirmDisk]:::working
+    CD[confirmDisk]:::complete
         CD --> CMD
         CD --> TBL
         CD --> CCP

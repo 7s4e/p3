@@ -87,15 +87,22 @@ def get_disk(console: Terminal) -> str:
         disk = (disks.get_record(0)["NAME"] 
                 if count == 1 else select_disk(console, disks))
 
-    #     if confirm_disk(console, disk):
-    #         break
-    #     else:
-    #         if Menu.query_yes_no(f"Do you want to unmount '{disk}'? (y/n) "):
-    #             unmount_disk(disk)
-    #         print("Check device and press Enter...")
-    #         input()
+        if confirm_disk(console, disk):
+            break
+        else:
+            unmount_prompt = f"Do you want to unmount '{disk}'? (y/n)"
+            unmount_confirmation = ConsolePrompt(unmount_prompt, 
+                                                 expect_keystroke=True, 
+                                                 validate_bool=True)
+            if unmount_confirmation.call(console):
+                cmd.unmount_disk(disk)
+            else:
+                check_disk_msg = "Check device and press any key..."
+                check_disk_alert = ConsolePrompt(check_disk_msg, 
+                                                 expect_keystroke=True)
+                check_disk_alert.call(console)
 
-    # return disk
+    return disk
 
 
 def main(console: Terminal) -> str:
