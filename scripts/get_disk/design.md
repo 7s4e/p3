@@ -22,11 +22,11 @@ flowchart LR
         GDS --> CMD
         GDS --> TBL
     CCP(console.ConsolePrompt):::complete
-    SD[selectDisk]:::working
+    SD[selectDisk]:::complete
         SD --> MNU
     CMD(commands):::complete
     TBL(Table):::complete
-    MNU(Menu):::working
+    MNU(Menu):::complete
 ```
 * [commands](../commands/design.md)
 * [console](../console/design.md)
