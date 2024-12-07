@@ -162,3 +162,56 @@ def test_put_table(mocker, table_instance, menu_flag, record_number):
     # Verify ConsoleTable called
     mock_console_table.assert_called_once_with(table_instance)
     display_mock.assert_called_once_with(mock_console)
+
+
+"""Getter Methods"""
+def test_basic_getters(table_instance):
+    # Setup
+    table_instance._calculate_widths()
+
+    # Execute
+    records_count = table_instance.count_records()
+    column_widths = table_instance.get_column_widths()
+    headings = table_instance.get_headings()
+    rjust_cols = table_instance.get_rjust_columns()
+    table_width = table_instance.get_table_width()
+    title = table_instance.get_title()
+
+    # Verify
+    assert records_count == 3
+    assert column_widths == {"FIRST": 5, "SECOND": 6}
+    assert headings == {"FIRST": "FIRST", "SECOND": "SECOND"}
+    assert rjust_cols == {"SECOND"}
+    assert table_width == 13
+    assert title == "MOCK TABLE"
+
+
+@pytest.mark.parametrize(
+    "index_in, exp_record, exception", 
+    [
+        # Test case 1: First record
+        (0, {"FIRST": "abc", "SECOND": "123"}, False), 
+
+        # Test case 2: Middle record
+        (1, {"FIRST": "", "SECOND": "456"}, False), 
+
+        # Test case 3: Last record
+        (2, {"FIRST": "xyz", "SECOND": "789"}, False), 
+
+        # Test case 4: Above range
+        (3, {"FIRST": "", "SECOND": ""}, True), 
+
+        # Test case 5: Below range
+        (-1, {"FIRST": "", "SECOND": ""}, True)
+    ]
+)
+def test_get_record(table_instance, index_in, exp_record, exception):
+    # Execute with exception
+    if exception:
+        with pytest.raises(IndexError):
+            table_instance.get_record(index_in)
+    
+    # Execute without acception
+    else:
+        result = table_instance.get_record(index_in)
+        assert result == exp_record
