@@ -16,7 +16,7 @@ from table import Table
         (10, 5),  # Test case 4: Double-digit records, middle option
     ]
 )
-def test_run(mocker, option_count, user_response):
+def test_run_and_get_selection(mocker, option_count, user_response):
     # Setup mock Table for Menu initialization and run() call
     mock_table = mocker.Mock(spec=Table)
     mock_table.count_records.return_value = option_count
@@ -33,15 +33,19 @@ def test_run(mocker, option_count, user_response):
     # Setup mock Terminal as test argument
     mock_console = mocker.Mock(spec=Terminal)
 
-    # Execute
+    # Execute run and getSelection methods
     menu_instance.run(mock_console)
+    result = menu_instance.get_selection("option")
 
-    # Verify
+    # Verify run method
     menu_instance._options.put_table.assert_called_once_with(mock_console, 
                                                              is_menu=True)
     menu_instance._prompt.call.assert_called_once_with(mock_console)
     menu_instance._options.get_record.called_once_with(user_response - 1)
     assert menu_instance._selection == {"OPTION": "Mock option"}
+
+    # Verify getSelection method
+    assert result == "Mock option"
 
 
 # Test setPrompt
