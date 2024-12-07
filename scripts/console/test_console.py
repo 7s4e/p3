@@ -33,5 +33,5 @@ def test_put_script_banner(mocker, mock_console):
     con.put_script_banner(mock_console, script_name)
 
     # Verify
-    expected_output = "<reverse>Running test_script...              </reverse>"
-    mock_print.assert_called_once_with(expected_output)
+    exp_out = "<reverse>Running test_script...              </reverse>"
+    mock_print.assert_called_once_with(exp_out)

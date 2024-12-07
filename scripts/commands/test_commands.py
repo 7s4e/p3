@@ -156,11 +156,11 @@ def test_unmount_disk(mocker, run_command_mock):
                                     None]            # Third call for umount
     
     # Setup mock Table
-    mock_table = mocker.patch("commands.Table")
-    mock_table_inst = mock_table.return_value
-    mock_table_inst.filter_nonempty.return_value = None
-    mock_table_inst.count_records.return_value = 2
-    mock_table_inst.get_record.side_effect = [{"PATH": "/dev/sda1", 
+    table_class = mocker.patch("commands.Table")
+    table_instance = table_class.return_value
+    table_instance.filter_nonempty.return_value = None
+    table_instance.count_records.return_value = 2
+    table_instance.get_record.side_effect = [{"PATH": "/dev/sda1", 
                                                "MOUNTPOINT": "/mnt/point1"}, 
                                                {"PATH": "/dev/sda2", 
                                                 "MOUNTPOINT": "/mnt/point2"}]
@@ -177,5 +177,5 @@ def test_unmount_disk(mocker, run_command_mock):
     assert run_command_mock.call_count == 3
 
     # Verify Table method calls
-    mock_table.assert_called_once_with(table_string=mock_lsblk_out)
-    mock_table_inst.filter_nonempty.assert_called_once_with("MOUNTPOINT")
+    table_class.assert_called_once_with(table_string=mock_lsblk_out)
+    table_instance.filter_nonempty.assert_called_once_with("MOUNTPOINT")

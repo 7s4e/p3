@@ -134,5 +134,5 @@ def test_constructor(table_data, table_string, title, rjust_columns,
     
     # Execute without exception
     else:
-        tbl = Table(table_data, table_string, title, rjust_columns)
-        assert tbl._records_count == 0
+        instance = Table(table_data, table_string, title, rjust_columns)
+        assert instance._records_count == 0

@@ -191,12 +191,12 @@ def test_console_prompt_constructor(prompt, exp_key, validate_bool,
                           validate_integer=validate_int, 
                           integer_validation=int_validation)
     else:
-        cp = ConsolePrompt(prompt, expect_keystroke=exp_key, 
-                           validate_bool=validate_bool, 
-                           validate_integer=validate_int, 
-                           integer_validation=int_validation)
-        assert cp._prompt == prompt
-        assert cp._expect_keystroke == exp_key
-        assert cp._validate_bool == validate_bool
-        assert cp._validate_integer == validate_int
-        assert cp._integer_validation == int_validation
+        instance = ConsolePrompt(prompt, expect_keystroke=exp_key, 
+                                validate_bool=validate_bool, 
+                                validate_integer=validate_int, 
+                                integer_validation=int_validation)
+        assert instance._prompt == prompt
+        assert instance._expect_keystroke == exp_key
+        assert instance._validate_bool == validate_bool
+        assert instance._validate_integer == validate_int
+        assert instance._integer_validation == int_validation
