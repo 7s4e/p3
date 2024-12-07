@@ -165,6 +165,8 @@ def test_put_table(mocker, table_instance, menu_flag, record_number):
 
 
 """Getter Methods"""
+# Test countRecords, getColumnWidths, getHeadings, getRjustColumns, 
+#   getTableWidth, and getTitle
 def test_basic_getters(table_instance):
     # Setup
     table_instance._calculate_widths()
@@ -186,6 +188,7 @@ def test_basic_getters(table_instance):
     assert title == "MOCK TABLE"
 
 
+# Test getRecords
 @pytest.mark.parametrize(
     "index_in, exp_record, exception", 
     [
