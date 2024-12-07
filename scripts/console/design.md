@@ -429,3 +429,78 @@ END
 ---
 ---
 ## `ConsoleTable`
+* [\_\_init__]()
+* [display]()
+* [_setDimensions]()
+* [_drawTable]()
+* [_drawRow]()
+* [_getRowEnds]()
+* [_getTextContent]()
+* [_processTextContent]()
+* [Table](../table/design.md)
+```mermaid
+graph
+    style MAIN fill:#4682b4,stroke:#b97d4b,stroke-width:2px,color:#0ff
+    style T fill:#b97d4b,stroke:#4682b4,stroke-width:2px
+    style C fill:#b97d4b,stroke:#4682b4,stroke-width:2px
+    classDef method fill:#4682b4,stroke:#b97d4b,stroke-width:2px
+    STRT([start])
+        STRT -- data --> INIT
+    INIT(*init*):::method
+        INIT --> MAIN
+    MAIN([**ConsoleTable**])
+        MAIN -- console  --> DSPL
+    DSPL(display):::method
+        DSPL          --> SDMN
+        CREC -- count --> DSPL
+        DSPL -- count --> DTBL
+    SDMN(_setDimensions):::method
+        GTBW -- width      --> SDMN
+        SDMN -- tableSpace --> RSZC
+        GCLW -- widths     --> SDMN
+    DTBL(_drawTable):::method
+        DTBL -- top
+                title
+                inner
+                headings
+                record, i
+                bottom    --> DROW
+    DROW(_drawRow):::method
+        GRJC -- rjustCols    --> DROW
+        DROW -- line.rowType --> GRWE
+        GRWE -- left
+                right
+                gap          --> DROW
+        DROW -- text.rowType
+                index        --> GTXT
+        GTXT -- content      --> DROW
+        DROW -- text.rowType
+                content
+                rjustCols    --> PTXT
+        PTXT -- cells        --> DROW
+    GRWE(_getRowEnds):::method
+    GTXT(_getTextContent):::method
+        GTTL -- title    --> GTXT
+        GHDG -- headings --> GTXT
+        GTXT -- index    --> GREC
+        GREC -- record   --> GTXT
+    PTXT(_processTextContent):::method
+        PTXT --> RVRS
+        PTXT --> UDLN
+    subgraph T [**Table**]
+        CREC(countRecords)
+        GTBW(getTableWidth)
+        RSZC(resizeColumns)
+        GCLW(getColumnWidths)
+        GRJC(getRjusColumns)
+        GTTL(getTitle)
+        GHDG(getHeadings)
+        GREC(getRecord)
+    end
+    subgraph C [**blessed.Terminal**]
+        RVRS(reverse)
+        UDLN(underline)
+    end
+```
+[️⬆️](#console-module)
+---

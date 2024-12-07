@@ -12,19 +12,19 @@ flowchart LR
     MAIN[main]
         MAIN --> CON
         MAIN --> GD
-    GD[getDisk]:::working
+    GD[getDisk]
         GD --> INSP
         GD --> GDS
         GD --> CCP
         GD --> SD
         GD --> CD
         GD --> CMD
-    GDS[getDisks]:::complete
+    GDS[getDisks]
         GDS --> CMD
         GDS --> TBL
-    SD[selectDisk]:::complete
+    SD[selectDisk]
         SD --> MNU
-    CD[confirmDisk]:::complete
+    CD[confirmDisk]
         CD --> CMD
         CD --> TBL
         CD --> CCP
