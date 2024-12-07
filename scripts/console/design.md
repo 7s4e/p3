@@ -451,51 +451,34 @@ graph
     MAIN([**ConsoleTable**])
         MAIN -- console  --> DSPL
     DSPL(display):::method
-        DSPL          --> SDMN
-        CREC -- count --> DSPL
-        DSPL -- count --> DTBL
+        DSPL                 --> SDMN
+        TGET -- recordCount --> DSPL
+        DSPL -- recordCount --> DTBL
     SDMN(_setDimensions):::method
-        GTBW -- width      --> SDMN
-        SDMN -- tableSpace --> RSZC
-        GCLW -- widths     --> SDMN
+        TGET -- tableWidth   --> SDMN
+        SDMN -- tableSpace   --> RSZC
+        TGET -- columnWidths --> SDMN
     DTBL(_drawTable):::method
-        DTBL -- top
-                title
-                inner
-                headings
-                record, i
-                bottom    --> DROW
+        DTBL -- row --> DROW
     DROW(_drawRow):::method
-        GRJC -- rjustCols    --> DROW
-        DROW -- line.rowType --> GRWE
-        GRWE -- left
-                right
-                gap          --> DROW
-        DROW -- text.rowType
-                index        --> GTXT
-        GTXT -- content      --> DROW
-        DROW -- text.rowType
-                content
-                rjustCols    --> PTXT
-        PTXT -- cells        --> DROW
+        TGET -- rjustCols --> DROW
+        DROW -- row       --> GRWE
+        GRWE -- spacing   --> DROW
+        DROW -- row       --> GTXT
+        GTXT -- content   --> DROW
+        DROW -- row       --> PTXT
+        PTXT -- cells     --> DROW
     GRWE(_getRowEnds):::method
     GTXT(_getTextContent):::method
-        GTTL -- title    --> GTXT
-        GHDG -- headings --> GTXT
-        GTXT -- index    --> GREC
-        GREC -- record   --> GTXT
+        TGET -- title    --> GTXT
+        TGET -- headings --> GTXT
+        TGET -- record   --> GTXT
     PTXT(_processTextContent):::method
         PTXT --> RVRS
         PTXT --> UDLN
     subgraph T [**Table**]
-        CREC(countRecords)
-        GTBW(getTableWidth)
+        TGET(Table getters)
         RSZC(resizeColumns)
-        GCLW(getColumnWidths)
-        GRJC(getRjusColumns)
-        GTTL(getTitle)
-        GHDG(getHeadings)
-        GREC(getRecord)
     end
     subgraph C [**blessed.Terminal**]
         RVRS(reverse)
