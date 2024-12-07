@@ -4,28 +4,37 @@ flowchart LR
     classDef complete color:#0f0,stroke:#0f0,fill:#555
     classDef working color:#ff0,stroke:#ff0,fill:#555
     classDef library color:#0ff,stroke:#0ff,fill:#555
+
+    %% Structure
     IF([start])
         IF --> TRM
         IF --> MAIN
-    TRM(blessed.Terminal):::library
     MAIN[main]
         MAIN --> CON
         MAIN --> GD
-    CON(console):::complete
     GD[getDisk]:::working
         GD --> INSP
         GD --> GDS
         GD --> CCP
         GD --> SD
-    INSP(inspect):::library
+        GD --> CD
     GDS[getDisks]:::complete
         GDS --> CMD
         GDS --> TBL
-    CCP(console.ConsolePrompt):::complete
     SD[selectDisk]:::complete
         SD --> MNU
+    CD[confirmDisk]:::working
+        CD --> CMD
+        CD --> TBL
+        CD --> CCP
+
+    %% Modules
+    TRM(blessed.Terminal):::library
+    INSP(inspect):::library
+    CON(console):::complete
     CMD(commands):::complete
     TBL(Table):::complete
+    CCP(console.ConsolePrompt):::complete
     MNU(Menu):::complete
 ```
 * [commands](../commands/design.md)

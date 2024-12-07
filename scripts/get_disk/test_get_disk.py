@@ -4,6 +4,11 @@ from table import Table
 import get_disk as gd
 
 
+# Test confirmDisk
+def test_confirm_disk():
+    pass
+
+
 # Test getDisks
 def test_get_disks(mocker):
     # Setup mock `lsblk` command
