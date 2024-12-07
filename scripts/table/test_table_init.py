@@ -32,7 +32,7 @@ PARAMS = [
 
 
 @pytest.fixture
-def mock_instance(mocker):
+def mock_table(mocker):
     mock = mocker.Mock(spec=Table)
     for method_name in ["_capitalize_keys", 
                         "_find_column_positions", 
@@ -65,16 +65,15 @@ def mock_instance(mocker):
         ({"COLUMN1"}, ["Column1", "Column4"], {"COLUMN1", "COLUMN4"}), 
     ]
 )
-def test_add_rjust_col_label(mock_instance, initial_set, label_in, 
-                             exp_labels):
+def test_add_rjust_col_label(mock_table, initial_set, label_in, exp_labels):
     # Setup
-    mock_instance._right_justified_columns = initial_set
+    mock_table._right_justified_columns = initial_set
 
     # Execute
-    mock_instance._add_rjust_col_label(label_in)
+    mock_table._add_rjust_col_label(label_in)
 
     # Verify
-    assert mock_instance._right_justified_columns == exp_labels
+    assert mock_table._right_justified_columns == exp_labels
 
 
 # Test capitalizeKeys
@@ -106,23 +105,23 @@ def test_add_rjust_col_label(mock_instance, initial_set, label_in,
         )
     ]
 )
-def test_capitalize_keys(mock_instance, data_input, exp_dataset, exp_count):
+def test_capitalize_keys(mock_table, data_input, exp_dataset, exp_count):
     # Execute
-    mock_instance._capitalize_keys(data_input)
+    mock_table._capitalize_keys(data_input)
 
     # Verify
-    assert mock_instance._dataset == exp_dataset
-    assert mock_instance._records_count == exp_count
+    assert mock_table._dataset == exp_dataset
+    assert mock_table._records_count == exp_count
 
 
 # Test findBoundaries
 @pytest.mark.parametrize("col_idx, pos_list, line, exp_boundaries, _", 
                          PARAMS)
-def test_find_boundaries(mock_instance, col_idx, pos_list, line, 
-                         exp_boundaries, _):
+def test_find_boundaries(mock_table, col_idx, pos_list, line, exp_boundaries, 
+                         _):
     # Execute
-    start_result, end_result = mock_instance._find_boundaries(col_idx, 
-                                                              pos_list, line)
+    start_result, end_result = mock_table._find_boundaries(col_idx, pos_list, 
+                                                           line)
     
     # Verify
     assert start_result == exp_boundaries[0]
@@ -158,24 +157,24 @@ def test_find_boundaries(mock_instance, col_idx, pos_list, line,
         ("", ["Column"], None, ValueError)
     ]
 )
-def test_find_column_positions(mock_instance, header_ln, keys, exp_pos, 
+def test_find_column_positions(mock_table, header_ln, keys, exp_pos, 
                                exception):
     # Execute with exception
     if exception:
         with pytest.raises(exception, 
                            match="Column '.*' not found in header line."):
-            mock_instance._find_column_positions(header_ln, keys)
+            mock_table._find_column_positions(header_ln, keys)
     
     # Execute without exception
     else:
-        result = mock_instance._find_column_positions(header_ln, keys)
+        result = mock_table._find_column_positions(header_ln, keys)
         assert result == exp_pos
 
 
 # Test getSlice
 @pytest.mark.parametrize("col_idx, pos_list, line, _, exp_slice", PARAMS)
-def test_get_slice(mock_instance, col_idx, pos_list, line, _, exp_slice):
-    result = mock_instance._get_slice(col_idx, pos_list, line)
+def test_get_slice(mock_table, col_idx, pos_list, line, _, exp_slice):
+    result = mock_table._get_slice(col_idx, pos_list, line)
     assert result == exp_slice
 
 
@@ -207,10 +206,10 @@ def test_get_slice(mock_instance, col_idx, pos_list, line, _, exp_slice):
         )
     ]
 )
-def test_read_table(mock_instance, table_string, exp_dataset, exp_count):
+def test_read_table(mock_table, table_string, exp_dataset, exp_count):
     # Execute
-    mock_instance._read_table(table_string)
+    mock_table._read_table(table_string)
     
     # Verify
-    assert mock_instance._dataset == exp_dataset
-    assert mock_instance._records_count == exp_count
+    assert mock_table._dataset == exp_dataset
+    assert mock_table._records_count == exp_count

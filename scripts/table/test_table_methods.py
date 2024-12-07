@@ -4,7 +4,7 @@ from blessed import Terminal
 
 
 @pytest.fixture
-def mock_table():
+def table_instance():
     tbl_data = [{"First": "abc", "Second": "123"}, 
                 {"First": "", "Second": "456"}, 
                 {"First": "xyz", "Second": "789"}]
@@ -43,10 +43,10 @@ def mock_table():
         )
     ]
 )
-def test_filter_nonempty(mock_table, filter_key, exp_dataset, exp_count):
-    mock_table.filter_nonempty(filter_key)
-    assert mock_table._dataset == exp_dataset
-    assert mock_table._records_count == exp_count
+def test_filter_nonempty(table_instance, filter_key, exp_dataset, exp_count):
+    table_instance.filter_nonempty(filter_key)
+    assert table_instance._dataset == exp_dataset
+    assert table_instance._records_count == exp_count
 
 
 # Test filterStartwith
@@ -76,11 +76,11 @@ def test_filter_nonempty(mock_table, filter_key, exp_dataset, exp_count):
         )
     ]
 )
-def test_filter_startswith(mock_table, filter_key, value_prefix, exp_dataset, 
-                           exp_count):
-    mock_table.filter_startswith(filter_key, value_prefix)
-    assert mock_table._dataset == exp_dataset
-    assert mock_table._records_count == exp_count
+def test_filter_startswith(table_instance, filter_key, value_prefix, 
+                           exp_dataset, exp_count):
+    table_instance.filter_startswith(filter_key, value_prefix)
+    assert table_instance._dataset == exp_dataset
+    assert table_instance._records_count == exp_count
 
 
 # Test resizeColumns
@@ -103,30 +103,33 @@ def test_filter_startswith(mock_table, filter_key, value_prefix, exp_dataset,
         (8, {"FIRST": 3, "SECOND": 3}, 8)
     ]
 )
-def test_resize_columns(mock_table, width_limit, exp_col_widths, 
+def test_resize_columns(table_instance, width_limit, exp_col_widths, 
                         exp_tbl_width):
-    mock_table._column_widths = {"FIRST": 5, "SECOND": 6}
-    mock_table._table_width = 13
-    mock_table.resize_columns(width_limit)
-    assert mock_table._column_widths == exp_col_widths
-    assert mock_table._table_width == exp_tbl_width
+    table_instance._column_widths = {"FIRST": 5, "SECOND": 6}
+    table_instance._table_width = 13
+    table_instance.resize_columns(width_limit)
+    assert table_instance._column_widths == exp_col_widths
+    assert table_instance._table_width == exp_tbl_width
 
 
 """Display Table Methods"""
 # Test numberRecords
-def test_number_records(mock_table):
-    mock_table._number_records()
-    assert mock_table._dataset == [{"#": 1, "FIRST": "abc", "SECOND": "123"}, 
-                                   {"#": 2, "FIRST": "", "SECOND": "456"}, 
-                                   {"#": 3, "FIRST": "xyz", "SECOND": "789"}]
-    assert mock_table._right_justified_columns == {"#", "SECOND"}
+def test_number_records(table_instance):
+    table_instance._number_records()
+    assert table_instance._dataset == [{"#": 1, "FIRST": "abc", 
+                                        "SECOND": "123"}, 
+                                       {"#": 2, "FIRST": "", 
+                                        "SECOND": "456"}, 
+                                       {"#": 3, "FIRST": "xyz", 
+                                        "SECOND": "789"}]
+    assert table_instance._right_justified_columns == {"#", "SECOND"}
 
 
 # Test calculateWidths
-def test_calculate_widths(mock_table):
-    mock_table._calculate_widths()
-    assert mock_table._column_widths == {"FIRST": 5, "SECOND": 6}
-    assert mock_table._table_width == 13
+def test_calculate_widths(table_instance):
+    table_instance._calculate_widths()
+    assert table_instance._column_widths == {"FIRST": 5, "SECOND": 6}
+    assert table_instance._table_width == 13
 
 
 # Test putTable
@@ -140,22 +143,22 @@ def test_calculate_widths(mock_table):
         (False, "")
     ]
 )
-def test_put_table(mocker, mock_table, menu_flag, record_number):
+def test_put_table(mocker, table_instance, menu_flag, record_number):
     # Setup console mocks
     mock_console = mocker.Mock(spec=Terminal)
     mock_console_table = mocker.patch("table.ConsoleTable")
     display_mock = mock_console_table.return_value.display
 
     # Execute
-    mock_table.put_table(console=mock_console, is_menu=menu_flag)
+    table_instance.put_table(console=mock_console, is_menu=menu_flag)
     
     # Verify numberRecords called, pending menuFlag
-    assert mock_table._dataset[2].get("#", "") == record_number
+    assert table_instance._dataset[2].get("#", "") == record_number
 
     # Verify calculateWidth called
-    assert hasattr(mock_table, "_column_widths")
-    assert hasattr(mock_table, "_table_width")
+    assert hasattr(table_instance, "_column_widths")
+    assert hasattr(table_instance, "_table_width")
 
     # Verify ConsoleTable called
-    mock_console_table.assert_called_once_with(mock_table)
+    mock_console_table.assert_called_once_with(table_instance)
     display_mock.assert_called_once_with(mock_console)
