@@ -32,10 +32,12 @@ flowchart LR
     %% Modules
     TRM(blessed.Terminal):::library
     INSP(inspect):::library
-    CON(console):::complete
     CMD(commands):::complete
-    TBL(Table):::complete
+    CON(console):::complete
     CCP(console.ConsolePrompt):::complete
+    CCT(console.ConsoleTable):::working
+    TBL(Table):::complete
+        TBL --> CCT
     MNU(Menu):::complete
 ```
 * [commands](../commands/design.md)

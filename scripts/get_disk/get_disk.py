@@ -96,11 +96,10 @@ def get_disk(console: Terminal) -> str:
                                                  validate_bool=True)
             if unmount_confirmation.call(console):
                 cmd.unmount_disk(disk)
-            else:
-                check_disk_msg = "Check device and press any key..."
-                check_disk_alert = ConsolePrompt(check_disk_msg, 
-                                                 expect_keystroke=True)
-                check_disk_alert.call(console)
+            check_disk_msg = "Check device and press any key..."
+            check_disk_alert = ConsolePrompt(check_disk_msg, 
+                                             expect_keystroke=True)
+            check_disk_alert.call(console)
 
     return disk
 
