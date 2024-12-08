@@ -770,7 +770,7 @@ END
 ---
 ### `_processTextContent`
 ```mermaid
-flowchart LR
+flowchart
     classDef this fill:#4682b4,stroke:#b97d4b,stroke-width:2px
     classDef that fill:#b97d4b,stroke:#4682b4,stroke-width:2px
     DWRW([drawRow]):::this
@@ -778,19 +778,34 @@ flowchart LR
     TCRJ[\rowType
           content
           rjustCol\]
-        TCRJ --> RTYP
-    RTYP{rowType == title}
-        RTYP -- True  --> SCTL
-        RTYP -- False --> GREC
+        TCRJ --> RTTL
+    RTTL{rowType == title}
+        RTTL -- True  --> SCTL
+        RTTL -- False --> IINC
     SCTL[cell]
-        SCTL --> RTNT
-    GHDG[[getHeadings]]:::that
-        GHDG --> RTNH
-    GREC[[getRecord]]:::that
-        GREC --> RTNR
-    RTNT([title])
-    RTNH([headings])
-    RTNR([record])
+        SCTL --> APC1
+    APC1[cells]
+        APC1 --> RTRN
+    IINC{item in content}
+        IINC -- True  --> GCLW
+        APC2          --> IINC
+        IINC -- False --> RTRN
+    GCLW[\columnWidth\]
+        GCLW --> RTHD
+    RTHD{rowType == headings}
+        RTHD -- True  --> SCHD
+        RTHD -- False --> KRJC
+    SCHD[cell]
+        SCHD --> APC2
+    KRJC{key in rjustCol}
+        KRJC -- True  --> SCRJ
+        KRJC -- False --> SCLJ
+    SCRJ[cell]
+        SCRJ --> APC2
+    SCLJ[cell]
+        SCLJ --> APC2
+    APC2[cells]
+    RTRN([cells])
 ```
 ```
 processTextContent(rowType, content, rjusCol)
