@@ -429,14 +429,14 @@ END
 ---
 ---
 ## `ConsoleTable`
-* [\_\_init__]()
-* [display]()
-* [_setDimensions]()
-* [_drawTable]()
-* [_drawRow]()
-* [_getRowEnds]()
-* [_getTextContent]()
-* [_processTextContent]()
+* [\_\_init__](#__init__-1)
+* [display](#display)
+* [_setDimensions](#_setdimensions)
+* [_drawTable](#_drawtable)
+* [_drawRow](#_drawrow)
+* [_getRowEnds](#_getrowends)
+* [_getTextContent](#_gettextcontent)
+* [_processTextContent](#_processtextcontent)
 * [Table](../table/design.md)
 ```mermaid
 graph
@@ -486,4 +486,331 @@ graph
     end
 ```
 [️⬆️](#console-module)
+---
+### `__init__`
+```mermaid
+flowchart LR
+    classDef this fill:#4682b4,stroke:#b97d4b,stroke-width:2px
+    STRT([start])
+        STRT --> GDTA
+    GDTA[\data\]
+        GDTA --> SDTA
+    SDTA[/data
+         borders/]
+        SDTA --> CTBL
+    CTBL([**ConsoleTable**]):::this
+```
+```
+init(data)
+    SET self.data <- data
+    SET self.borders <- {"top": {"left": "╔", "fill": "═", "right": "╗"}, 
+                         "inner": {"left": "╟", "fill": "─", "right": "╢"}, 
+                         "bottom": {"left": "╚", "fill": "═", "right": "╝"}, 
+                         "side": "║"}
+END
+```
+ [️⬆️](#consoletable)
+---
+### `display`
+```mermaid
+flowchart
+    classDef this fill:#4682b4,stroke:#b97d4b,stroke-width:2px
+    classDef that fill:#b97d4b,stroke:#4682b4,stroke-width:2px
+    CTBL([**ConsoleTable**]):::this
+        CTBL --> GCNS
+    GCNS[\console\]
+        GCNS --> SCNS
+    SCNS[/console/]
+        SCNS --> SDMN
+    SDMN[[setDimensions]]:::this
+        SDMN --> CREC
+    CREC[[countRecords]]:::that
+        CREC --> DTBL
+    DTBL[[drawTable]]:::this
+        DTBL --> THEE
+    THEE([end])
+```
+```
+display(console)
+    SET self.con <- console
+    self.setDimensions()
+    self.drawTable(self.data.countRecords())
+END
+```
+ [️⬆️](#consoletable)
+---
+### `_setDimensions`
+```mermaid
+flowchart
+    classDef this fill:#4682b4,stroke:#b97d4b,stroke-width:2px
+    classDef that fill:#b97d4b,stroke:#4682b4,stroke-width:2px
+    DSPL([display]):::this
+        DSPL --> GCNS
+    GCNS[\console\]
+        GCNS --> SDMT
+    SDMT[/displayWidth
+          marginSize/]
+        SDMT --> GTW1
+    GTW1[[getTableWidth]]:::that
+        GTW1 --> STW1
+    STW1[/tableWidth/]
+        STW1 --> TBSP
+    TBSP[tableSpace]
+        TBSP --> WVSS
+    WVSS{tableWidth > tableSpace}
+        WVSS -- True  --> RSZC
+        WVSS -- False --> GCLW
+    RSZC[[resizeColumns]]:::that
+        RSZC --> GTW2
+    GTW2[[getTableWidth]]:::that
+        GTW2 --> STW2
+    STW2[/tableWidth/]
+        STW2 --> GCLW
+    GCLW[[getColumnWidths]]:::that
+        GCLW --> SCLW
+    SCLW[/columnWidths/]
+        SCLW --> THEE
+    THEE([end])
+```
+```
+setDimensions()
+    SET self.displayWidth <- MIN(self.con.width, 79)
+    SET self.marginSize <- (con.width - displayWidth) // 2
+    SET self.tableWidth <- self.data.getTableWidth()
+    SET tableSpace = displayWidth - 4
+    IF tableWidth > tableSpace
+        data.resizeColumns(tableSpace)
+        tableWidth <- data.getTableWidth()
+    SET self.columnWidths <- data.getColumnWidths()
+END
+```
+ [️⬆️](#consoletable)
+---
+### `_drawTable`
+```mermaid
+flowchart
+    classDef this fill:#4682b4,stroke:#b97d4b,stroke-width:2px
+    DSPL([display]):::this
+        DSPL --> RCNT
+    RCNT[\recordCount\]
+        RCNT --> DRTP
+    DRTP[[drawRow *top*]]:::this
+        DRTP --> DRTL
+    DRTL[[drawRow *title*]]:::this
+        DRTL --> DRIN
+    DRIN[[drawRow *inner*]]:::this
+        DRIN --> DRHD
+    DRHD[[drawRow *headings*]]:::this
+        DRHD --> FIRC
+    FIRC{i < recordCount}
+        FIRC -- True  --> DRRC
+        DRRC          --> FIRC
+        FIRC -- False --> DRBT
+    DRRC[[drawRow *record*]]:::this
+    DRBT[[drawRow *bottom*]]:::this
+        DRBT --> THEE
+    THEE([end])
+```
+```
+drawTable(recordCount)
+    self.drawRow("top")
+    self.drawRow("title")
+    self.drawRow("inner")
+    self.drawRow("headings")
+    FOR i IN recordCount
+        self.drawRow("record", i)
+    self.drawRow("bottom")
+END
+```
+ [️⬆️](#consoletable)
+---
+### `_drawRow`
+```mermaid
+flowchart
+    classDef this fill:#4682b4,stroke:#b97d4b,stroke-width:2px
+    classDef that fill:#b97d4b,stroke:#4682b4,stroke-width:2px
+    DTBL([drawTable]):::this
+        DTBL --> RTRI
+    RTRI[\rowType
+          recordIndex\]
+        RTRI --> SLTT
+    SLTT[lineTypes
+         textTypes]
+        SLTT --> RTYP
+    RTYP{rowType}
+        RTYP -- record --> GRJC
+        RTYP -- NOT record --> SMRG
+    GRJC[[getRjustColumns]]:::that
+        GRJC --> SRJC
+    SRJC[rjustCol]
+        SRJC --> SMRG
+    SMRG[margin]
+        SMRG --> GRWE
+    GRWE[[getRowEnds]]:::this
+        GRWE --> SLRG
+    SLRG[left
+         right
+         gap]
+        SLRG --> RTT1
+    RTT1{rowType in textTypes}
+        RTT1 -- True  --> GTXC
+        RTT1 -- False --> SCNT
+    GTXC[[getTextContent]]:::this
+        GTXC --> SCNT
+    SCNT[content]
+        SCNT --> RTT2
+    RTT2{rowType in textTypes}
+        RTT2 -- True  --> PTXC
+        RTT2 -- False --> SCLL
+    PTXC[[processTextContent]]:::this
+        PTXC --> SCLL
+    SCLL[cells]
+        SCLL --> PRNT
+    PRNT[/margin + left + gap + cells + gap + right/]
+        PRNT --> THEE
+    THEE([end])
+```
+```
+drawRow(rowType, recordIndex)
+    SET lineTypes <- ["top", "inner", "bottom"]
+    SET textTypes <- ["title", "headings", "record"]
+    IF rowType == "record"
+        SET rjustCol <- self.data.getRjustColumns()
+    ELSE
+        SET rjustCol <- {}
+    SET margin <- " " * self.marginSize
+    SET left, right, gap <- self.getRowEnds(rowType, rowType IN lineTypes)
+    IF rowType IN textTypes
+        SET content <- self.getTextContent(rowType, recordIndex)
+    ELSE
+        SET content <- self.borders[rowType]["fill"]
+    IF rowType IN textTypes
+        SET cells <- self.processTextContent(rowType, content, rjustCol)
+    ELSE
+        SET cells <- content * (self.tableWidth + 2)
+    PUT margin + left + gap + cells.join("  ") + gap + right
+END
+```
+ [️⬆️](#consoletable)
+---
+### `_getRowEnds`
+```mermaid
+flowchart
+    classDef this fill:#4682b4,stroke:#b97d4b,stroke-width:2px
+    DWRW([drawRow]):::this
+        DWRW --> RTLT
+    RTLT[\rowType
+          isLineType\]
+        RTLT --> ISLT
+    ISLT{isLineType}
+        ISLT -- True  --> GBRT
+        ISLT -- False --> GBSD
+    GBRT[\borders.rowType\]
+        GBRT --> SLRP
+    GBSD[\borders.side\]
+        GBSD --> SLRP
+    SLRP[leftEnd
+         rightEnd
+         padding]
+        SLRP --> RTRN
+    RTRN([left
+          right
+          gap])
+```
+```
+getRowEnds(rowType, isLineType)
+    IF isLineType
+        SET leftEnd <- self.borders[rowType]["left"]
+        SET rightEnd <- self.borders[rowType]["right"]
+        SET padding <- ""
+    ELSE
+        SET leftEnd, rightEnd <- self.borders["side"]
+        SET padding <- " "
+    RETURN leftEnd, rightEnd, padding
+END
+```
+ [️⬆️](#consoletable)
+---
+### `_getTextContent`
+```mermaid
+flowchart LR
+    classDef this fill:#4682b4,stroke:#b97d4b,stroke-width:2px
+    classDef that fill:#b97d4b,stroke:#4682b4,stroke-width:2px
+    DWRW([drawRow]):::this
+        DWRW --> RTIX
+    RTIX[\rowType
+          index\]
+        RTIX --> RTYP
+    RTYP{rowType}
+        RTYP -- title   --> GTTL
+        RTYP -- heading --> GHDG
+        RTYP -- record  --> GREC
+    GTTL[[getTitle]]:::that
+        GTTL --> RTNT
+    GHDG[[getHeadings]]:::that
+        GHDG --> RTNH
+    GREC[[getRecord]]:::that
+        GREC --> RTNR
+    RTNT([title])
+    RTNH([headings])
+    RTNR([record])
+```
+```
+getTextContent(rowType, index)
+    SWITCH rowType
+        CASE "title"
+            RETURN self.data.getTitle()
+        CASE "headings"
+            RETURN self.data.getHeadings()
+        CASE "record"
+            RETURN self.data.getRecord(index)
+END
+```
+ [️⬆️](#consoletable)
+---
+### `_processTextContent`
+```mermaid
+flowchart LR
+    classDef this fill:#4682b4,stroke:#b97d4b,stroke-width:2px
+    classDef that fill:#b97d4b,stroke:#4682b4,stroke-width:2px
+    DWRW([drawRow]):::this
+        DWRW --> TCRJ
+    TCRJ[\rowType
+          content
+          rjustCol\]
+        TCRJ --> RTYP
+    RTYP{rowType == title}
+        RTYP -- True  --> SCTL
+        RTYP -- False --> GREC
+    SCTL[cell]
+        SCTL --> RTNT
+    GHDG[[getHeadings]]:::that
+        GHDG --> RTNH
+    GREC[[getRecord]]:::that
+        GREC --> RTNR
+    RTNT([title])
+    RTNH([headings])
+    RTNR([record])
+```
+```
+processTextContent(rowType, content, rjusCol)
+    SET cells <- []
+    IF rowType == "title"
+        SET cell <- centered content in reverse
+        APPEND cell TO cells
+    ELSE
+        FOR key, value IN content
+            GET self.columnWidths[key]
+            IF rowType == "headings"
+                SET cell <- centered value in underline
+            ELSE
+                IF key IN rjustCol
+                    SET cell <- right-justified value
+                ELSE
+                    SET cell <- left-justified value
+            APPEND cell TO cells
+    RETURN cells
+END
+```
+ [️⬆️](#consoletable)
 ---
