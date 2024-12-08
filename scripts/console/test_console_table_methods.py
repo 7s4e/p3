@@ -4,12 +4,58 @@ from console_table import ConsoleTable
 from table import Table
 
 
+@pytest.fixture
+def console_mock(mocker):
+    mock = mocker.Mock(spec=Terminal)
+    mock.blue = mocker.Mock(side_effect=lambda x: f"<blue>{x}</blue>")
+    return mock
+
+@pytest.fixture
+def data_mock(mocker):
+    return mocker.Mock(spec=Table)
+
+@pytest.fixture
+def con_tbl_inst(data_mock, console_mock):
+    instance = ConsoleTable(data_mock)
+    instance._con = console_mock
+    return instance
+
+
 #7 Test display
 #5 Test drawRow
 #6 Test drawTable
-#2 Test getRowEnds
+
+
+# Test getRowEnds
+@pytest.mark.parametrize(
+    "row_type, is_line_type, expected", 
+    [
+        # Test case 1: Top line
+        ("top", True, ("<blue>╔</blue>", "<blue>╗</blue>", "")), 
+
+        # Test case 2: Inner line
+        ("inner", True, ("<blue>╟</blue>", "<blue>╢</blue>", "")), 
+
+        # Test case 3: Bottom line
+        ("bottom", True, ("<blue>╚</blue>", "<blue>╝</blue>", "")), 
+
+        # Test case 4: Text row
+        ("text", False, ("<blue>║</blue>", "<blue>║</blue>", " ")), 
+
+    ]
+)
+def test_get_row_ends(con_tbl_inst, row_type, is_line_type, expected):
+    # Execute
+    result = con_tbl_inst._get_row_ends(row_type, is_line_type)
+
+    # Verify
+    assert result == expected
+
+
 #3 Test getTextContent
 #4 Test processTextContent
+
+
 # Test setDimensions
 @pytest.mark.parametrize(
     "term_wd, tbl_wds, col_wds, dply_wd", 
@@ -20,32 +66,25 @@ from table import Table
         (79, [34], [10, 10, 10], 79)       # Test case 4: Narrow table
     ]
 )
-def test_set_dimensions(mocker, term_wd, tbl_wds, col_wds, dply_wd):
-    # Setup console mock
-    mock_console = mocker.Mock(spec=Terminal)
-    mock_console.width = term_wd
-    
-    # Setup data mock
-    mock_data = mocker.Mock(spec=Table)
-    mock_data.get_table_width.side_effect = tbl_wds
-    mock_data.get_column_widths.return_value = col_wds
-
-    # Setup ConsoleTable instance
-    console_table = ConsoleTable(mock_data)
-    console_table._con = mock_console
+def test_set_dimensions(console_mock, data_mock, con_tbl_inst, term_wd, 
+                        tbl_wds, col_wds, dply_wd):
+    # Setup
+    console_mock.width = term_wd
+    data_mock.get_table_width.side_effect = tbl_wds
+    data_mock.get_column_widths.return_value = col_wds
 
     # Execute
-    console_table._set_dimensions()
+    con_tbl_inst._set_dimensions()
 
     # Verify function results
-    assert console_table._display_width == dply_wd
-    assert console_table._margin_size == (term_wd - dply_wd) // 2
-    assert console_table._table_width == tbl_wds[-1]
-    assert console_table._column_widths == col_wds
+    assert con_tbl_inst._display_width == dply_wd
+    assert con_tbl_inst._margin_size == (term_wd - dply_wd) // 2
+    assert con_tbl_inst._table_width == tbl_wds[-1]
+    assert con_tbl_inst._column_widths == col_wds
     
     # Verify function process
-    assert console_table._data.get_table_width.call_count == len(tbl_wds)
-    resize_called = console_table._data.resize_columns.call_count > 0
+    assert con_tbl_inst._data.get_table_width.call_count == len(tbl_wds)
+    resize_called = con_tbl_inst._data.resize_columns.call_count > 0
     if resize_called:
-        console_table._data.resize_columns.assert_called_once_with(dply_wd - 4)
-    console_table._data.get_column_widths.assert_called_once()
+        con_tbl_inst._data.resize_columns.assert_called_once_with(dply_wd - 4)
+    con_tbl_inst._data.get_column_widths.assert_called_once()
