@@ -1,6 +1,6 @@
 """Console module member"""
 # Standard library imports
-from __future__ import annotations
+from __future__ import annotations  # Postpone evaluation of annotations
 from typing import TYPE_CHECKING
 
 # Third-party imports
@@ -8,7 +8,7 @@ from blessed import Terminal
 
 # Local module import
 if TYPE_CHECKING:
-    from table import Table
+    from table import Table  # Imported only during static type checking
 
 
 class ConsoleTable:
@@ -36,10 +36,11 @@ class ConsoleTable:
     """
 
     def __init__(self, data: Table) -> None:
-
-        # Type validation
-        # if not isinstance(data, Table):
-        #     raise TypeError("Expected `Table` or 'data'")
+        # Lazy import avoids circular import and enables runtime type 
+        # validation
+        from table import Table
+        if not isinstance(data, Table):
+            raise TypeError("Expected `Table` or 'data'")
 
         self._data = data
         self._borders = {"top": {"left": "╔", "fill": "═", "right": "╗"}, 
