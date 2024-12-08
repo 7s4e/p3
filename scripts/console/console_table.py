@@ -27,9 +27,9 @@ class ConsoleTable:
         _draw_row(row_type, index): Draw a specific row in the table.
         _draw_table(record_count): Draw the full table structure.
         _get_row_ends(row_type, is_line_type): Get row ends and padding.
-        _get_text_content(row_type, index): Retrieve text content for a 
+        _get_row_content(row_type, index): Retrieve text content for a 
             row.
-        _process_text_content(row_type, content, rjust_col): Process row 
+        _process_row_content(row_type, content, rjust_col): Process row 
             content into formatted text cells.
         _set_dimensions(): Set display and table dimensions based on 
             terminal width.
@@ -92,11 +92,11 @@ class ConsoleTable:
         left, right, gap = self._get_row_ends(row_type, 
                                               row_type in line_types)
 
-        content = (self._get_text_content(row_type, index)
+        content = (self._get_row_content(row_type, index)
                    if row_type in text_types
                    else self._borders[row_type]["fill"])
 
-        cells = (self._process_text_content(row_type, content, rjust_col)
+        cells = (self._process_row_content(row_type, content, rjust_col)
                  if row_type in text_types
                  else [
                      f"{self._con.blue(content * (self._table_width + 2))}"])
@@ -122,41 +122,7 @@ class ConsoleTable:
             self._draw_row("record", i)
         self._draw_row("bottom")
 
-    def _get_row_ends(self, 
-                      row_type: str, 
-                      is_line_type: bool) -> tuple[str, str, str]:
-        """Generate a row's left and right ends  and the inner padding.
-
-        This function returns the left and right end characters for a 
-        row based on whether the `row_type` is a line type or not. If 
-        the row is a line type, the left and right ends are styled as 
-        borders from the `self._borders` dictionary, otherwise, both 
-        left and right are a default 'side' border. Non-line, text-type 
-        rows have a single space as padding.
-
-        Args:
-            row_type: The type of the row, used to determine the border style.
-            is_line_type: A boolean flag indicating if the row is a line type
-                (used for borders) or a content row.
-
-        Returns:
-            A tuple of three strings:
-                - The left border (styled).
-                - The right border (styled).
-                - The padding between cells (either a space or an empty 
-                    string).
-        """
-        if is_line_type:
-            left_end = f"{self._con.blue(self._borders[row_type]['left'])}"
-            right_end = f"{self._con.blue(self._borders[row_type]['right'])}"
-            padding = ""
-        else:
-            left_end = right_end = f"{self._con.blue(self._borders['side'])}"
-            padding = " "
-
-        return left_end, right_end, padding
-
-    def _get_text_content(self, 
+    def _get_row_content(self, 
                           row_type: str, 
                           index: int | None = None) -> str | dict[str, str]:
         """Retrieve the text content for a specific type of table row.
@@ -194,7 +160,41 @@ class ConsoleTable:
                         "Index must be provided for 'record' row_type")
                 return self._data.get_record(index)
 
-    def _process_text_content(self, 
+    def _get_row_ends(self, 
+                      row_type: str, 
+                      is_line_type: bool) -> tuple[str, str, str]:
+        """Generate a row's left and right ends  and the inner padding.
+
+        This function returns the left and right end characters for a 
+        row based on whether the `row_type` is a line type or not. If 
+        the row is a line type, the left and right ends are styled as 
+        borders from the `self._borders` dictionary, otherwise, both 
+        left and right are a default 'side' border. Non-line, text-type 
+        rows have a single space as padding.
+
+        Args:
+            row_type: The type of the row, used to determine the border style.
+            is_line_type: A boolean flag indicating if the row is a line type
+                (used for borders) or a content row.
+
+        Returns:
+            A tuple of three strings:
+                - The left border (styled).
+                - The right border (styled).
+                - The padding between cells (either a space or an empty 
+                    string).
+        """
+        if is_line_type:
+            left_end = f"{self._con.blue(self._borders[row_type]['left'])}"
+            right_end = f"{self._con.blue(self._borders[row_type]['right'])}"
+            padding = ""
+        else:
+            left_end = right_end = f"{self._con.blue(self._borders['side'])}"
+            padding = " "
+
+        return left_end, right_end, padding
+
+    def _process_row_content(self, 
                               row_type: str, 
                               content: str | dict[str, str], 
                               rjust_col: set) -> list[str]:

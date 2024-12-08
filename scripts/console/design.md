@@ -435,8 +435,8 @@ END
 * [_drawTable](#_drawtable)
 * [_drawRow](#_drawrow)
 * [_getRowEnds](#_getrowends)
-* [_getTextContent](#_gettextcontent)
-* [_processTextContent](#_processtextcontent)
+* [_getRowContent](#_getrowcontent)
+* [_processRowContent](#_processrowcontent)
 * [Table](../table/design.md)
 ```mermaid
 graph
@@ -469,11 +469,11 @@ graph
         DROW -- row       --> PTXT
         PTXT -- cells     --> DROW
     GRWE(_getRowEnds):::method
-    GTXT(_getTextContent):::method
+    GTXT(_getRowContent):::method
         TGET -- title    --> GTXT
         TGET -- headings --> GTXT
         TGET -- record   --> GTXT
-    PTXT(_processTextContent):::method
+    PTXT(_processRowContent):::method
         PTXT --> RVRS
         PTXT --> UDLN
     subgraph T [**Table**]
@@ -662,7 +662,7 @@ flowchart
     RTT2{rowType in textTypes}
         RTT2 -- True  --> PTXC
         RTT2 -- False --> SCLL
-    PTXC[[processTextContent]]:::this
+    PTXC[[processRowContent]]:::this
         PTXC --> SCLL
     SCLL[cells]
         SCLL --> PRNT
@@ -685,7 +685,7 @@ drawRow(rowType, recordIndex)
     ELSE
         SET content <- self.borders[rowType]["fill"]
     IF rowType IN textTypes
-        SET cells <- self.processTextContent(rowType, content, rjustCol)
+        SET cells <- self.processRowContent(rowType, content, rjustCol)
     ELSE
         SET cells <- content * (self.tableWidth + 2)
     PUT margin + left + gap + cells.join("  ") + gap + right
@@ -731,7 +731,7 @@ END
 ```
  [️⬆️](#consoletable)
 ---
-### `_getTextContent`
+### `_getRowContent`
 ```mermaid
 flowchart LR
     classDef this fill:#4682b4,stroke:#b97d4b,stroke-width:2px
@@ -768,7 +768,7 @@ END
 ```
  [️⬆️](#consoletable)
 ---
-### `_processTextContent`
+### `_processRowContent`
 ```mermaid
 flowchart
     classDef this fill:#4682b4,stroke:#b97d4b,stroke-width:2px
@@ -808,7 +808,7 @@ flowchart
     RTRN([cells])
 ```
 ```
-processTextContent(rowType, content, rjusCol)
+processRowContent(rowType, content, rjusCol)
     SET cells <- []
     IF rowType == "title"
         SET cell <- centered content in reverse

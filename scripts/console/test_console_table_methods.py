@@ -24,7 +24,9 @@ def con_tbl_inst(data_mock, console_mock):
 #7 Test display
 #5 Test drawRow
 #6 Test drawTable
-
+#3 Test getRowContent
+def test_get_row_content():
+    pass
 
 # Test getRowEnds
 @pytest.mark.parametrize(
@@ -52,8 +54,7 @@ def test_get_row_ends(con_tbl_inst, row_type, is_line_type, expected):
     assert result == expected
 
 
-#3 Test getTextContent
-#4 Test processTextContent
+#4 Test processRowContent
 
 
 # Test setDimensions
