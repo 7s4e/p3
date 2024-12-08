@@ -36,7 +36,11 @@ class ConsoleTable:
     """
 
     def __init__(self, data: Table) -> None:
-        """Initialize the TerminalTable with data and default borders."""
+
+        # Type validation
+        # if not isinstance(data, Table):
+        #     raise TypeError("Expected `Table` or 'data'")
+
         self._data = data
         self._borders = {"top": {"left": "╔", "fill": "═", "right": "╗"}, 
                          "inner": {"left": "╟", "fill": "─", "right": "╢"}, 
