@@ -124,7 +124,7 @@ def test_check_integer_validity(console_prompt, put_alert_mock,
         put_alert_mock.assert_called_once_with(alert)
 
 
-#Test _get_response
+# Test _get_response
 @pytest.mark.parametrize(
     "keystroke, leave_crsr", 
     [(True, False),  # Test case 1: readKeystroke path
