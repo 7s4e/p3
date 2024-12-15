@@ -155,9 +155,6 @@ class ConsoleTable:
             case "headings":
                 return self._data.get_headings()
             case "record":
-                if index is None:
-                    raise ValueError(
-                        "Index must be provided for 'record' row_type")
                 return self._data.get_record(index)
 
     def _get_row_ends(self, 

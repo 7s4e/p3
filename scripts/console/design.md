@@ -693,6 +693,43 @@ END
 ```
  [️⬆️](#consoletable)
 ---
+### `_getRowContent`
+```mermaid
+flowchart LR
+    classDef this fill:#4682b4,stroke:#b97d4b,stroke-width:2px
+    classDef that fill:#b97d4b,stroke:#4682b4,stroke-width:2px
+    DWRW([drawRow]):::this
+        DWRW --> RTIX
+    RTIX[\rowType
+          index\]
+        RTIX --> RTYP
+    RTYP{rowType}
+        RTYP -- title   --> GTTL
+        RTYP -- heading --> GHDG
+        RTYP -- record  --> GREC
+    GTTL[[getTitle]]:::that
+        GTTL --> RTNT
+    GHDG[[getHeadings]]:::that
+        GHDG --> RTNH
+    GREC[[getRecord]]:::that
+        GREC --> RTNR
+    RTNT([title])
+    RTNH([headings])
+    RTNR([record])
+```
+```
+getTextContent(rowType, index)
+    SWITCH rowType
+        CASE "title"
+            RETURN self.data.getTitle()
+        CASE "headings"
+            RETURN self.data.getHeadings()
+        CASE "record"
+            RETURN self.data.getRecord(index)
+END
+```
+ [️⬆️](#consoletable)
+---
 ### `_getRowEnds`
 ```mermaid
 flowchart
@@ -727,43 +764,6 @@ getRowEnds(rowType, isLineType)
         SET leftEnd, rightEnd <- self.borders["side"]
         SET padding <- " "
     RETURN leftEnd, rightEnd, padding
-END
-```
- [️⬆️](#consoletable)
----
-### `_getRowContent`
-```mermaid
-flowchart LR
-    classDef this fill:#4682b4,stroke:#b97d4b,stroke-width:2px
-    classDef that fill:#b97d4b,stroke:#4682b4,stroke-width:2px
-    DWRW([drawRow]):::this
-        DWRW --> RTIX
-    RTIX[\rowType
-          index\]
-        RTIX --> RTYP
-    RTYP{rowType}
-        RTYP -- title   --> GTTL
-        RTYP -- heading --> GHDG
-        RTYP -- record  --> GREC
-    GTTL[[getTitle]]:::that
-        GTTL --> RTNT
-    GHDG[[getHeadings]]:::that
-        GHDG --> RTNH
-    GREC[[getRecord]]:::that
-        GREC --> RTNR
-    RTNT([title])
-    RTNH([headings])
-    RTNR([record])
-```
-```
-getTextContent(rowType, index)
-    SWITCH rowType
-        CASE "title"
-            RETURN self.data.getTitle()
-        CASE "headings"
-            RETURN self.data.getHeadings()
-        CASE "record"
-            RETURN self.data.getRecord(index)
 END
 ```
  [️⬆️](#consoletable)

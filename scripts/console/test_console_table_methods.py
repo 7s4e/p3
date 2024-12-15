@@ -12,7 +12,11 @@ def console_mock(mocker):
 
 @pytest.fixture
 def data_mock(mocker):
-    return mocker.Mock(spec=Table)
+    mock = mocker.Mock(spec=Table)
+    mock.get_title.return_value = "Data Title"
+    mock.get_headings.return_value = {"COL A": "COL A", "COL B": "COL B"}
+    mock.get_record.return_value = {"COL A": "abc", "COL B": "123"}
+    return mock
 
 @pytest.fixture
 def con_tbl_inst(data_mock, console_mock):
@@ -24,9 +28,33 @@ def con_tbl_inst(data_mock, console_mock):
 #7 Test display
 #5 Test drawRow
 #6 Test drawTable
-#3 Test getRowContent
-def test_get_row_content():
-    pass
+
+
+# Test getRowContent
+@pytest.mark.parametrize(
+    "row_type, index", 
+    [
+        ("title", None),     # Test case 1: Title
+        ("headings", None),  # Test case 2: Headings
+        ("record", 0)        # Test case 3: Record
+    ]
+)
+def test_get_row_content(con_tbl_inst, row_type, index):
+    # Execute
+    result = con_tbl_inst._get_row_content(row_type, index)
+
+    # Verify
+    match row_type:
+        case "title":
+            con_tbl_inst._data.get_title.assert_called_once()
+            assert result == "Data Title"
+        case "headings":
+            con_tbl_inst._data.get_headings.assert_called_once()
+            assert result == {"COL A": "COL A", "COL B": "COL B"}
+        case "record":
+            con_tbl_inst._data.get_record.assert_called_once_with(index)
+            assert result == {"COL A": "abc", "COL B": "123"}
+
 
 # Test getRowEnds
 @pytest.mark.parametrize(
