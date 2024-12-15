@@ -16,6 +16,7 @@ def data_mock(mocker):
     mock.get_title.return_value = "Data Title"
     mock.get_headings.return_value = {"COL A": "COL A", "COL B": "COL B"}
     mock.get_record.return_value = {"COL A": "abc", "COL B": "123"}
+    mock.get_rjust_columns.return_value = {"COL B"}
     return mock
 
 @pytest.fixture
@@ -39,7 +40,7 @@ def con_tbl_inst(data_mock, console_mock):
         ("record", 0)        # Test case 3: Record
     ]
 )
-def test_get_row_content(con_tbl_inst, row_type, index):
+def test_get_row_content(con_tbl_inst, data_mock, row_type, index):
     # Execute
     result = con_tbl_inst._get_row_content(row_type, index)
 
@@ -47,13 +48,13 @@ def test_get_row_content(con_tbl_inst, row_type, index):
     match row_type:
         case "title":
             con_tbl_inst._data.get_title.assert_called_once()
-            assert result == "Data Title"
+            assert result == data_mock.get_title.return_value
         case "headings":
             con_tbl_inst._data.get_headings.assert_called_once()
-            assert result == {"COL A": "COL A", "COL B": "COL B"}
+            assert result == data_mock.get_headings.return_value
         case "record":
             con_tbl_inst._data.get_record.assert_called_once_with(index)
-            assert result == {"COL A": "abc", "COL B": "123"}
+            assert result == data_mock.get_record.return_value
 
 
 # Test getRowEnds
@@ -70,8 +71,7 @@ def test_get_row_content(con_tbl_inst, row_type, index):
         ("bottom", True, ("<blue>╚</blue>", "<blue>╝</blue>", "")), 
 
         # Test case 4: Text row
-        ("text", False, ("<blue>║</blue>", "<blue>║</blue>", " ")), 
-
+        ("text", False, ("<blue>║</blue>", "<blue>║</blue>", " "))
     ]
 )
 def test_get_row_ends(con_tbl_inst, row_type, is_line_type, expected):
@@ -82,7 +82,28 @@ def test_get_row_ends(con_tbl_inst, row_type, is_line_type, expected):
     assert result == expected
 
 
-#4 Test processRowContent
+# Test processRowContent
+@pytest.mark.parametrize(
+    "row_type", 
+    [
+        ("title"), 
+        ("headings"), 
+        ("record")
+    ]
+)
+def test_process_row_content(data_mock, con_tbl_inst, row_type):
+    # Setup
+    match row_type:
+        case "title":
+            content = data_mock.get_title.return_value
+        case "headings":
+            content = data_mock.get_headings.return_value
+        case "record":
+            content = data_mock.get_record.return_value
+    rjust_col = data_mock.get_rjust_columns.return_value
+    
+    # Execute
+    # result = con_tbl_inst._process_row_content(row_type, content, rjust_col)
 
 
 # Test setDimensions
