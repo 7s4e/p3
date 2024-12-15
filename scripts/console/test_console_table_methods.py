@@ -8,6 +8,8 @@ from table import Table
 def console_mock(mocker):
     mock = mocker.Mock(spec=Terminal)
     mock.blue = mocker.Mock(side_effect=lambda x: f"<blue>{x}</blue>")
+    mock.reverse = mocker.Mock(side_effect=lambda x: f"<reverse>{x}</reverse>")
+    mock.underline = mocker.Mock(side_effect=lambda x: f"<underline>{x}</underline>")
     return mock
 
 @pytest.fixture
@@ -17,6 +19,8 @@ def data_mock(mocker):
     mock.get_headings.return_value = {"COL A": "COL A", "COL B": "COL B"}
     mock.get_record.return_value = {"COL A": "abc", "COL B": "123"}
     mock.get_rjust_columns.return_value = {"COL B"}
+    mock.get_column_widths.return_value = {"COL A": 5, "COL B": 5}
+    mock.get_table_width.return_value = 12
     return mock
 
 @pytest.fixture
@@ -101,9 +105,11 @@ def test_process_row_content(data_mock, con_tbl_inst, row_type):
         case "record":
             content = data_mock.get_record.return_value
     rjust_col = data_mock.get_rjust_columns.return_value
+    con_tbl_inst._column_widths = data_mock.get_column_widths.return_value
+    con_tbl_inst._table_width = data_mock.get_table_width.return_value
     
     # Execute
-    # result = con_tbl_inst._process_row_content(row_type, content, rjust_col)
+    result = con_tbl_inst._process_row_content(row_type, content, rjust_col)
 
 
 # Test setDimensions
