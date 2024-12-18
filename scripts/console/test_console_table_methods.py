@@ -88,14 +88,14 @@ def test_get_row_ends(con_tbl_inst, row_type, is_line_type, expected):
 
 # Test processRowContent
 @pytest.mark.parametrize(
-    "row_type", 
+    "row_type, expected", 
     [
-        ("title"), 
-        ("headings"), 
-        ("record")
+        ("title", ["<reverse> Data Title </reverse>"]), 
+        ("headings", ["<underline>COL A</underline>", "<underline>COL B</underline>"]), 
+        ("record", ["abc  ", "  123"])
     ]
 )
-def test_process_row_content(data_mock, con_tbl_inst, row_type):
+def test_process_row_content(data_mock, con_tbl_inst, row_type, expected):
     # Setup
     match row_type:
         case "title":
@@ -110,6 +110,9 @@ def test_process_row_content(data_mock, con_tbl_inst, row_type):
     
     # Execute
     result = con_tbl_inst._process_row_content(row_type, content, rjust_col)
+
+    # Verify
+    assert result == expected
 
 
 # Test setDimensions
