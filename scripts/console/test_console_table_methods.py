@@ -31,7 +31,36 @@ def con_tbl_inst(data_mock, console_mock):
 
 
 #7 Test display
-#5 Test drawRow
+
+
+# Test drawRow
+@pytest.mark.parametrize(
+    "row_type, index",
+    [
+        ("top", None), 
+        ("inner", None), 
+        ("bottom", None), 
+        ("title", None), 
+        ("headings", None), 
+        ("record", 0)
+    ]
+)
+def test_draw_row(data_mock, con_tbl_inst, row_type, index):
+    # Setup
+    rjust_col = data_mock.get_rjust_columns.return_value
+    con_tbl_inst._margin_size = 0
+    con_tbl_inst._column_widths = data_mock.get_column_widths.return_value
+    con_tbl_inst._table_width = data_mock.get_table_width.return_value
+
+    # Execute
+    con_tbl_inst._draw_row(row_type, index)
+
+    # Verify
+    if row_type == "record":
+        data_mock.get_rjust_columns.assert_called_once()
+    # con_tbl_inst._get_row_ends.assert_called_once()
+
+
 #6 Test drawTable
 
 
@@ -90,8 +119,13 @@ def test_get_row_ends(con_tbl_inst, row_type, is_line_type, expected):
 @pytest.mark.parametrize(
     "row_type, expected", 
     [
+        # Test case 1: Title line
         ("title", ["<reverse> Data Title </reverse>"]), 
+
+        # Test case 2: Headings line
         ("headings", ["<underline>COL A</underline>", "<underline>COL B</underline>"]), 
+
+        # Test case 3: Record line
         ("record", ["abc  ", "  123"])
     ]
 )
