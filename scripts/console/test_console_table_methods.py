@@ -4,6 +4,23 @@ from console_table import ConsoleTable
 from table import Table
 
 
+ROW_ENDS = {"top": ("<blue>╔</blue>", "<blue>╗</blue>", ""), 
+            "inr": ("<blue>╟</blue>", "<blue>╢</blue>", ""), 
+            "btm": ("<blue>╚</blue>", "<blue>╝</blue>", ""), 
+            "txt": ("<blue>║</blue>", "<blue>║</blue>", " ")}
+
+ROW_CONTENT = {
+    "top": {"raw": "═", "prc": "<blue>══════════════</blue>"}, 
+    "inr": {"raw": "─", "prc": "<blue>──────────────</blue>"}, 
+    "btm": {"raw": "═", "prc": "<blue>══════════════</blue>"}, 
+    "ttl": {"raw": "Data Title", "prc": ["<reverse> Data Title </reverse>"]}, 
+    "hdg": {"raw": {"COL A": "COL A", "COL B": "COL B"}, 
+            "prc": ["<underline>COL A</underline>", 
+                    "<underline>COL B</underline>"]}, 
+    "rec": {"raw": {"COL A": "abc", "COL B": "123"}, "prc": ["abc  ", "  123"]}
+}
+
+
 @pytest.fixture
 def console_mock(mocker):
     mock = mocker.Mock(spec=Terminal)
@@ -15,9 +32,9 @@ def console_mock(mocker):
 @pytest.fixture
 def data_mock(mocker):
     mock = mocker.Mock(spec=Table)
-    mock.get_title.return_value = "Data Title"
-    mock.get_headings.return_value = {"COL A": "COL A", "COL B": "COL B"}
-    mock.get_record.return_value = {"COL A": "abc", "COL B": "123"}
+    mock.get_title.return_value = ROW_CONTENT["ttl"]["raw"]
+    mock.get_headings.return_value = ROW_CONTENT["hdg"]["raw"]
+    mock.get_record.return_value = ROW_CONTENT["rec"]["raw"]
     mock.get_rjust_columns.return_value = {"COL B"}
     mock.get_column_widths.return_value = {"COL A": 5, "COL B": 5}
     mock.get_table_width.return_value = 12
@@ -35,30 +52,99 @@ def con_tbl_inst(data_mock, console_mock):
 
 # Test drawRow
 @pytest.mark.parametrize(
-    "row_type, index",
+    "row_type, ends, raw, processed, index, is_line_type, exp_out",
     [
-        ("top", None), 
-        ("inner", None), 
-        ("bottom", None), 
-        ("title", None), 
-        ("headings", None), 
-        ("record", 0)
+        (
+            "top", 
+            ROW_ENDS["top"], 
+            ROW_CONTENT["top"]["raw"], 
+            ROW_CONTENT["top"]["prc"], 
+            None, 
+            True, 
+            "<blue>╔</blue><blue>══════════════</blue><blue>╗</blue>\n"
+        ), 
+        (
+            "inner", 
+            ROW_ENDS["inr"], 
+            ROW_CONTENT["inr"]["raw"], 
+            ROW_CONTENT["inr"]["prc"], 
+            None, 
+            True, 
+            "<blue>╟</blue><blue>──────────────</blue><blue>╢</blue>\n"
+        ), 
+        (
+            "bottom", 
+            ROW_ENDS["btm"], 
+            ROW_CONTENT["btm"]["raw"], 
+            ROW_CONTENT["btm"]["prc"], 
+            None, 
+            True, 
+            "<blue>╚</blue><blue>══════════════</blue><blue>╝</blue>\n"
+        ), 
+        (
+            "title", 
+            ROW_ENDS["txt"], 
+            ROW_CONTENT["ttl"]["raw"], 
+            ROW_CONTENT["ttl"]["prc"], 
+            None, 
+            False,
+            "<blue>║</blue> <reverse> Data Title </reverse> <blue>║</blue>\n"
+        ), 
+        (
+            "headings", 
+            ROW_ENDS["txt"], 
+            ROW_CONTENT["hdg"]["raw"], 
+            ROW_CONTENT["hdg"]["prc"], 
+            None, 
+            False,
+            "<blue>║</blue> <underline>COL A</underline>  " + 
+            "<underline>COL B</underline> <blue>║</blue>\n"
+        ), 
+        (
+            "record", 
+            ROW_ENDS["txt"], 
+            ROW_CONTENT["rec"]["raw"], 
+            ROW_CONTENT["rec"]["prc"], 
+            0, 
+            False,
+            "<blue>║</blue> abc      123 <blue>║</blue>\n"
+        )
     ]
 )
-def test_draw_row(data_mock, con_tbl_inst, row_type, index):
-    # Setup
-    rjust_col = data_mock.get_rjust_columns.return_value
+def test_draw_row(mocker, con_tbl_inst, data_mock, row_type, ends, raw, 
+                  processed, index, is_line_type, exp_out, capfd):
+    # Setup attributes
     con_tbl_inst._margin_size = 0
     con_tbl_inst._column_widths = data_mock.get_column_widths.return_value
     con_tbl_inst._table_width = data_mock.get_table_width.return_value
 
+    # Setup methods
+    mocker.patch.object(con_tbl_inst, "_get_row_ends", return_value=ends)
+    mocker.patch.object(con_tbl_inst, "_get_row_content", return_value=raw)
+    mocker.patch.object(con_tbl_inst, "_process_row_content", 
+                        return_value=processed)
+    
+    # Setup method argument
+    rjust_col = (data_mock.get_rjust_columns.return_value 
+                 if row_type == "record" else {})
+
     # Execute
     con_tbl_inst._draw_row(row_type, index)
+    out, err = capfd.readouterr()
 
-    # Verify
+    # Verify method calls
     if row_type == "record":
         data_mock.get_rjust_columns.assert_called_once()
-    # con_tbl_inst._get_row_ends.assert_called_once()
+    con_tbl_inst._get_row_ends.assert_called_once_with(row_type, is_line_type)
+    if row_type in ["title", "headings", "record"]:
+        con_tbl_inst._get_row_content.assert_called_once_with(row_type, index)
+        con_tbl_inst._process_row_content.assert_called_once_with(row_type, 
+                                                                  raw, 
+                                                                  rjust_col)
+    
+    # Verify output    
+    assert out == exp_out
+    assert err == ""
 
 
 #6 Test drawTable
@@ -95,16 +181,16 @@ def test_get_row_content(con_tbl_inst, data_mock, row_type, index):
     "row_type, is_line_type, expected", 
     [
         # Test case 1: Top line
-        ("top", True, ("<blue>╔</blue>", "<blue>╗</blue>", "")), 
+        ("top", True, ROW_ENDS["top"]), 
 
         # Test case 2: Inner line
-        ("inner", True, ("<blue>╟</blue>", "<blue>╢</blue>", "")), 
+        ("inner", True, ROW_ENDS["inr"]), 
 
         # Test case 3: Bottom line
-        ("bottom", True, ("<blue>╚</blue>", "<blue>╝</blue>", "")), 
+        ("bottom", True, ROW_ENDS["btm"]), 
 
         # Test case 4: Text row
-        ("text", False, ("<blue>║</blue>", "<blue>║</blue>", " "))
+        ("text", False, ROW_ENDS["txt"])
     ]
 )
 def test_get_row_ends(con_tbl_inst, row_type, is_line_type, expected):
@@ -120,13 +206,13 @@ def test_get_row_ends(con_tbl_inst, row_type, is_line_type, expected):
     "row_type, expected", 
     [
         # Test case 1: Title line
-        ("title", ["<reverse> Data Title </reverse>"]), 
+        ("title", ROW_CONTENT["ttl"]["prc"]), 
 
         # Test case 2: Headings line
-        ("headings", ["<underline>COL A</underline>", "<underline>COL B</underline>"]), 
+        ("headings", ROW_CONTENT["hdg"]["prc"]), 
 
         # Test case 3: Record line
-        ("record", ["abc  ", "  123"])
+        ("record", ROW_CONTENT["rec"]["prc"])
     ]
 )
 def test_process_row_content(data_mock, con_tbl_inst, row_type, expected):
