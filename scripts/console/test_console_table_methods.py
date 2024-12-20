@@ -125,7 +125,7 @@ def con_tbl_inst(data_mock, console_mock):
             ROW_CONTENT["prc"]["rec"], 
             0, 
             False, 
-            ROW_CONTENT["prc"]["rec"]
+            ROW_CONTENT["fin"]["rec"]
         )
     ]
 )
@@ -147,7 +147,7 @@ def test_draw_row(mocker, con_tbl_inst, data_mock, row_type, ends_in, raw_in,
                  if row_type == "record" else {})
 
     # Execute
-    con_tbl_inst._draw_row(row_type, index)
+    con_tbl_inst._draw_row(row_type, record_idx)
     out, err = capfd.readouterr()
 
     # Verify method calls
