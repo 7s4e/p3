@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import call
 from blessed import Terminal
 from console_table import ConsoleTable
 from table import Table
@@ -152,7 +153,7 @@ def test_draw_row(mocker, con_tbl_inst, data_mock, row_type, ends_in, raw_in,
 
     # Verify method calls
     if row_type == "record":
-        data_mock.get_rjust_columns.assert_called_once()
+        con_tbl_inst._data.get_rjust_columns.assert_called_once()
     con_tbl_inst._get_row_ends.assert_called_once_with(row_type, is_line_type)
     if row_type in ["title", "headings", "record"]:
         con_tbl_inst._get_row_content.assert_called_once_with(row_type, 
@@ -166,7 +167,24 @@ def test_draw_row(mocker, con_tbl_inst, data_mock, row_type, ends_in, raw_in,
     assert err == ""
 
 
-#6 Test drawTable
+# Test drawTable
+@pytest.mark.parametrize("record_count", [0, 1, 9])
+def test_draw_table(mocker, con_tbl_inst, record_count):
+    # Setup
+    mocker.patch.object(con_tbl_inst, "_draw_row")
+
+    # Execute
+    con_tbl_inst._draw_table(record_count)
+
+    # Verify
+    exp_calls = [call("top"), 
+                 call("title"), 
+                 call("inner"), 
+                 call("headings"), 
+                 *[call("record", i) for i in range(record_count)], 
+                 call("bottom")]
+    con_tbl_inst._draw_row.assert_has_calls(exp_calls)
+    assert con_tbl_inst._draw_row.call_count == len(exp_calls)
 
 
 # Test getRowContent
