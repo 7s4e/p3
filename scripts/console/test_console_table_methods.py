@@ -45,8 +45,10 @@ ROW_CONTENT = {
 def console_mock(mocker):
     mock = mocker.Mock(spec=Terminal)
     mock.blue = mocker.Mock(side_effect=lambda x: f"<blue>{x}</blue>")
-    mock.reverse = mocker.Mock(side_effect=lambda x: f"<reverse>{x}</reverse>")
-    mock.underline = mocker.Mock(side_effect=lambda x: f"<underline>{x}</underline>")
+    mock.reverse = mocker.Mock(side_effect=lambda x: (f"<reverse>{x}" + 
+                                                      "</reverse>"))
+    mock.underline = mocker.Mock(side_effect=lambda x: (f"<underline>{x}" + 
+                                                        "</underline>"))
     return mock
 
 @pytest.fixture
@@ -67,12 +69,28 @@ def con_tbl_inst(data_mock, console_mock):
     return instance
 
 
-#7 Test display
+# Test display
+@pytest.mark.parametrize("record_count", [0, 1, 9])
+def test_display(data_mock, mocker, record_count, console_mock):
+    # Setup
+    consoleTable = ConsoleTable(data_mock)
+    mocker.patch.object(consoleTable, "_set_dimensions")
+    mocker.patch.object(consoleTable, "_draw_table")
+    mocker.patch.object(consoleTable._data, "count_records", 
+                        return_value=record_count)
 
+    # Execute
+    consoleTable.display(console_mock)
+
+    # Verify
+    assert consoleTable._con == console_mock
+    consoleTable._set_dimensions.assert_called_once()
+    consoleTable._data.count_records.assert_called_once()
+    consoleTable._draw_table.assert_called_once_with(record_count)
 
 # Test drawRow
 @pytest.mark.parametrize(
-    "row_type, ends_in, raw_in, processed_in, record_idx, is_line_type, exp_out",
+    "row_type, ends_in, raw_in, proc_in, record_idx, is_line_type, exp_out",
     [
         (   # Test case 1: Top border line
             "top", 
@@ -131,7 +149,7 @@ def con_tbl_inst(data_mock, console_mock):
     ]
 )
 def test_draw_row(mocker, con_tbl_inst, data_mock, row_type, ends_in, raw_in, 
-                  processed_in, record_idx, is_line_type, exp_out, capfd):
+                  proc_in, record_idx, is_line_type, exp_out, capfd):
     # Setup attributes
     con_tbl_inst._margin_size = 0
     con_tbl_inst._column_widths = data_mock.get_column_widths.return_value
@@ -141,7 +159,7 @@ def test_draw_row(mocker, con_tbl_inst, data_mock, row_type, ends_in, raw_in,
     mocker.patch.object(con_tbl_inst, "_get_row_ends", return_value=ends_in)
     mocker.patch.object(con_tbl_inst, "_get_row_content", return_value=raw_in)
     mocker.patch.object(con_tbl_inst, "_process_row_content", 
-                        return_value=processed_in)
+                        return_value=proc_in)
     
     # Setup method argument
     rjust_col = (data_mock.get_rjust_columns.return_value 
