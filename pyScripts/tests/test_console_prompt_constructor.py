@@ -1,7 +1,7 @@
 import pytest
 import sys
 from blessed import Terminal
-from src.console import ConsolePrompt
+from src import ConsolePrompt
 
 
 @pytest.mark.parametrize(

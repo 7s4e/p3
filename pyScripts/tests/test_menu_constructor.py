@@ -1,6 +1,5 @@
 import pytest
-from src.menu import Menu
-from src.table import Table
+from src import Menu, Table
 
 
 @pytest.mark.parametrize(

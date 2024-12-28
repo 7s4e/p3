@@ -1,6 +1,6 @@
 import pytest
 from blessed import Terminal
-from src.console import Console
+from src import Console
 
 
 @pytest.fixture
@@ -9,7 +9,7 @@ def mock_console(mocker):
 
 @pytest.fixture
 def mock_base(mocker, mock_console):
-    base_class = mocker.patch("src.console.console.ConsoleBase")
+    base_class = mocker.patch("src.console.ConsoleBase")
     base_class.return_value._trm = mock_console
     return base_class
 

@@ -1,2 +1,2 @@
 # Scripts
-* [getDisk](get_disk/design.md)
+* [getDisk](docs/design/getDisk.md)

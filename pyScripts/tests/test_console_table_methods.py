@@ -1,8 +1,7 @@
 import pytest
 from unittest.mock import call
 from blessed import Terminal
-from src.console import ConsoleTable
-from src.table import Table
+from src import ConsoleTable, Table
 
 
 ROW_ENDS = {"top": ("<blue>╔</blue>", "<blue>╗</blue>", ""), 

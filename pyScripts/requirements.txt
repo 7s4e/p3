@@ -1,0 +1,4 @@
+# https://docs.python-guide.org/writing/structure/
+# https://pip.pypa.io/en/stable/user_guide/#requirements-files
+# https://pip.pypa.io/en/stable/reference/requirements-file-format/#requirements-file-format
+# mocker, cov

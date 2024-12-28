@@ -1,5 +1,5 @@
 from blessed import Terminal
-from src.console.console_base import ConsoleBase
+from src.console import ConsoleBase
 
 
 def test_console_base_constructor(mocker):

@@ -1,6 +1,6 @@
 import pytest
 from functools import partial
-from src.table import Table
+from src import Table
 
 
 # Tests parameters for findBoundaries and getSlice

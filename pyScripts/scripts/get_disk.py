@@ -3,10 +3,8 @@
 import inspect
 
 # Local module imports
-from src.commands import cmd
-from src.console import Console, ConsolePrompt
-from src.menu import Menu
-from src.table import Table
+from src import commands as cmd
+from src import Console, ConsolePrompt, Menu, Table
 
 
 def confirm_disk(disk: str) -> bool:
