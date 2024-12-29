@@ -553,7 +553,7 @@ graph LR
 [️⬆️](#method-groups)
 ---
 ##### `putTable`
-* [ConsoleTable](../console/console_table.py)
+* [ConsoleTable](console.md#consoletable)
 ```mermaid
 flowchart
     classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px

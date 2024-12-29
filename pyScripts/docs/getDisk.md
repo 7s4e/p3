@@ -40,7 +40,7 @@ flowchart LR
         TBL --> CCT
     MNU(Menu):::complete
 ```
-* [commands](../commands/design.md)
-* [console](../console/design.md)
-* [Menu](../menu/design.md)
-* [Table](../table/design.md)
+* [commands](commands.md)
+* [console](console.md)
+* [Menu](menu.md)
+* [Table](table.md)

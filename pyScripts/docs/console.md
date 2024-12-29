@@ -437,7 +437,7 @@ END
 * [_getRowEnds](#_getrowends)
 * [_getRowContent](#_getrowcontent)
 * [_processRowContent](#_processrowcontent)
-* [Table](../table/design.md)
+* [Table](table.md)
 ```mermaid
 graph
     style MAIN fill:#4682b4,stroke:#b97d4b,stroke-width:2px,color:#0ff

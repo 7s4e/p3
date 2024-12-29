@@ -4,8 +4,8 @@
 * [setPrompt](#setprompt)
 * [run](#run)
 * [getSelection](#getselection)
-* [Table](../table/design.md)
-* [ConsolePrompt](../console/design.md)
+* [Table](table.md)
+* [ConsolePrompt](console.md)
 ```mermaid
 graph LR
     style MNYU fill:#4682b4,stroke:#b97d4b,stroke-width:2px,color:#0ff
