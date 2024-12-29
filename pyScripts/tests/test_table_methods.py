@@ -141,7 +141,7 @@ def test_put_table(mocker, tbl_inst_with_wds, menu_flag, record_number):
     mocker.patch.object(tbl_inst_with_wds, "_number_records", 
                         return_value=record_number)
     mocker.patch.object(tbl_inst_with_wds, "_calculate_widths")
-    mock_con_tbl = mocker.patch("src.ConsoleTable")
+    mock_con_tbl = mocker.patch("src.table.ConsoleTable")
     mocker.patch.object(mock_con_tbl.return_value, "display")
 
     # Execute

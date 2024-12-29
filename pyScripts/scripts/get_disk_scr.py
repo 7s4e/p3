@@ -34,12 +34,10 @@ def get_disks() -> Table:
     Returns:
         A list of dictionaries containing disk information.
     """
-    print(f"Table class in use: {Table}, from module: {Table.__module__}")
     output = cmd.list_block_devices(columns=["NAME", "VENDOR", "SIZE"], 
                                     show_dependents=False)
     disks = Table(title="connected devices", table_string=output, 
                   rjust_columns="SIZE")
-    print(f"Disks as Table: {disks}")
     disks.filter_startswith("NAME", "sd")
     return disks
 
@@ -59,7 +57,7 @@ def select_disk(disks: Table) -> str:
     return disk_selection.get_selection("NAME")
 
 
-def main() -> str:
+def get_disk() -> str:
     """Main function to select and confirm a disk.
 
     Continuously prompts the user to connect and select a disk until
@@ -68,7 +66,6 @@ def main() -> str:
     Returns:
         The name of the confirmed disk.
     """
-    Console.clear_stdscr()
     Console.put_script_banner(inspect.currentframe().f_code.co_name)
 
     while True:
@@ -99,6 +96,11 @@ def main() -> str:
             check_disk_alert.call()
 
     return disk
+
+
+def main() -> str:
+    Console.clear_stdscr()
+    return get_disk()
 
 
 if __name__ == "__main__":

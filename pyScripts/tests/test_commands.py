@@ -5,7 +5,7 @@ from src import commands as cmd
 
 @pytest.fixture
 def run_cmmnd_mock(mocker):
-    return mocker.patch("src.cmd.run_command")
+    return mocker.patch("src.commands.run_command")
 
 
 # Test listBlockDevices
@@ -119,7 +119,7 @@ def test_run_badblocks(run_cmmnd_mock, non_destruct, capt_out, exp_cmnd,
 )
 def test_run_command(mocker, cmnd, mock_rtn, capt_out, exp_out, should_raise):
     # Setup
-    run_mock = mocker.patch("src.cmd.subprocess.run")
+    run_mock = mocker.patch("subprocess.run")
     run_mock.return_value = mocker.MagicMock(**mock_rtn)
 
     # Execute exception
@@ -154,7 +154,7 @@ def test_unmount_disk(mocker, run_cmmnd_mock):
                                   None]            # Third call for umount
     
     # Setup mock Table
-    tbl_patch = mocker.patch("src.cmd.Table")
+    tbl_patch = mocker.patch("src.commands.Table")
     mock_tbl = tbl_patch.return_value
     mock_tbl.filter_nonempty.return_value = None
     mock_tbl.count_records.return_value = 2

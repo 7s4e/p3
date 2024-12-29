@@ -66,7 +66,7 @@ def test_run_and_get_selection(mocker, option_count, user_response):
         (False, 
          ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"], "Mock prompt?"), 
 
-        # Test case 4: Integrated method on long menu without prompt
+        # Test case 8: Integrated method on long menu without prompt
         (False, ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"], None), 
     ]
 )
@@ -86,7 +86,7 @@ def test_set_prompt(mocker, mock_menu, options, prompt_param):
 
     # Setup ConsolePrompt, patch, and parameter
     mock_con_prmpt = mocker.Mock(spec=ConsolePrompt)
-    cprmpt_patch = mocker.patch("src.ConsolePrompt", 
+    cprmpt_patch = mocker.patch("src.menu.ConsolePrompt", 
                                 return_value=mock_con_prmpt)
     prompt_arg = (prompt_param if prompt_param is not None 
                   else f"Enter number (1-{options}) for selection:")
