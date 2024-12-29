@@ -13,6 +13,7 @@ flowchart LR
         MAIN --> CON
         MAIN --> GD
     GD[getDisk]
+        GD --> CON
         GD --> INSP
         GD --> GDS
         GD --> CCP
@@ -33,14 +34,16 @@ flowchart LR
     TRM(blessed.Terminal):::library
     INSP(inspect):::library
     CMD(commands):::complete
-    CON(console):::complete
-    CCP(console.ConsolePrompt):::complete
-    CCT(console.ConsoleTable):::working
+    CON(Console):::complete
+    CCP(ConsolePrompt):::complete
+    CCT(ConsoleTable):::complete
     TBL(Table):::complete
         TBL --> CCT
     MNU(Menu):::complete
 ```
 * [commands](commands.md)
-* [console](console.md)
+* [Console](console.md#console)
+* [Console](console.md#consoleprompt)
+* [Console](console.md#consoletable)
 * [Menu](menu.md)
 * [Table](table.md)

@@ -1,10 +1,16 @@
 # Console Module
-* [clearStdscr](#clearstdscr)
-* [putScriptBanner](#putscriptbanner)
+## Classes
+* [Console](#console)
 * [ConsolePrompt](#consoleprompt)
 * [ConsoleTable](#consoletable)
 ---
-### `clearStdscr`
+---
+## Console
+### Static Methods
+* [clearStdscr](#clearstdscr)
+* [putScriptBanner](#putscriptbanner)
+---
+#### `clearStdscr`
 ```mermaid
 flowchart LR
     STR([start])
@@ -19,7 +25,7 @@ clearStdscr(console)
 END
 ```
 ---
-### `putScriptBanner`
+#### `putScriptBanner`
 ```mermaid
 flowchart LR
     STR([start])
