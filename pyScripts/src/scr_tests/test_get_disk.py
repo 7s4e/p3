@@ -1,6 +1,6 @@
 import pytest
 import scripts.get_disk_scr as gd
-from src import Table
+from modules import Table
 
 
 @pytest.fixture

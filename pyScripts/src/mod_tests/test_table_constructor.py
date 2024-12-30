@@ -1,5 +1,5 @@
 import pytest
-from src import Table
+from modules import Table
 
 
 @pytest.mark.parametrize(

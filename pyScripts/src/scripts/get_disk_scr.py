@@ -3,8 +3,8 @@
 import inspect
 
 # Local module imports
-from src import commands as cmd
-from src import Console, ConsolePrompt, Menu, Table
+from modules import commands as cmd
+from modules import Console, ConsolePrompt, Menu, Table
 
 
 def confirm_disk(disk: str) -> bool:
@@ -21,6 +21,7 @@ def confirm_disk(disk: str) -> bool:
                                     columns=["NAME", "TYPE", "FSTYPE", "LABEL", 
                                              "MOUNTPOINTS"])
     partitions = Table(title="selected device", table_string=output)
+    print()
     partitions.put_table()
     disk_confirmation = ConsolePrompt(prompt, 
                                       expect_keystroke=True, 
@@ -53,6 +54,7 @@ def select_disk(disks: Table) -> str:
         The name of the selected disk.
     """
     disk_selection = Menu(disks)
+    print()
     disk_selection.run()
     return disk_selection.get_selection("NAME")
 

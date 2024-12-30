@@ -1,6 +1,6 @@
 import pytest
 from blessed import Terminal
-from src import ConsoleTable, Table
+from modules import ConsoleTable, Table
 
 
 @pytest.mark.parametrize(

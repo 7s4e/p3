@@ -1,5 +1,5 @@
 import pytest
-from src import Menu, Table
+from modules import Menu, Table
 
 
 @pytest.mark.parametrize(
@@ -129,8 +129,8 @@ def test_menu_constructor(mocker, options, title, prompt, exp_count,
     # Setup mock Table
         if isinstance(options, list):
             mock_tbl = mocker.Mock(spec=Table)
-            tbl_patch = mocker.patch("src.table.Table",
-                                     # not src.menu.menu.Table with 
+            tbl_patch = mocker.patch("modules.table.Table",
+                                     # not modules.menu.menu.Table with 
                                      # Menu.__init__() import
                                      return_value=mock_tbl)
     

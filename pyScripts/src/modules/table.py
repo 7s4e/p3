@@ -1,5 +1,5 @@
 # Local module import
-from console import ConsoleTable
+from .console import ConsoleTable
 
 
 class Table:
@@ -45,7 +45,6 @@ class Table:
                  title: str | None = None, 
                  rjust_columns: str | list[str] | set[str] | None = None
                  ) -> None:
-        print(f"Table instantiated with title: {title}, table_string: {table_string}")
         """Initialize the Table instance.
         Args:
             table_data: A list of dictionaries representing the table 

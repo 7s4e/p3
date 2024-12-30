@@ -8,7 +8,7 @@ import textwrap
 from blessed import Terminal
 
 if TYPE_CHECKING:
-    from table import Table  # For static type checking only
+    from .table import Table  # For static type checking only
 
 
 class ConsoleBase:
@@ -175,7 +175,7 @@ class ConsolePrompt(ConsoleBase):
                 otherwise.
         """
         if self._user_response.lower() in {"y", "n"}:
-            self._user_response = self._user_response.lower() == "y"
+            self._validated_response = self._user_response.lower() == "y"
             return True
 
         self._put_alert("Respond with 'y' or 'n'")
@@ -280,9 +280,12 @@ class ConsolePrompt(ConsoleBase):
                 a trailing space; if False, it moves to the next line 
                 after the prompt.
         """
-        self._print_message(self._trm.bright_yellow(self._prompt), 
+        # self._print_message(self._trm.bright_yellow(self._prompt), 
+        #                     leave_cursor_inline=leave_cursor_inline)
+        self._print_message(self._trm.yellow(self._prompt), 
                             leave_cursor_inline=leave_cursor_inline)
-  
+
+
     def _read_keystroke(self) -> None:
         """Captures a single keystroke from the user, waiting for a 
             printable character or the Enter key, and stores the result 
@@ -302,10 +305,14 @@ class ConsolePrompt(ConsoleBase):
         key = None
 
         with self._trm.cbreak(), self._trm.hidden_cursor():
-            while key is None or not (32 <= key.code <= 126 or key.code == 10):
+            while key is None or not (32 <= key_code <= 126 or key_code == 10):
                 key = self._trm.inkey()
+                try:
+                    key_code = ord(key)
+                except:
+                    key = None
 
-        self._user_response = str(key if key.code != 10 else "")
+        self._user_response = str(key if key_code != 10 else "")
 
     def _read_string(self) -> None:
         """Read a user input string character by character, handling 
@@ -327,19 +334,23 @@ class ConsolePrompt(ConsoleBase):
         response = []
 
         with self._trm.cbreak():
-            while key is None or key.code != 10:  # Wait New Line/Enter
+            while key is None or key_code != 10:  # Wait New Line/Enter
                 key = self._trm.inkey()
-
-                if key.code == 8:  # Handle Backspace
-                    if response:
-                        response.pop()
-                        bckspce_sequence = "\b \b" * len(self._trm.green("x"))
-                        print(bckspce_sequence, end="", flush=True)
-                elif 32 <= key.code <= 126:  # Handle printable chars
-                    response.append(str(key))
-                    formatted_char = self._trm.green(str(key))
-                    print(formatted_char, end="", flush=True)
-
+                try:
+                    key_code = ord(key)
+                except:
+                    key = None
+                else:
+                    if key_code == 8 or key_code == 127:  # Backspace
+                        if response:
+                            response.pop()
+                            bckspce_sequence = ("\b \b" * 
+                                                len(self._trm.green("x")))
+                            print(bckspce_sequence, end="", flush=True)
+                    elif 32 <= key.code <= 126:  # Printable chars
+                        response.append(str(key))
+                        formatted_char = self._trm.green(str(key))
+                        print(formatted_char, end="", flush=True)
             print()  # Move to next line after Enter
 
         self._user_response = "".join(response)
@@ -361,6 +372,7 @@ class ConsolePrompt(ConsoleBase):
             return self._check_bool_validity()
         if self._validate_integer:
             return self._check_integer_validity()
+        self._validated_response = self._user_response
         return True
 
 
@@ -400,7 +412,7 @@ class ConsoleTable(ConsoleBase):
     def __init__(self, data: Table) -> None:
         # Lazy import avoids circular import and enables runtime type 
         # validation
-        from src.table import Table  # for test_console_table_constructor.py
+        from modules.table import Table  # for test_console_table_constructor.py
         if not isinstance(data, Table):
             raise TypeError("Expected `Table` for 'data'")
         

@@ -3,7 +3,7 @@ import subprocess
 import sys
 
 # Local module imports
-from table import Table
+from .table import Table
 
 
 def list_block_devices(disk: str | None = None, 

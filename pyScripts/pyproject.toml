@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyScripts"
+version = "0.1"
+description = "Python scripts part of the Personal Project Portfolio"
+authors = [
+    {name = "Bryant Smith"}, {email = "bryant@7s4e.org"},
+]
+license = {text = "MIT License, Copyright (c) 2024 7s4e"}
+dependencies = ["blessed"]
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Home = "https://github.com/7s4e/p3"
+
+[tool.setuptools.packages]
+find = { where = ["src"] }
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[project.scripts]
+get-disk = "scripts.get_disk_scr:main"
+
+[tool.pytest.ini_options]
+testpaths = [
+    "src/mod_tests",
+    "scr_tests"
+]

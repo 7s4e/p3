@@ -1,6 +1,6 @@
 import pytest
 from functools import partial
-from src import ConsolePrompt, Menu, Table
+from modules import ConsolePrompt, Menu, Table
 
 
 # Test run
@@ -86,7 +86,7 @@ def test_set_prompt(mocker, mock_menu, options, prompt_param):
 
     # Setup ConsolePrompt, patch, and parameter
     mock_con_prmpt = mocker.Mock(spec=ConsolePrompt)
-    cprmpt_patch = mocker.patch("src.menu.ConsolePrompt", 
+    cprmpt_patch = mocker.patch("modules.menu.ConsolePrompt", 
                                 return_value=mock_con_prmpt)
     prompt_arg = (prompt_param if prompt_param is not None 
                   else f"Enter number (1-{options}) for selection:")

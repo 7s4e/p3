@@ -1,6 +1,6 @@
 import pytest
 from blessed import keyboard, Terminal
-from src import ConsolePrompt
+from modules import ConsolePrompt
 
 
 @pytest.fixture

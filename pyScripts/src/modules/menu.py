@@ -3,8 +3,8 @@
 from typing import Any
 
 # Local module import
-from console import ConsolePrompt
-from table import Table
+from .console import ConsolePrompt
+from .table import Table
 
 class Menu:
     def __init__(self, 
@@ -13,7 +13,7 @@ class Menu:
                  prompt: str | None = None) -> None:
 
         # Parameter validation
-        from src.table import Table  # matchs test_menu_constuctory.py
+        from modules.table import Table  # matchs test_menu_constuctory.py
         if not isinstance(options, (list, Table)):
             raise TypeError("Expected `Table` or `list` for 'options'")
         if isinstance(options, list) and options == []:
@@ -36,7 +36,7 @@ class Menu:
 
     def run(self) -> None:
         self._options.put_table(is_menu=True)
-        index = self._prompt.call() - 1
+        index = int(self._prompt.call()) - 1
         self._selection = self._options.get_record(index)
 
     def set_prompt(self, prompt: str | None = None) -> None:

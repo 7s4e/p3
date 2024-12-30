@@ -1,11 +1,11 @@
 import pytest
 import sys
-from src import commands as cmd
+from modules import commands as cmd
 
 
 @pytest.fixture
 def run_cmmnd_mock(mocker):
-    return mocker.patch("src.commands.run_command")
+    return mocker.patch("modules.commands.run_command")
 
 
 # Test listBlockDevices
@@ -154,7 +154,7 @@ def test_unmount_disk(mocker, run_cmmnd_mock):
                                   None]            # Third call for umount
     
     # Setup mock Table
-    tbl_patch = mocker.patch("src.commands.Table")
+    tbl_patch = mocker.patch("modules.commands.Table")
     mock_tbl = tbl_patch.return_value
     mock_tbl.filter_nonempty.return_value = None
     mock_tbl.count_records.return_value = 2
