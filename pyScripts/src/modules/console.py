@@ -35,8 +35,12 @@ class Console(ConsoleBase):
             script_name: The name of the script to be displayed in the 
                 banner.
         """
+        print(f"TRACE: Console.put_script_banner called with {script_name}")#####
         term = ConsoleBase()._trm
+        print(f"TRACE: Console.put_script_banner.term: {term}")#####
+        print(f"TRACE: Console.put_script_banner.term.width: {term.width}")#####
         scr_str = snake_to_camel(script_name)
+        print(f"TRACE: Console.put_script_banner.scr_str: {scr_str}")#####
         print(term.reverse(f"Running {scr_str}...".ljust(term.width)))
 
 

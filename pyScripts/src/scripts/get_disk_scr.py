@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Standard library imports
 import inspect
+import sys
 
 # Local module imports
 from modules import commands as cmd
@@ -35,11 +36,15 @@ def get_disks() -> Table:
     Returns:
         A list of dictionaries containing disk information.
     """
+    print(f"TRACE: GD > main > getDisk > getDisks called")#####
     output = cmd.list_block_devices(columns=["NAME", "VENDOR", "SIZE"], 
                                     show_dependents=False)
+    print(f"TRACE: GD > main > getDisk > getDisks.output: {output}")#####
     disks = Table(title="connected devices", table_string=output, 
                   rjust_columns="SIZE")
+    print(f"TRACE: GD > main > getDisk > getDisks.disks: {disks}")#####
     disks.filter_startswith("NAME", "sd")
+    print(f"TRACE: GD > main > getDisk > getDisks.disks: {disks}")#####
     return disks
 
 
@@ -68,17 +73,29 @@ def get_disk() -> str:
     Returns:
         The name of the confirmed disk.
     """
-    print(f"TRACE: main > getDisk")#####
+    print(f"TRACE: GD > main > getDisk")#####
     Console.put_script_banner(inspect.currentframe().f_code.co_name)
 
     while True:
+        print(f"TRACE: GD > main > getDisk loop start")#####
         disks = get_disks()
+        print(f"TRACE: GD > main > getDisk.disks: {disks}")#####
         count = disks.count_records()
+        print(f"TRACE: GD > main > getDisk.count: {count}")#####
 
         if count == 0:
-            no_disk_msg = "Connect a device and press any key to continue..."
+            print(f"TRACE: GD > main > getDisk.count == 0")#####
+            no_disk_msg = ("Press 'q' to quit, or connect a device and " +
+                           "press any key to continue...")
+            print(f"TRACE: GD > main > getDisk.no_disk_msg assigned")#####
             no_disk_alert = ConsolePrompt(no_disk_msg, expect_keystroke=True)
-            no_disk_alert.call()
+            print(f"TRACE: GD > main > getDisk.no_disk_alert: {no_disk_alert}")#####
+            response = no_disk_alert.call()
+            print(f"TRACE: GD > main > getDisk.response: {response}")#####
+            if response in {"q", "Q"}:
+                print(f"Aborted {inspect.currentframe().f_code.co_filename}")
+                sys.exit(10)
+            print(f"TRACE: GD > main > getDisk continue")#####
             continue
 
         disk = (disks.get_record(0)["NAME"] 
@@ -103,7 +120,7 @@ def get_disk() -> str:
 
 def main() -> str:
     Console.clear_stdscr()
-    print(f"TRACE: main")#####
+    print(f"TRACE: GD > main")#####
     return get_disk()
 
 
