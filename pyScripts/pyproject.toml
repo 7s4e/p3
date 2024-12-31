@@ -4,10 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyScripts"
-version = "0.1"
+version = "0.1.1"
 description = "Python scripts part of the Personal Project Portfolio"
 authors = [
-    {name = "Bryant Smith"}, {email = "bryant@7s4e.org"},
+    {name = "Bryant Smith"},
+    {email = "bryant@7s4e.org"},
 ]
 license = {text = "MIT License, Copyright (c) 2024 7s4e"}
 dependencies = ["blessed"]
