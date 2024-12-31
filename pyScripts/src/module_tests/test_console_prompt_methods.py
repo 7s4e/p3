@@ -212,7 +212,7 @@ def test_put_alert(prompt_inst, capfd):
                           (False, "\n")])  # Test case 2: New line
 def test_put_prompt(prompt_inst, is_inline, end, capfd):
     # Setup terminal color
-    prompt_inst._trm.bright_yellow = lambda x: f"[yellow]{x}[/yellow]"
+    prompt_inst._trm.yellow = lambda x: f"[yellow]{x}[/yellow]"
 
     # Execute and capture
     prompt_inst._put_prompt(leave_cursor_inline=is_inline)
@@ -341,6 +341,7 @@ def test_get_validate_reponse(mocker, prompt_inst, bool_path, int_path,
     # Setup instance attributes
     prompt_inst._validate_bool = bool_path
     prompt_inst._validate_integer = int_path
+    prompt_inst._user_response = "mock response"
 
     # Execute
     result = prompt_inst._validate_response()
@@ -358,3 +359,4 @@ def test_get_validate_reponse(mocker, prompt_inst, bool_path, int_path,
     else:
         check_bool_validity_mock.assert_not_called()
         check_int_validity_mock.assert_not_called()
+        assert prompt_inst._validated_response == prompt_inst._user_response

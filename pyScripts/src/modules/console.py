@@ -280,8 +280,6 @@ class ConsolePrompt(ConsoleBase):
                 a trailing space; if False, it moves to the next line 
                 after the prompt.
         """
-        # self._print_message(self._trm.bright_yellow(self._prompt), 
-        #                     leave_cursor_inline=leave_cursor_inline)
         self._print_message(self._trm.yellow(self._prompt), 
                             leave_cursor_inline=leave_cursor_inline)
 

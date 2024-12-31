@@ -1,4 +1,0 @@
-mod_tests
-modules
-scr_tests
-scripts
