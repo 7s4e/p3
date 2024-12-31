@@ -1,18 +1,20 @@
 # Table Module
 ## `Table`
-### Method Groups
-* [Initialize Table Methods](#initialize-table-methods)
-* [Modify Table Methods](#modify-table-methods)
-* [Display Table Methods](#display-table-methods)
-* [Getters](#getters)
-#### Initialize Table Methods
-* [\_\_init__](#__init__)
-* [_capitalizeKeys](#_capitalizekeys)
-* [_readTable](#_readtable)
-* [_findColumnPositions](#_findcolumnpositions)
-* [_getSlice](#_getslice)
-* [_findBoundaries](#_findboundaries)
-* [_addRjustColLabel](#_addrjustcollabel)
+| Method Groups |
+| --- |
+| [Initialize Table Methods](#initialize-table-methods)
+| [Modify Table Methods](#modify-table-methods)
+| [Display Table Methods](#display-table-methods)
+| [Getters](#getters)
+### Initialize Table Methods
+| Constructor | Private Methods |
+| --- | --- |
+| [\_\_init__](#__init__) | [_capitalizeKeys](#_capitalizekeys) |
+| | [_readTable](#_readtable) |
+| | [_findColumnPositions](#_findcolumnpositions) |
+| | [_getSlice](#_getslice) |
+| | [_findBoundaries](#_findboundaries) |
+| | [_addRjustColLabel](#_addrjustcollabel) |
 ```mermaid
 graph
     STRT([start])
@@ -57,9 +59,9 @@ graph
 ```
 [️⬆️](#method-groups)
 ---
-##### `__init__`
+### `__init__`
 ```mermaid
-flowchart
+flowchart LR
     classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
     STR([start]):::shape
         STR --> SRC
@@ -99,7 +101,7 @@ END
 ```
 [️⬆️](#initialize-table-methods)
 ---
-##### `_capitalizeKeys`
+### `_capitalizeKeys`
 ```mermaid
 flowchart LR
     classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
@@ -127,9 +129,9 @@ capitalize_keys(data)
 ```
 [️⬆️](#initialize-table-methods)
 ---
-##### `_readTable`
+### `_readTable`
 ```mermaid
-flowchart
+flowchart LR
     classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
     STR([init]):::shape
         STR --> TBS
@@ -170,7 +172,7 @@ readTable(string)
 ```
 [️⬆️](#initialize-table-methods)
 ---
-##### `_findColumnPositions`
+### `_findColumnPositions`
 ```mermaid
 flowchart LR
     classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
@@ -197,7 +199,7 @@ findColumnPositions(headerLine, keys)
 ```
 [️⬆️](#initialize-table-methods)
 ---
-##### `_getSlice`
+### `_getSlice`
 ```mermaid
 flowchart LR
     classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
@@ -216,10 +218,10 @@ getSlice(columnIndex, positionsList, line)
 ```
 [️⬆️](#initialize-table-methods)
 ---
-##### `_findBoundaries`
-###### Overview
+### `_findBoundaries`
+#### Overview
 ```mermaid
-flowchart
+flowchart LR
     classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
     STR([getSlice]):::shape
         STR --> ARG
@@ -236,9 +238,9 @@ flowchart
     END(["return <span style='color:#0f0;'>start</span>, <span style=
               'color:red;'>end</span>"]):::shape
 ```
-###### Initialize Subgraph
+#### Initialize Subgraph
 ```mermaid
-flowchart
+flowchart LR
     classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
     INP[\input\]:::shape
         INP --> SST
@@ -261,9 +263,9 @@ flowchart
         SE1 --> AJS
         SE2 --> AJS
 ```
-###### Start Subgraph
+#### Start Subgraph
 ```mermaid
-flowchart
+flowchart LR
     classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
     INT[[initialize start, end]]:::shape
         INT --> SIL
@@ -296,9 +298,9 @@ flowchart
             WNS -- False --> AJE
             SLL          --> AJE
 ```
-###### End Subgraph
+#### End Subgraph
 ```mermaid
-flowchart
+flowchart LR
     classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
     AJS[[adjust start]]:::shape
         AJS --> EIL
@@ -355,7 +357,7 @@ findBoundaries(columnIndex, positionsList, line)
 ```
 [️⬆️](#initialize-table-methods)
 ---
-##### `_addRjustColLabel`
+### `_addRjustColLabel`
 ```mermaid
 flowchart LR
     classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
@@ -372,10 +374,12 @@ addRjustColLabel(label)
 ```
 [️⬆️](#initialize-table-methods)
 ---
-#### Modify Table Methods
-* [filterNonempty](#filternonempty)
-* [filterStartswith](#filterstartswith)
-* [resizeColumns](#resizecolumns)
+### Modify Table Methods
+| Public Methods |
+| --- |
+| [filterNonempty](#filternonempty) |
+| [filterStartswith](#filterstartswith) |
+| [resizeColumns](#resizecolumns) |
 ```mermaid
 graph
     TABL([**Table**])
@@ -403,9 +407,9 @@ graph
 ```
 [️⬆️](#method-groups)
 ---
-##### `filterNonempty`
+### `filterNonempty`
 ```mermaid
-flowchart
+flowchart LR
     classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
     STR([Table]):::shape
         STR --> INP
@@ -437,9 +441,9 @@ filterNonempty(key)
 ```
 [️⬆️](#modify-table-methods)
 ---
-##### `filterStartswith`
+### `filterStartswith`
 ```mermaid
-flowchart
+flowchart LR
     classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
     STR([Table]):::shape
         STR --> INP
@@ -472,7 +476,7 @@ filterStartswith(key, prefix)
 ```
 [️⬆️](#modify-table-methods)
 ---
-##### `resizeColumns`
+### `resizeColumns`
 ```mermaid
 flowchart
     classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
@@ -511,17 +515,17 @@ resizeColumns(widthLimit)
 ```
 [️⬆️](#modify-table-methods)
 ---
-#### Display Table Methods
-* [putTable](#puttable)
-* [_numberRecords](#_numberrecords)
-* [_calculateWidths](#_calculatewidths)
-* [_addRjustColLabel](#_addrjustcollabel) (see Initialize Table Methods)
+### Display Table Methods
+| Public Method | Private Methods | Dependency |
+| --- | --- | --- |
+| [putTable](#puttable) | [_numberRecords](#_numberrecords) | [ConsoleTable](console.md#consoletable) |
+| | [_calculateWidths](#_calculatewidths) | |
+| | [_addRjustColLabel](#_addrjustcollabel)<br>(see Initialize Table Methods) | |
 ```mermaid
-graph LR
+graph
     
     TABL([**Table**])
-        TABL -- console
-                isMenu  --> PTBL
+        TABL -- isMenu  --> PTBL
     subgraph i [Initialize Table Methods]
         style i fill:#4682b4,stroke:#b97d4b,stroke-width:2px
         INIT(*init*)
@@ -552,31 +556,30 @@ graph LR
 ```
 [️⬆️](#method-groups)
 ---
-##### `putTable`
-* [ConsoleTable](console.md#consoletable)
+### `putTable`
 ```mermaid
-flowchart
-    classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
-    STR([Table]):::shape
+flowchart LR
+    classDef this fill:#4682b4,stroke:#b97d4b,stroke-width:2px
+    classDef that fill:#b97d4b,stroke:#4682b4,stroke-width:2px
+    STR([Table]):::this
         STR --> INP
-    INP[\"<span style='color:cyan;'>isMenu</span>
-          <span style='color:magenta;'>console</span>"\]:::shape
+    INP[\"<span style='color:cyan;'>isMenu</span>"\]:::this
         INP --> IIM
-    IIM{"<span style='color:cyan;'>isMenu</span>"}:::shape
+    IIM{"<span style='color:cyan;'>isMenu</span>"}:::this
         IIM -- True  --> NBR
         IIM -- False --> CWD
-    NBR[[_numberRecords]]:::shape
+    NBR[[_numberRecords]]:::this
         NBR --> CWD
-    CWD[[_calculateWidths]]:::shape
+    CWD[[_calculateWidths]]:::this
         CWD --> CST
-    CST[[ConsoleTable.init]]:::shape
+    CST[[ConsoleTable]]:::that
         CST --> DIS
-    DIS[["ConsoleTable.<span style='color:magenta;'>display</span>"]]:::shape
+    DIS[[display]]:::that
         DIS --> END
-    END([end]):::shape
+    END([end]):::this
 ```
 ```
-putTable(console, isMenu)
+putTable(isMenu)
     IF isMenu
         CALL self.numberRecords
     CALL self.calculateWidths
@@ -585,9 +588,9 @@ putTable(console, isMenu)
 ```
 [️⬆️](#display-table-methods)
 ---
-##### `_numberRecords`
+### `_numberRecords`
 ```mermaid
-flowchart
+flowchart LR
     classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
     STR([putTable]):::shape
         STR --> INP
@@ -617,9 +620,9 @@ END
 ```
 [️⬆️](#display-table-methods)
 ---
-##### `_calculateWidths`
+### `_calculateWidths`
 ```mermaid
-flowchart
+flowchart LR
     classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
     STR([putTable]):::shape
         STR --> INP
@@ -657,14 +660,14 @@ END
 ```
 [️⬆️](#display-table-methods)
 ---
-#### Getters
-* [countRecors](#countrecords)
-* [getColumnWidts](#getcolumnwidths)
-* [getHeadings](#getheadings)
-* [getRecord](#getrecord)
-* [getRjustColumns](#getrjustcolumns)
-* [getTableWidth](#gettablewidth)
-* [getTitle](#gettitle)
+### Getters
+| [countRecors](#countrecords)
+| [getColumnWidths](#getcolumnwidths)
+| [getHeadings](#getheadings)
+| [getRecord](#getrecord)
+| [getRjustColumns](#getrjustcolumns)
+| [getTableWidth](#gettablewidth)
+| [getTitle](#gettitle)
 ```mermaid
 graph LR
     TABL([**Table**])
@@ -682,21 +685,21 @@ graph LR
 ```
 [️⬆️](#method-groups)
 ---
-##### `countRecords`
+### `countRecords`
 ```
 countRecords()
     RETURN self.recordsCount
 ```
 [️⬆️](#getters)
 ---
-##### `getColumnWidths`
+### `getColumnWidths`
 ```
 getColumnWidths()
     RETURN self.columnWidths
 ```
 [️⬆️](#getters)
 ---
-##### `getHeadings`
+### `getHeadings`
 ```
 getHeadings()
     FOR key IN dataset.keys
@@ -706,7 +709,7 @@ getHeadings()
 ```
 [️⬆️](#getters)
 ---
-##### `getRecord`
+### `getRecord`
 ```
 getRecord(index)
     IF index < 0 OR index >= self.dataset.length
@@ -715,21 +718,21 @@ getRecord(index)
 ```
 [️⬆️](#getters)
 ---
-##### `getRjustColumns`
+### `getRjustColumns`
 ```
 getRjustColumns()
     RETURN self.rightJustifiedColumns
 ```
 [️⬆️](#getters)
 ---
-##### `getTableWidth`
+### `getTableWidth`
 ```
 getTableWidth()
     RETURN self.tableWidth
 ```
 [️⬆️](#getters)
 ---
-##### `getTitle`
+### `getTitle`
 ```
 getTitle()
     RETURN self.Title

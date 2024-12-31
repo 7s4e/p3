@@ -6,7 +6,7 @@
 ---
 ### `listBlockDevices`
 ```mermaid
-flowchart
+flowchart LR
     classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
     STRT([start]):::shape
         STRT --> ARGS
@@ -40,10 +40,11 @@ listBlockDevices(disk, columns, showDependents)
     RETURN runCommand("lsblk {deps} {output} {path}")
 END
 ```
+[️⬆️](#commands-module)
 ---
 ### `runBadblocks`
 ```mermaid
-flowchart
+flowchart LR
     classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
     STRT([start]):::shape
         STRT --> ARGS
@@ -77,10 +78,11 @@ runBadblocks(disk, nonDestructive, captureOutput)
     RETURN None
 END
 ```
+[️⬆️](#commands-module)
 ---
 ### `runCommand`
 ```mermaid
-flowchart
+flowchart LR
     classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
     STRT([start]):::shape
         STRT --> ARGS
@@ -117,10 +119,11 @@ runCommand(command, captureOutput, useShell)
         RETURN None
 END
 ```
+[️⬆️](#commands-module)
 ---
 ### `unmountDisk`
 ```mermaid
-flowchart
+flowchart LR
     classDef shape fill:#4682b4,stroke:#b97d4b,stroke-width:2px
     classDef alt fill:#b97d4b,stroke:#4682b4,stroke-width:2px
     STRT([start]):::shape
@@ -150,3 +153,5 @@ unmountDisk(disk)
         runCommand(cmdStr, captureOutput=False)
 END
 ```
+[️⬆️](#commands-module)
+---

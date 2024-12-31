@@ -1,13 +1,13 @@
 # Menu Module
 ## `Menu`
-* [\_\_init__](#__init__)
-* [setPrompt](#setprompt)
-* [run](#run)
-* [getSelection](#getselection)
-* [Table](table.md)
-* [ConsolePrompt](console.md)
+| Constructor | Public Methods | Dependencies |
+| --- | --- | --- |
+| [\_\_init__](#__init__) | [setPrompt](#setprompt) | [Table](table.md) |
+| | [run](#run) | [ConsolePrompt](console.md) |
+| | [getSelection](#getselection) | |
+
 ```mermaid
-graph LR
+graph
     style MNYU fill:#4682b4,stroke:#b97d4b,stroke-width:2px,color:#0ff
     style T fill:#b97d4b,stroke:#4682b4,stroke-width:2px
     style CP fill:#b97d4b,stroke:#4682b4,stroke-width:2px
@@ -25,14 +25,13 @@ graph LR
     MNYU([**Menu**])
         MNYU -- prompt  --> SPMT
         MNYU -- key     --> GSLC
-        MNYU -- console --> RNMN
+        MNYU            --> RNMN
     SPMT(setPrompt):::method
         SPMT -- prompt --> CPMT
     RNMN(run):::method
-        RNMN -- console
-                isMenu  --> PTBL
-        RNMN -- console --> CLLP
-        RNMN -- index   --> GREC
+        RNMN -- isMenu --> PTBL
+        RNMN           --> CLLP
+        RNMN -- index  --> GREC
     GSLC(getSelection):::method
     subgraph T [**Table**]
         TBLE(Table)
@@ -93,7 +92,7 @@ END
 ---
 ### `setPrompt`
 ```mermaid
-flowchart
+flowchart LR
     classDef this fill:#4682b4,stroke:#b97d4b,stroke-width:2px
     classDef that fill:#b97d4b,stroke:#4682b4,stroke-width:2px
     MNYU([*init*
@@ -149,8 +148,8 @@ flowchart LR
 ```
 ```
 run(console)
-    self.options.putTable(console, isMenu=True)
-    SET index <- self.prompt.call(console) - 1
+    self.options.putTable(isMenu=True)
+    SET index <- self.prompt.call() - 1
     SET self.selection <- self.options.getRecord(index)
 END
 ```

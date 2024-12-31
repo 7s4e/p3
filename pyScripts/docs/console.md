@@ -1,60 +1,102 @@
 # Console Module
-## Classes
-* [Console](#console)
-* [ConsolePrompt](#consoleprompt)
-* [ConsoleTable](#consoletable)
+| Classes |
+| --- |
+| [ConsoleBase](#consolebase) |
+| [Console](#console) |
+| [ConsolePrompt](#consoleprompt) |
+| [ConsoleTable](#consoletable) |
 ---
 ---
-## Console
-### Static Methods
-* [clearStdscr](#clearstdscr)
-* [putScriptBanner](#putscriptbanner)
+## ConsoleBase
+```mermaid
+graph LR
+    STRT([start])
+        STRT --> INIT
+    INIT(*init*)
+        INIT --> MAIN
+    MAIN([**ConsoleBase**])
+```
 ---
-#### `clearStdscr`
+### `__init__`
 ```mermaid
 flowchart LR
     STR([start])
-        STR --> PUT
+        STR --> SET
+    SET[/terminal/]
+        SET --> END
+    END([**ConsoleBase**])
+```
+```
+init()
+    SET self.terminal <- blessed.Terminal
+END
+```
+ [️⬆️](#console-module)
+---
+---
+## Console
+| Static Methods |
+| --- |
+| [clearStdscr](#clearstdscr) |
+| [putScriptBanner](#putscriptbanner) |
+
+```mermaid
+graph LR
+    STRT([start])
+        STRT -- ConsoleBase --> MAIN
+    MAIN([**Console**])
+```
+---
+### `clearStdscr`
+```mermaid
+flowchart LR
+    STR([start])
+        STR --> GET
+    GET[\terminal\]
+        GET --> PUT
     PUT[/print/]
         PUT --> END
     END([end])
 ```
 ```
-clearStdscr(console)
-    PUT console.home + console.clear
+clearStdscr()
+    SET trm <- ConsoleBase().terminal
+    PUT trm.home + trm.clear
 END
 ```
 ---
-#### `putScriptBanner`
+### `putScriptBanner`
 ```mermaid
 flowchart LR
     STR([start])
-        STR --> PUT
+        STR --> GET
+    GET[\terminal\]
+        GET --> PUT
     PUT[/print/]
         PUT --> END
     END([end])
 ```
 ```
 putScriptBanner(console, scriptName)
-    PUT "Running {scriptName}..."
-        + left-justified(console.width)
-        + console.reverse
+    SET trm <- ConsoleBase().terminal
+    PUT "Running {scriptName}..." + left-justified(trm.width) + trm.reverse
 END
 ```
+[️⬆️](#console-module)
 ---
 ---
 ## `ConsolePrompt`
-* [\_\_init__](#__init__)
-* [call](#call)
-* [_getResponse](#_getresponse)
-* [_validateResponse](#_validateresponse)
-* [_readKeystroke](#_readkeystroke)
-* [_readString](#_readstring)
-* [_checkBoolValidity](#_checkboolvalidity)
-* [_checkIntegerValidity](#_checkintegervalidity)
-* [_putPrompt](#_putprompt)
-* [_putAlert](#_putalert)
-* [_printMessage](#_printmessage)
+| Constructor | Public Method | Private Methods |
+| --- | --- | --- |
+| [\_\_init__](#__init__-1) | [call](#call) | [_getResponse](#_getresponse) |
+| | | [_validateResponse](#_validateresponse) |
+| | | [_readKeystroke](#_readkeystroke) |
+| | | [_readString](#_readstring) |
+| | | [_checkBoolValidity](#_checkboolvalidity) |
+| | | [_checkIntegerValidity](#_checkintegervalidity) |
+| | | [_putPrompt](#_putprompt) |
+| | | [_putAlert](#_putalert) |
+| | | [_printMessage](#_printmessage) |
 ```mermaid
 graph
     STRT([start])
@@ -64,9 +106,12 @@ graph
                 validateInteger
                 integerValidation --> INIT
     INIT(*init*)
-        INIT --> MAIN
+        INIT              --> BASE
+        BASE -- terminal --> INIT
+        INIT              --> MAIN
+    BASE(**ConsoleBase**)
     MAIN([**ConsolePrompt**])
-        MAIN -- console  --> CALL
+        MAIN             --> CALL
         CALL -- response --> MAIN
     CALL(call)
         CALL          --> GRSP
@@ -110,7 +155,9 @@ flowchart LR
          validateBool
          validateInt
          intValidation\]
-        GET --> SET
+        GET --> BSE
+    BSE[[ConsoleBase]]
+        BSE --> SET
     SET[/prompt
          expectKeystroke
          validateBool
@@ -121,6 +168,7 @@ flowchart LR
 ```
 ```
 init(prompt, expectKeystroke, validateBool, validateInt, intValidation)
+    ConsoleBase()
     SET self.prompt <- prompt
     SET self.expectKeystroke <- expectKeystroke
     SET self.validateBool <- validateBool
@@ -132,7 +180,7 @@ END
 ---
 ### `call`
 ```mermaid
-flowchart
+flowchart LR
     CONP([**ConsolePrompt**])
         CONP --> RCON
     RCON[\console\]
@@ -164,7 +212,7 @@ END
 ---
 ### `_getResponse`
 ```mermaid
-flowchart
+flowchart LR
     CALL([call])
         CALL --> GETK
     GETK[\expectKeystroke\]
@@ -197,7 +245,7 @@ END
 ---
 ### `_validateResponse`
 ```mermaid
-flowchart TB
+flowchart LR
     CALL([call])
         CALL --> RDBI
     RDBI[\validateBool
@@ -250,7 +298,7 @@ END
 ---
 ### `_readString`
 ```mermaid
-flowchart TB
+flowchart LR
     GRES([getResponse])
         GRES --> GKEY
     GKEY[\keystroke\]
@@ -292,7 +340,7 @@ END
 ---
 ### `_checkBoolValidity`
 ```mermaid
-flowchart
+flowchart LR
     VRES([validateResponse])
         VRES --> RRES
     RRES[\userResponse\]
@@ -319,7 +367,7 @@ checkBoolValidation()
 ---
 ### `_checkIntegerValidity`
 ```mermaid
-flowchart
+flowchart LR
     VRES([validateResponse])
         VRES --> URIV
     URIV[\userResponse
@@ -372,7 +420,8 @@ flowchart LR
     GRRS([getResponse
           readString])
         GRRS --> LCIP
-    LCIP[\prompt
+    LCIP[\terminal
+          prompt
           leaveCursorInline\]
         LCIP --> PRNT
     PRNT[[printMessage]]
@@ -381,7 +430,7 @@ flowchart LR
 ```
 ```
 putPrompt(leaveCursorInline)
-    printMessage(console.brightYellow + prompt, leaveCursorInline)
+    printMessage(terminal.brightYellow + prompt, leaveCursorInline)
 END
 ```
 [️⬆️](#consoleprompt)
@@ -392,7 +441,8 @@ flowchart LR
     CBCI([checkBoolValidity
           checkIntValidity])
         CBCI --> ALRT
-    ALRT[\alert\]
+    ALRT[\terminal
+          alert\]
         ALRT --> PRNT
     PRNT[[printMessage]]
         PRNT --> TEND
@@ -400,18 +450,18 @@ flowchart LR
 ```
 ```
 putAlert(alert, leaveCursorInline)
-    printMessage(console.red + alert, leaveCursorInline)
+    printMessage(terminal.red + alert, leaveCursorInline)
 END
 ```
 [️⬆️](#consoleprompt)
 ---
 ### `_printMessage`
 ```mermaid
-flowchart
+flowchart LR
     PPPA([putPrompt
           putAlert])
         PPPA --> CMLC
-    CMLC[\console
+    CMLC[\terminal
           message
           leaveCursorInline\]
         CMLC --> SDPE
@@ -435,15 +485,15 @@ END
 ---
 ---
 ## `ConsoleTable`
-* [\_\_init__](#__init__-1)
-* [display](#display)
-* [_setDimensions](#_setdimensions)
-* [_drawTable](#_drawtable)
-* [_drawRow](#_drawrow)
-* [_getRowEnds](#_getrowends)
-* [_getRowContent](#_getrowcontent)
-* [_processRowContent](#_processrowcontent)
-* [Table](table.md)
+| Constructor | Public Method | Private Methods | Dependencies |
+| --- | --- | --- | --- |
+| [\_\_init__](#__init__-2) | [display](#display) | [_setDimensions](#_setdimensions) | [Table](table.md) |
+| | | [_drawTable](#_drawtable) | [Terminal](https://blessed.readthedocs.io/en/latest/index.html) |
+| | | [_drawRow](#_drawrow) | |
+| | | [_getRowEnds](#_getrowends) | |
+| | | [_getRowContent](#_getrowcontent) | |
+| | | [_processRowContent](#_processrowcontent) | |
+
 ```mermaid
 graph
     style MAIN fill:#4682b4,stroke:#b97d4b,stroke-width:2px,color:#0ff
@@ -453,9 +503,12 @@ graph
     STRT([start])
         STRT -- data --> INIT
     INIT(*init*):::method
-        INIT --> MAIN
+        INIT              --> BASE
+        BASE -- terminal --> INIT
+        INIT              --> MAIN
+    BASE(**ConsoleBase**)
     MAIN([**ConsoleTable**])
-        MAIN -- console  --> DSPL
+        MAIN --> DSPL
     DSPL(display):::method
         DSPL                 --> SDMN
         TGET -- recordCount --> DSPL
@@ -500,7 +553,9 @@ flowchart LR
     STRT([start])
         STRT --> GDTA
     GDTA[\data\]
-        GDTA --> SDTA
+        GDTA --> BASE
+    BASE[[ConsoleBase]]
+        BASE --> SDTA
     SDTA[/data
          borders/]
         SDTA --> CTBL
@@ -508,8 +563,9 @@ flowchart LR
 ```
 ```
 init(data)
+    ConsoleBase()
     SET self.data <- data
-    SET self.borders <- {"top": {"left": "╔", "fill": "═", "right": "╗"}, 
+    SET BORDERS <- {"top": {"left": "╔", "fill": "═", "right": "╗"}, 
                          "inner": {"left": "╟", "fill": "─", "right": "╢"}, 
                          "bottom": {"left": "╚", "fill": "═", "right": "╝"}, 
                          "side": "║"}
@@ -519,15 +575,13 @@ END
 ---
 ### `display`
 ```mermaid
-flowchart
+flowchart LR
     classDef this fill:#4682b4,stroke:#b97d4b,stroke-width:2px
     classDef that fill:#b97d4b,stroke:#4682b4,stroke-width:2px
     CTBL([**ConsoleTable**]):::this
-        CTBL --> GCNS
-    GCNS[\console\]
-        GCNS --> SCNS
-    SCNS[/console/]
-        SCNS --> SDMN
+        CTBL --> GDTA
+    GDTA[\data\]
+        GDTA --> SDMN
     SDMN[[setDimensions]]:::this
         SDMN --> CREC
     CREC[[countRecords]]:::that
@@ -537,8 +591,7 @@ flowchart
     THEE([end])
 ```
 ```
-display(console)
-    SET self.con <- console
+display()
     self.setDimensions()
     self.drawTable(self.data.countRecords())
 END
@@ -552,7 +605,7 @@ flowchart
     classDef that fill:#b97d4b,stroke:#4682b4,stroke-width:2px
     DSPL([display]):::this
         DSPL --> GCNS
-    GCNS[\console\]
+    GCNS[\terminal\]
         GCNS --> SDMT
     SDMT[/displayWidth
           marginSize/]
@@ -689,7 +742,7 @@ drawRow(rowType, recordIndex)
     IF rowType IN textTypes
         SET content <- self.getTextContent(rowType, recordIndex)
     ELSE
-        SET content <- self.borders[rowType]["fill"]
+        SET content <- BORDERS[rowType]["fill"]
     IF rowType IN textTypes
         SET cells <- self.processRowContent(rowType, content, rjustCol)
     ELSE
@@ -738,7 +791,7 @@ END
 ---
 ### `_getRowEnds`
 ```mermaid
-flowchart
+flowchart LR
     classDef this fill:#4682b4,stroke:#b97d4b,stroke-width:2px
     DWRW([drawRow]):::this
         DWRW --> RTLT
@@ -748,9 +801,9 @@ flowchart
     ISLT{isLineType}
         ISLT -- True  --> GBRT
         ISLT -- False --> GBSD
-    GBRT[\borders.rowType\]
+    GBRT[\BORDERS.rowType\]
         GBRT --> SLRP
-    GBSD[\borders.side\]
+    GBSD[\BORDERS.side\]
         GBSD --> SLRP
     SLRP[leftEnd
          rightEnd
@@ -763,11 +816,11 @@ flowchart
 ```
 getRowEnds(rowType, isLineType)
     IF isLineType
-        SET leftEnd <- self.borders[rowType]["left"]
-        SET rightEnd <- self.borders[rowType]["right"]
+        SET leftEnd <- BORDERS[rowType]["left"]
+        SET rightEnd <- BORDERS[rowType]["right"]
         SET padding <- ""
     ELSE
-        SET leftEnd, rightEnd <- self.borders["side"]
+        SET leftEnd, rightEnd <- BORDERS["side"]
         SET padding <- " "
     RETURN leftEnd, rightEnd, padding
 END

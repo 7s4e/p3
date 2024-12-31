@@ -1,3 +1,3 @@
 # P<sup>3</sup>
 **Personal Project Portfolio**
-* [scripts](pyScripts/README.md)
+* [Python scripts](pyScripts/README.md)

@@ -1,6 +1,7 @@
 # getDisk Script
+## Structure Chart
 ```mermaid
-flowchart LR
+flowchart
     classDef complete color:#0f0,stroke:#0f0,fill:#555
     classDef working color:#ff0,stroke:#ff0,fill:#555
     classDef library color:#0ff,stroke:#0ff,fill:#555
@@ -41,6 +42,7 @@ flowchart LR
         TBL --> CCT
     MNU(Menu):::complete
 ```
+## Module and Classes
 * [commands](commands.md)
 * [Console](console.md#console)
 * [Console](console.md#consoleprompt)
