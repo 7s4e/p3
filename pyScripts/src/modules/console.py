@@ -7,6 +7,8 @@ import textwrap
 # Third-party import
 from blessed import Terminal
 
+# Local imports
+from .utilties import snake_to_camel
 if TYPE_CHECKING:
     from .table import Table  # For static type checking only
 
@@ -34,7 +36,8 @@ class Console(ConsoleBase):
                 banner.
         """
         term = ConsoleBase()._trm
-        print(term.reverse(f"Running {script_name}...".ljust(term.width)))
+        scr_str = snake_to_camel(script_name)
+        print(term.reverse(f"Running {scr_str}...".ljust(term.width)))
 
 
 class ConsolePrompt(ConsoleBase):

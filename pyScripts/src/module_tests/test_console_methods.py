@@ -41,5 +41,5 @@ def test_put_script_banner(mock_console, mock_base, print_mock):
 
     # Verify
     mock_base.assert_called_once()
-    exp_out = "<reverse>Running mock_script...              </reverse>"
+    exp_out = "<reverse>Running mockScript...               </reverse>"
     print_mock.assert_called_once_with(exp_out)

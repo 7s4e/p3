@@ -68,6 +68,7 @@ def get_disk() -> str:
     Returns:
         The name of the confirmed disk.
     """
+    print(f"TRACE: main > getDisk")#####
     Console.put_script_banner(inspect.currentframe().f_code.co_name)
 
     while True:
@@ -102,6 +103,7 @@ def get_disk() -> str:
 
 def main() -> str:
     Console.clear_stdscr()
+    print(f"TRACE: main")#####
     return get_disk()
 
 
