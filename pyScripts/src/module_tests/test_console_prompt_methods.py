@@ -181,7 +181,8 @@ def test_print_message(prompt_inst, width, padding, message, is_inline,
     prompt_inst._trm.width = width
 
     # Execute and capture
-    prompt_inst._print_message(message, leave_cursor_inline=is_inline)
+    prompt_inst._print_message(message, formatting_allowance=0, 
+                               leave_cursor_inline=is_inline)
     out, err = capfd.readouterr()
 
     # Verify padding and line break

@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
-# Standard library imports
-import inspect
-import sys
-
 # Local module imports
 from modules import commands as cmd
+from modules import utilities as utl
 from modules import Console, ConsolePrompt, Menu, Table
 
 
@@ -81,7 +78,8 @@ def get_disk() -> str:
         The name of the confirmed disk.
     """
     print(f"TRACE: GD > main > getDisk called >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")#####
-    Console.put_script_banner(inspect.currentframe().f_code.co_name)
+    caller_info = utl.get_caller_info()
+    Console.put_script_banner(caller_info["function"])
     print(f"TRACE: GD > main > getDisk Console.putScriptBanner executed")#####
 
     while True:
@@ -92,7 +90,7 @@ def get_disk() -> str:
         print(f"TRACE: GD > main > getDisk.count: {count}")#####
 
         if count == 0:
-            print(f"TRACE: GD > main > getDisk.count == 0")#####
+            print(f"TRACE: GD > main > getDisk.count == 0 ....................")#####
             no_disk_msg = ("Press 'q' to quit, or connect a device and " +
                            "press any key to continue...")
             print(f"TRACE: GD > main > getDisk.no_disk_msg assigned")#####
@@ -100,10 +98,7 @@ def get_disk() -> str:
             print(f"TRACE: GD > main > getDisk.no_disk_alert: {no_disk_alert}")#####
             response = no_disk_alert.call()
             print(f"TRACE: GD > main > getDisk.response: {response}")#####
-            if response in {"q", "Q"}:
-                print(f"Aborted {inspect.currentframe().f_code.co_filename}")
-                sys.exit(10)
-            print(f"TRACE: GD > main > getDisk continue")#####
+            utl.abort(response in {"q", "Q"}, caller_info["file"])
             continue
 
         disk = (disks.get_record(0)["NAME"] 

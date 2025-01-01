@@ -8,14 +8,27 @@ import textwrap
 from blessed import Terminal
 
 # Local imports
-from .utilties import snake_to_camel
+from .utilities import snake_to_camel
 if TYPE_CHECKING:
     from .table import Table  # For static type checking only
 
 
+BORDERS = {"top": {"left": "╔", "fill": "═", "right": "╗"}, 
+           "inner": {"left": "╟", "fill": "─", "right": "╢"}, 
+           "bottom": {"left": "╚", "fill": "═", "right": "╝"}, 
+           "side": "║"}
+
+FORMATTING_ALLOWANCE = {"blue": len("[blue][/blue]"), 
+                        "red": len("[red][/red]"), 
+                        "yellow": len("[yellow][/yellow]")}
+
+
 class ConsoleBase:
     def __init__(self):
+        # print(f"TRACE: ConsoleBase.init called >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")#####
         self._trm = Terminal()
+        # print(f"TRACE: ConsoleBase.init trm.width: {self._trm.width}")#####
+        # print(f"TRACE: ConsoleBase.init <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")#####
 
 
 class Console(ConsoleBase):
@@ -134,12 +147,21 @@ class ConsolePrompt(ConsoleBase):
                                      "be less than the first")
 
         # Initialize base and assign validated attributes
+        # print(f"TRACE: ConsolePrompt.init called >>>>>>>>>>>>>>>>>>>>>>>>>>>>>")#####
         super().__init__()
+        # print(f"TRACE: ConsolePrompt.init ConsoleBase called")#####
+        # print(f"TRACE: ConsolePrompt.init trm.width {self._trm.width}")#####
         self._prompt = prompt
+        # print(f"TRACE: ConsolePrompt.init _prompt set as {self._prompt}")#####
         self._expect_keystroke = expect_keystroke
+        # print(f"TRACE: ConsolePrompt.init _expect_keystroke set as {self._expect_keystroke}")#####
         self._validate_bool = validate_bool
+        # print(f"TRACE: ConsolePrompt.init _validate_bool set as {self._validate_bool}")#####
         self._validate_integer = validate_integer
+        # print(f"TRACE: ConsolePrompt.init _validate_integer set as {self._validate_integer}")#####
         self._integer_validation = integer_validation
+        # print(f"TRACE: ConsolePrompt.init _integer_validation set as {self._integer_validation}")#####
+        # print(f"TRACE: ConsolePrompt.init <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")#####
 
     # Public Method
     def call(self) -> Any:
@@ -160,10 +182,17 @@ class ConsolePrompt(ConsoleBase):
                 string, integer, or boolean, depending on the validation 
                 type.
         """
+        # print(f"TRACE: ConsolePrompt.call called >>>>>>>>>>>>>>>>>>>>>>>>>>>>>")#####
         valid = False
+        # print(f"TRACE: ConsolePrompt.call.valid == {valid}")#####
         while not valid:
+            # print(f"TRACE: ConsolePrompt.call.valid == {valid} .......>>>>>>>>")#####
             self._get_response()
+            # print(f"TRACE: ConsolePrompt.call getResponse executed")#####
             valid = self._validate_response()
+            # print(f"TRACE: ConsolePrompt.call validateResponse executed")#####
+            # print(f"TRACE: ConsolePrompt.call.valid == {valid}")#####
+        # print(f"TRACE: ConsolePrompt.call validated_response == {self._validated_response}")#####
         return self._validated_response
 
     # Private Methods
@@ -233,14 +262,23 @@ class ConsolePrompt(ConsoleBase):
         If `_expect_keystroke` is True, a keystroke is read and stored; 
         otherwise, a string input is captured.
         """
+        # print(f"TRACE: ConsolePrompt.call > getResponse called >>>>>>>>")#####
         if self._expect_keystroke:
+            # print(f"TRACE: ConsolePrompt.call > getResponse expectKeystroke == {self._expect_keystroke} ...")#####
             self._put_prompt(leave_cursor_inline=False)
+            # print(f"TRACE: ConsolePrompt.call > putPrompt executed")#####
             self._read_keystroke()
+            # print(f"TRACE: ConsolePrompt.call > readKeystroke executed")#####
         else:
+            # print(f"TRACE: ConsolePrompt.call > getResponse expectKeystroke == {self._expect_keystroke} ...")#####
             self._put_prompt(leave_cursor_inline=True)
+            # print(f"TRACE: ConsolePrompt.call > putPrompt executed")#####
             self._read_string()
+            # print(f"TRACE: ConsolePrompt.call > readString executed")#####
+        # print(f"TRACE: ConsolePrompt.call > getResponse <<<<<<<<<<<<<<<")#####
 
-    def _print_message(self, message: str, leave_cursor_inline: bool) -> None:
+    def _print_message(self, message: str, formatting_allowance: int, 
+                       leave_cursor_inline: bool) -> None:
         """Print a centered, wrapped message to the console.
 
         This method displays a message centered within the console 
@@ -255,14 +293,18 @@ class ConsolePrompt(ConsoleBase):
                 a trailing space after the message. If False, the cursor 
                 moves to the next line after printing.
         """
+        # print(f"TRACE: ConsolePrompt.call > getResponse > putPrompt > printMessage called with {message}, {formatting_allowance}, {leave_cursor_inline}>>>")#####
+        # print(f"TRACE: ConsolePrompt.call > getResponse > putPrompt > printMessage _trm.width: {self._trm.width}")#####
         display_width = min(self._trm.width, 79)
+        # print(f"TRACE: ConsolePrompt.call > getResponse > putPrompt > printMessage.display_width: {display_width}")#####
         padding = " " * ((self._trm.width - display_width) // 2)
-        print(textwrap.fill(message, 
-                            width=display_width, 
-                            initial_indent=padding, 
-                            subsequent_indent=padding), 
-              end=" " if leave_cursor_inline else "\n", 
-              flush=True)
+        # print(f"TRACE: ConsolePrompt.call > getResponse > putPrompt > printMessage.padding.length: {len(padding)}")#####
+        print(textwrap.fill(message, width=(display_width + 
+                                            formatting_allowance + 
+                                            len(padding)), 
+                            initial_indent=padding, subsequent_indent=padding), 
+              end=" " if leave_cursor_inline else "\n", flush=True)
+        # print(f"TRACE: ConsolePrompt.call > getResponse > putPrompt > printMessage <<<")#####
 
     def _put_alert(self, alert: str) -> None:
         """Display an alert message to the user in red.
@@ -273,7 +315,8 @@ class ConsolePrompt(ConsoleBase):
         Args:
             alert: The alert message to be displayed.
         """
-        self._print_message(self._trm.red(alert), leave_cursor_inline=False)
+        self._print_message(self._trm.red(alert), FORMATTING_ALLOWANCE["red"], 
+                            leave_cursor_inline=False)
 
     def _put_prompt(self, leave_cursor_inline: bool) -> None:
         """Display the prompt message to the user.
@@ -287,8 +330,11 @@ class ConsolePrompt(ConsoleBase):
                 a trailing space; if False, it moves to the next line 
                 after the prompt.
         """
+        # print(f"TRACE: ConsolePrompt.call > getResponse > putPrompt called >>>")#####
         self._print_message(self._trm.yellow(self._prompt), 
+                            FORMATTING_ALLOWANCE["yellow"], 
                             leave_cursor_inline=leave_cursor_inline)
+        # print(f"TRACE: ConsolePrompt.call > getResponse > putPrompt <<<")#####
 
 
     def _read_keystroke(self) -> None:
@@ -307,17 +353,27 @@ class ConsolePrompt(ConsoleBase):
             _user_response (str): The captured keystroke, or an empty 
                 string if the Enter key is pressed.
         """
+        # print(f"TRACE: ConsolePrompt.call > getResponse > readKeystroke called >>>")#####
         key = None
+        # print(f"TRACE: ConsolePrompt.call > getResponse > readKeystroke.key: {key}")#####
 
         with self._trm.cbreak(), self._trm.hidden_cursor():
             while key is None or not (32 <= key_code <= 126 or key_code == 10):
+                # print(f"TRACE: ConsolePrompt.call > getResponse > readKeystroke loop started ...")#####
                 key = self._trm.inkey()
+                # print(f"TRACE: ConsolePrompt.call > getResponse > readKeystroke.key: {key}")#####
                 try:
+                    # print(f"TRACE: ConsolePrompt.call > getResponse > readKeystroke try started ...")#####
                     key_code = ord(key)
+                    # print(f"TRACE: ConsolePrompt.call > getResponse > readKeystroke loop ended with {key}, {key_code}")#####
                 except:
+                    # print(f"TRACE: ConsolePrompt.call > getResponse > readKeystroke try failed ...")#####
                     key = None
+                    # print(f"TRACE: ConsolePrompt.call > getResponse > readKeystroke loop ended with {key}")#####
 
         self._user_response = str(key if key_code != 10 else "")
+        # print(f"TRACE: ConsolePrompt.call > getResponse > readKeystroke _user_response set as {self._user_response}")#####
+        # print(f"TRACE: ConsolePrompt.call > getResponse > readKeystroke <<<")#####
 
     def _read_string(self) -> None:
         """Read a user input string character by character, handling 
@@ -373,20 +429,18 @@ class ConsolePrompt(ConsoleBase):
             bool: The result of the validation check, or True if no 
             validation is required.
         """
+        # print(f"TRACE: ConsolePrompt.call > validateResponse called >>>>>>>>>>>>>>>>>>>>>>")#####
         if self._validate_bool:
+            # print(f"TRACE: ConsolePrompt.call > validateResponse validateBool == True ...")#####
             return self._check_bool_validity()
         if self._validate_integer:
+            # print(f"TRACE: ConsolePrompt.call > validateResponse validateInteger == True ...")#####
             return self._check_integer_validity()
+        # print(f"TRACE: ConsolePrompt.call > validateResponse validateBool == False && validateInteger == False ...")#####
         self._validated_response = self._user_response
+        # print(f"TRACE: ConsolePrompt.call > validateResponse user_response: {self._user_response}")#####
+        # print(f"TRACE: ConsolePrompt.call > validateResponse validated_response: {self._validated_response}")#####
         return True
-
-
-
-
-BORDERS = {"top": {"left": "╔", "fill": "═", "right": "╗"}, 
-           "inner": {"left": "╟", "fill": "─", "right": "╢"}, 
-           "bottom": {"left": "╚", "fill": "═", "right": "╝"}, 
-           "side": "║"}
 
 
 class ConsoleTable(ConsoleBase):
