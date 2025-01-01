@@ -42,8 +42,8 @@ def snake_to_camel(snake_str: str) -> str:
     Returns:
         str: The converted string in camelCase.
     """
-    segments = snake_str.split('_')
-    return segments[0] + ''.join(segment.capitalize() for segment in segments[1:])
+    parts = snake_str.split('_')
+    return parts[0] + ''.join(part.capitalize() for part in parts[1:])
 
 
 def truncate_string(strng: str, max_lngth: int) -> str:
@@ -58,6 +58,7 @@ def truncate_string(strng: str, max_lngth: int) -> str:
     Returns:
         str: The truncated string with ellipses if necessary.
     """
-    if len(str(strng)) > max_lngth:
-        return strng[:max_lngth - 3] + "..."
-    return strng
+    lgth = len(str(strng))
+    return (strng if lgth <= max_lngth 
+            else "." * max_lngth if max_lngth < 3 
+            else strng[:max_lngth - 3] + "...")

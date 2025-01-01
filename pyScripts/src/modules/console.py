@@ -25,10 +25,7 @@ FORMATTING_ALLOWANCE = {"blue": len("[blue][/blue]"),
 
 class ConsoleBase:
     def __init__(self):
-        # print(f"TRACE: ConsoleBase.init called >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")#####
         self._trm = Terminal()
-        # print(f"TRACE: ConsoleBase.init trm.width: {self._trm.width}")#####
-        # print(f"TRACE: ConsoleBase.init <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")#####
 
 
 class Console(ConsoleBase):
@@ -48,13 +45,9 @@ class Console(ConsoleBase):
             script_name: The name of the script to be displayed in the 
                 banner.
         """
-        # print(f"TRACE: Console.put_script_banner called with {script_name} >>>")#####
         term = ConsoleBase()._trm
-        # print(f"TRACE: Console.put_script_banner.term: {term}")#####
         scr_str = snake_to_camel(script_name)
-        # print(f"TRACE: Console.put_script_banner.scr_str: {scr_str}")#####
         print(term.reverse(f"Running {scr_str}...".ljust(term.width)))
-        # print(f"TRACE: Console.put_script_banner <<<<<<<<<<<<<<<<<<<<<<<<<<<<<")#####
 
 
 class ConsolePrompt(ConsoleBase):
@@ -147,21 +140,12 @@ class ConsolePrompt(ConsoleBase):
                                      "be less than the first")
 
         # Initialize base and assign validated attributes
-        # print(f"TRACE: ConsolePrompt.init called >>>>>>>>>>>>>>>>>>>>>>>>>>>>>")#####
         super().__init__()
-        # print(f"TRACE: ConsolePrompt.init ConsoleBase called")#####
-        # print(f"TRACE: ConsolePrompt.init trm.width {self._trm.width}")#####
         self._prompt = prompt
-        # print(f"TRACE: ConsolePrompt.init _prompt set as {self._prompt}")#####
         self._expect_keystroke = expect_keystroke
-        # print(f"TRACE: ConsolePrompt.init _expect_keystroke set as {self._expect_keystroke}")#####
         self._validate_bool = validate_bool
-        # print(f"TRACE: ConsolePrompt.init _validate_bool set as {self._validate_bool}")#####
         self._validate_integer = validate_integer
-        # print(f"TRACE: ConsolePrompt.init _validate_integer set as {self._validate_integer}")#####
         self._integer_validation = integer_validation
-        # print(f"TRACE: ConsolePrompt.init _integer_validation set as {self._integer_validation}")#####
-        # print(f"TRACE: ConsolePrompt.init <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")#####
 
     # Public Method
     def call(self) -> Any:
@@ -182,17 +166,10 @@ class ConsolePrompt(ConsoleBase):
                 string, integer, or boolean, depending on the validation 
                 type.
         """
-        # print(f"TRACE: ConsolePrompt.call called >>>>>>>>>>>>>>>>>>>>>>>>>>>>>")#####
         valid = False
-        # print(f"TRACE: ConsolePrompt.call.valid == {valid}")#####
         while not valid:
-            # print(f"TRACE: ConsolePrompt.call.valid == {valid} .......>>>>>>>>")#####
             self._get_response()
-            # print(f"TRACE: ConsolePrompt.call getResponse executed")#####
             valid = self._validate_response()
-            # print(f"TRACE: ConsolePrompt.call validateResponse executed")#####
-            # print(f"TRACE: ConsolePrompt.call.valid == {valid}")#####
-        # print(f"TRACE: ConsolePrompt.call validated_response == {self._validated_response}")#####
         return self._validated_response
 
     # Private Methods
@@ -262,20 +239,12 @@ class ConsolePrompt(ConsoleBase):
         If `_expect_keystroke` is True, a keystroke is read and stored; 
         otherwise, a string input is captured.
         """
-        # print(f"TRACE: ConsolePrompt.call > getResponse called >>>>>>>>")#####
         if self._expect_keystroke:
-            # print(f"TRACE: ConsolePrompt.call > getResponse expectKeystroke == {self._expect_keystroke} ...")#####
             self._put_prompt(leave_cursor_inline=False)
-            # print(f"TRACE: ConsolePrompt.call > putPrompt executed")#####
             self._read_keystroke()
-            # print(f"TRACE: ConsolePrompt.call > readKeystroke executed")#####
         else:
-            # print(f"TRACE: ConsolePrompt.call > getResponse expectKeystroke == {self._expect_keystroke} ...")#####
             self._put_prompt(leave_cursor_inline=True)
-            # print(f"TRACE: ConsolePrompt.call > putPrompt executed")#####
             self._read_string()
-            # print(f"TRACE: ConsolePrompt.call > readString executed")#####
-        # print(f"TRACE: ConsolePrompt.call > getResponse <<<<<<<<<<<<<<<")#####
 
     def _print_message(self, message: str, formatting_allowance: int, 
                        leave_cursor_inline: bool) -> None:
@@ -293,18 +262,13 @@ class ConsolePrompt(ConsoleBase):
                 a trailing space after the message. If False, the cursor 
                 moves to the next line after printing.
         """
-        # print(f"TRACE: ConsolePrompt.call > getResponse > putPrompt > printMessage called with {message}, {formatting_allowance}, {leave_cursor_inline}>>>")#####
-        # print(f"TRACE: ConsolePrompt.call > getResponse > putPrompt > printMessage _trm.width: {self._trm.width}")#####
         display_width = min(self._trm.width, 79)
-        # print(f"TRACE: ConsolePrompt.call > getResponse > putPrompt > printMessage.display_width: {display_width}")#####
         padding = " " * ((self._trm.width - display_width) // 2)
-        # print(f"TRACE: ConsolePrompt.call > getResponse > putPrompt > printMessage.padding.length: {len(padding)}")#####
         print(textwrap.fill(message, width=(display_width + 
                                             formatting_allowance + 
                                             len(padding)), 
                             initial_indent=padding, subsequent_indent=padding), 
               end=" " if leave_cursor_inline else "\n", flush=True)
-        # print(f"TRACE: ConsolePrompt.call > getResponse > putPrompt > printMessage <<<")#####
 
     def _put_alert(self, alert: str) -> None:
         """Display an alert message to the user in red.
@@ -330,11 +294,9 @@ class ConsolePrompt(ConsoleBase):
                 a trailing space; if False, it moves to the next line 
                 after the prompt.
         """
-        # print(f"TRACE: ConsolePrompt.call > getResponse > putPrompt called >>>")#####
         self._print_message(self._trm.yellow(self._prompt), 
                             FORMATTING_ALLOWANCE["yellow"], 
                             leave_cursor_inline=leave_cursor_inline)
-        # print(f"TRACE: ConsolePrompt.call > getResponse > putPrompt <<<")#####
 
 
     def _read_keystroke(self) -> None:
@@ -353,27 +315,17 @@ class ConsolePrompt(ConsoleBase):
             _user_response (str): The captured keystroke, or an empty 
                 string if the Enter key is pressed.
         """
-        # print(f"TRACE: ConsolePrompt.call > getResponse > readKeystroke called >>>")#####
         key = None
-        # print(f"TRACE: ConsolePrompt.call > getResponse > readKeystroke.key: {key}")#####
 
         with self._trm.cbreak(), self._trm.hidden_cursor():
             while key is None or not (32 <= key_code <= 126 or key_code == 10):
-                # print(f"TRACE: ConsolePrompt.call > getResponse > readKeystroke loop started ...")#####
                 key = self._trm.inkey()
-                # print(f"TRACE: ConsolePrompt.call > getResponse > readKeystroke.key: {key}")#####
                 try:
-                    # print(f"TRACE: ConsolePrompt.call > getResponse > readKeystroke try started ...")#####
                     key_code = ord(key)
-                    # print(f"TRACE: ConsolePrompt.call > getResponse > readKeystroke loop ended with {key}, {key_code}")#####
                 except:
-                    # print(f"TRACE: ConsolePrompt.call > getResponse > readKeystroke try failed ...")#####
                     key = None
-                    # print(f"TRACE: ConsolePrompt.call > getResponse > readKeystroke loop ended with {key}")#####
 
         self._user_response = str(key if key_code != 10 else "")
-        # print(f"TRACE: ConsolePrompt.call > getResponse > readKeystroke _user_response set as {self._user_response}")#####
-        # print(f"TRACE: ConsolePrompt.call > getResponse > readKeystroke <<<")#####
 
     def _read_string(self) -> None:
         """Read a user input string character by character, handling 
@@ -429,17 +381,11 @@ class ConsolePrompt(ConsoleBase):
             bool: The result of the validation check, or True if no 
             validation is required.
         """
-        # print(f"TRACE: ConsolePrompt.call > validateResponse called >>>>>>>>>>>>>>>>>>>>>>")#####
         if self._validate_bool:
-            # print(f"TRACE: ConsolePrompt.call > validateResponse validateBool == True ...")#####
             return self._check_bool_validity()
         if self._validate_integer:
-            # print(f"TRACE: ConsolePrompt.call > validateResponse validateInteger == True ...")#####
             return self._check_integer_validity()
-        # print(f"TRACE: ConsolePrompt.call > validateResponse validateBool == False && validateInteger == False ...")#####
         self._validated_response = self._user_response
-        # print(f"TRACE: ConsolePrompt.call > validateResponse user_response: {self._user_response}")#####
-        # print(f"TRACE: ConsolePrompt.call > validateResponse validated_response: {self._validated_response}")#####
         return True
 
 
@@ -476,11 +422,8 @@ class ConsoleTable(ConsoleBase):
             raise TypeError("Expected `Table` for 'data'")
         
         # Base initialization and attribute assignment
-        # print(f"TRACE: ConsoleTable.init called with {data} >>>>>>>>>>>>>>>>>>")#####
         super().__init__()
-        # print(f"TRACE: ConsoleTable.init ConsoleBase called")#####
         self._data = data
-        # print(f"TRACE: ConsoleTable.init _data set as {self._data}")#####
 
 
     # Public Method
@@ -495,11 +438,8 @@ class ConsoleTable(ConsoleBase):
             con: An instance of the `Terminal` class, used to handle 
                 terminal display settings and styling.
         """
-        # print(f"TRACE: ConsoleTable.display called >>>>>>>>>>>>>>>>>>>>>>>>>>>")#####
         self._set_dimensions()
-        # print(f"TRACE: ConsoleTable.display setDimensions executed")#####
         self._draw_table(self._data.count_records())
-        # print(f"TRACE: ConsoleTable.display drawTable executed")#####
 
     # Private Methods
     def _draw_row(self, row_type: str, index: int | None = None) -> None:
@@ -518,31 +458,25 @@ class ConsoleTable(ConsoleBase):
             index: An integer index is required when drawing a "record" 
                 row to specify which record to draw. Defaults to None.
         """
-        # if row_type == "record": print(f"TRACE: ConsoleTable.display > drawTable > drawRow called with {row_type}, {index} >>>")#####
         line_types = ["top", "inner", "bottom"]
         text_types = ["title", "headings", "record"]
     
         rjust_col = (self._data.get_rjust_columns() 
                      if row_type == "record" else {})
-        # if row_type == "record": print(f"TRACE: ConsoleTable.display > drawTable > drawRow.rjust_col: {rjust_col}")#####
 
         margin = " " * self._margin_size
-        # if row_type == "record": print(f"TRACE: ConsoleTable.display > drawTable > drawRow.margin.length: {len(margin)}")#####
 
         left, right, gap = self._get_row_ends(row_type, 
                                               row_type in line_types)
-        # if row_type == "record": print(f"TRACE: ConsoleTable.display > drawTable > drawRow.(left, right, gap): ({left}, {right}, {gap})")#####
 
         content = (self._get_row_content(row_type, index)
                    if row_type in text_types
                    else BORDERS[row_type]["fill"])
-        # if row_type == "record": print(f"TRACE: ConsoleTable.display > drawTable > drawRow.content: {content}")#####
 
         cells = (self._process_row_content(row_type, content, rjust_col)
                  if row_type in text_types
                  else [
                      f"{self._trm.blue(content * (self._table_width + 2))}"])
-        # if row_type == "record": print(f"TRACE: ConsoleTable.display > drawTable > drawRow.cells: {cells}")#####
 
         print(f"{margin}{left}{gap}{'  '.join(cells)}{gap}{right}")
 
@@ -557,20 +491,13 @@ class ConsoleTable(ConsoleBase):
         Args:
             record_count: The number of record rows to draw.
         """
-        # print(f"TRACE: ConsoleTable.display > drawTable called with {record_count} >>>")#####
         self._draw_row("top")
-        # print(f"TRACE: ConsoleTable.display > drawTable drawRow (top) executed")#####
         self._draw_row("title")
-        # print(f"TRACE: ConsoleTable.display > drawTable drawRow (ttl) executed")#####
         self._draw_row("inner")
-        # print(f"TRACE: ConsoleTable.display > drawTable drawRow (inr) executed")#####
         self._draw_row("headings")
-        # print(f"TRACE: ConsoleTable.display > drawTable drawRow (hdg) executed")#####
         for i in range(record_count):
             self._draw_row("record", i)
-            # print(f"TRACE: ConsoleTable.display > drawTable drawRow (rec[{i}]) executed")#####
         self._draw_row("bottom")
-        # print(f"TRACE: ConsoleTable.display > drawTable drawRow (btm) executed")#####
 
     def _get_row_content(self, 
                          row_type: str, 
@@ -631,19 +558,13 @@ class ConsoleTable(ConsoleBase):
                 - The padding between cells (either a space or an empty 
                     string).
         """
-        # if row_type == "record": print(f"TRACE: ConsoleTable.display > drawTable > drawRow > getRowEnds called with {row_type}, {is_line_type} >>>")#####
         if is_line_type:
-            # if row_type == "record": print(f"TRACE: ConsoleTable.display > drawTable > drawRow > getRowEnds is_line_type == True ...")#####
             left_end = f"{self._trm.blue(BORDERS[row_type]['left'])}"
             right_end = f"{self._trm.blue(BORDERS[row_type]['right'])}"
             padding = ""
         else:
-            # if row_type == "record": print(f"TRACE: ConsoleTable.display > drawTable > drawRow > getRowEnds is_line_type == False ...")#####
             left_end = right_end = f"{self._trm.blue(BORDERS['side'])}"
             padding = " "
-        # if row_type == "record": print(f"TRACE: ConsoleTable.display > drawTable > drawRow > getRowEnds.left_end {left_end}")#####
-        # if row_type == "record": print(f"TRACE: ConsoleTable.display > drawTable > drawRow > getRowEnds.right_end {right_end}")#####
-        # if row_type == "record": print(f"TRACE: ConsoleTable.display > drawTable > drawRow > getRowEnds.padding {padding}")#####
         return left_end, right_end, padding
 
     def _process_row_content(self, 
@@ -673,7 +594,6 @@ class ConsoleTable(ConsoleBase):
             A list of formatted strings, each representing a cell in the 
             row.
         """
-        # if row_type == "record": print(f"TRACE: ConsoleTable.display > drawTable > drawRow > processRowContent called with {row_type}, {content}, {rjust_col} >>>")#####
         cells = []
 
         if row_type == "title":
@@ -719,23 +639,13 @@ class ConsoleTable(ConsoleBase):
             - Updates `self._column_widths` to reflect the resized table 
                 layout.
         """
-        # print(f"TRACE: ConsoleTable.display > setDimensions called >>>>>>>>>>>")#####
-        # print(f"TRACE: ConsoleTable.display > setDimensions _trm.width: {self._trm.width}")#####
         self._display_width = min(self._trm.width, 79)
-        # print(f"TRACE: ConsoleTable.display > setDimensions _display_width set as {self._display_width}")#####
         self._margin_size = (self._trm.width - self._display_width) // 2
-        # print(f"TRACE: ConsoleTable.display > setDimensions _margin_size set as {self._margin_size}")#####
         self._table_width = self._data.get_table_width()
-        # print(f"TRACE: ConsoleTable.display > setDimensions _table_width set as {self._table_width}")#####
 
         table_space = self._display_width - 4  # For borders and padding
-        # print(f"TRACE: ConsoleTable.display > setDimensions.table_space: {table_space}")#####
         if self._table_width > table_space:
-            # print(f"TRACE: ConsoleTable.display > setDimensions tableWidth > tableSpace ...")#####
             self._data.resize_columns(table_space)
-            # print(f"TRACE: ConsoleTable.display > setDimensions resizeColumns executed")#####
             self._table_width = self._data.get_table_width()
-            # print(f"TRACE: ConsoleTable.display > setDimensions _table_width set as {self._table_width}")#####
 
         self._column_widths = self._data.get_column_widths()
-        # print(f"TRACE: ConsoleTable.display > setDimensions _column_widths set as {self._column_widths}")#####

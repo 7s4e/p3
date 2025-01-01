@@ -71,3 +71,26 @@ def test_snake_to_camel(str_in, exp_out):
 
     # Veriry
     assert result == exp_out
+
+
+# Test truncateString
+@pytest.mark.parametrize(
+    "max, exp_out", 
+    [
+        (79, "Lorem ipsum odor amet, consectetuer adipiscing elit."), 
+        (52, "Lorem ipsum odor amet, consectetuer adipiscing elit."), 
+        (51, "Lorem ipsum odor amet, consectetuer adipiscing e..."), 
+        (3, "..."), 
+        (1, "."), 
+        (0, ""), 
+    ]
+)
+def test_truncate_string(max, exp_out):
+    # Setup
+    string = "Lorem ipsum odor amet, consectetuer adipiscing elit."
+
+    # Execute
+    result = utl.truncate_string(string, max)
+
+    # Verify
+    assert result == exp_out
