@@ -17,16 +17,23 @@ def confirm_disk(disk: str) -> bool:
     Returns:
         True if the user confirms, False otherwise.
     """
+    # print(f"TRACE: GD > main > getDisk > confirmDisk called with {disk}")#####
     prompt = f"Are you sure you want to select the disk '{disk}'? (y/n) "
+    # print(f"TRACE: GD > main > getDisk > confirmDisk.prompt assigned")#####
     output = cmd.list_block_devices(disk, 
                                     columns=["NAME", "TYPE", "FSTYPE", "LABEL", 
                                              "MOUNTPOINTS"])
+    # print(f"TRACE: GD > main > getDisk > confirmDisk.output: {output}")#####
     partitions = Table(title="selected device", table_string=output)
+    # print(f"TRACE: GD > main > getDisk > confirmDisk.partitions: {partitions}")#####
     print()
+    # print(f"TRACE: GD > main > getDisk > confirmDisk new line printed")#####
     partitions.put_table()
+    # print(f"TRACE: GD > main > getDisk > confirmDisk.partitions put")#####
     disk_confirmation = ConsolePrompt(prompt, 
                                       expect_keystroke=True, 
                                       validate_bool=True)
+    # print(f"TRACE: GD > main > getDisk > confirmDisk.disk_confirmation: {disk_confirmation}")#####
     return disk_confirmation.call()
 
 
@@ -36,15 +43,15 @@ def get_disks() -> Table:
     Returns:
         A list of dictionaries containing disk information.
     """
-    print(f"TRACE: GD > main > getDisk > getDisks called")#####
+    # print(f"TRACE: GD > main > getDisk > getDisks called >>>>>>>>>>>>>>>>>>>>>")#####
     output = cmd.list_block_devices(columns=["NAME", "VENDOR", "SIZE"], 
                                     show_dependents=False)
-    print(f"TRACE: GD > main > getDisk > getDisks.output: {output}")#####
+    # print(f"TRACE: GD > main > getDisk > getDisks.output: {output}")#####
     disks = Table(title="connected devices", table_string=output, 
                   rjust_columns="SIZE")
-    print(f"TRACE: GD > main > getDisk > getDisks.disks: {disks}")#####
+    # print(f"TRACE: GD > main > getDisk > getDisks.disks: {disks}")#####
     disks.filter_startswith("NAME", "sd")
-    print(f"TRACE: GD > main > getDisk > getDisks.disks: {disks}")#####
+    # print(f"TRACE: GD > main > getDisk > getDisks.disks: {disks}")#####
     return disks
 
 
@@ -73,11 +80,12 @@ def get_disk() -> str:
     Returns:
         The name of the confirmed disk.
     """
-    print(f"TRACE: GD > main > getDisk")#####
+    print(f"TRACE: GD > main > getDisk called >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")#####
     Console.put_script_banner(inspect.currentframe().f_code.co_name)
+    print(f"TRACE: GD > main > getDisk Console.putScriptBanner executed")#####
 
     while True:
-        print(f"TRACE: GD > main > getDisk loop start")#####
+        print(f"TRACE: GD > main > getDisk loop started")#####
         disks = get_disks()
         print(f"TRACE: GD > main > getDisk.disks: {disks}")#####
         count = disks.count_records()
@@ -100,6 +108,7 @@ def get_disk() -> str:
 
         disk = (disks.get_record(0)["NAME"] 
                 if count == 1 else select_disk(disks))
+        print(f"TRACE: GD > main > getDisk.disk: {disk}")#####
 
         if confirm_disk(disk):
             break
@@ -120,7 +129,7 @@ def get_disk() -> str:
 
 def main() -> str:
     Console.clear_stdscr()
-    print(f"TRACE: GD > main")#####
+    print(f"TRACE: GD > main called >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")#####
     return get_disk()
 
 

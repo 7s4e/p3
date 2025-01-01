@@ -59,6 +59,7 @@ class Table:
             ValueError: If neither or both 'table_data' and 
                 'table_string' are provided.
         """
+        print(f"TRACE: Table.init called with {table_data}, {table_string}, {title}, {rjust_columns}")#####
         # Type validation
         if not (table_data is None or 
                 (isinstance(table_data, list) and 
@@ -86,14 +87,19 @@ class Table:
         
         # Assign validated attributes        
         if table_data:
+            print(f"TRACE: Table.init.table_data == True")#####
             self._capitalize_keys(table_data)
         else:
+            print(f"TRACE: Table.init.table_data == False")#####
             self._read_table(table_string)
         
         self._title = title.upper() if title else None
+        # print(f"TRACE: Table.init > self._title set as {self._title}")#####
         self._right_justified_columns = set()
+        # print(f"TRACE: Table.init > self._right_justified_columns set as {self._right_justified_columns}")#####
         
         if rjust_columns:
+            # print(f"TRACE: Table.init.rjust_columns == True")#####
             self._add_rjust_col_label(rjust_columns)
 
     # Public Methods
@@ -265,9 +271,12 @@ class Table:
             Updates self._dataset with keys converted to uppercase and updates
             self._records_count with the new count of records.
         """
+        # print(f"TRACE: Table. > init > capitalize_keys called with {data}")#####
         self._dataset = [{key.upper(): value for key, value in datum.items()} 
                          for datum in data]
+        # print(f"TRACE: Table. > init > capitalize_keys self._dataset set as {self._dataset}")#####
         self._records_count = len(self._dataset)
+        # print(f"TRACE: Table. > init > capitalize_keys self._records_count set as {self._records_count}")#####
 
     def _find_boundaries(self, 
                          column_index: int, 
@@ -377,17 +386,22 @@ class Table:
         Args:
             table_string (str): The string input representing the table.
         """
+        # print(f"TRACE: Table.init > readTable called with {table_string} >>>>>")#####
         # Split the input string into lines
         lines = table_string.splitlines()
+        # print(f"TRACE: Table.init > readTable.lines: {lines}")#####
 
         # Non-empty string
         if len(lines) > 0:
+            # print(f"TRACE: Table.init > readTable len(lines) > 0")#####
             
             # Extract column headers from the first line
             headers = lines[0].split()
+            # print(f"TRACE: Table.init > readTable.headers: {headers}")#####
             
             # Find the positions of each column in the header line
             col_positions = self._find_column_positions(lines[0], headers)
+            # print(f"TRACE: Table.init > readTable.col_positions: {col_positions}")#####
 
             # Parse each subsequent line into a dictionary with header keys
             self._dataset = [{header.upper(): self._get_slice(index, 
@@ -395,10 +409,14 @@ class Table:
                                                               line) 
                               for index, header in enumerate(headers)} 
                              for line in lines[1:]]
+            # print(f"TRACE: Table.init > readTable _dataset set as {self._dataset}")#####
         
         # Empty string
         else:
+            # print(f"TRACE: Table.init > readTable len(lines) !> 0")#####
             self._dataset = []
+            # print(f"TRACE: Table.init > readTable _dataset set as {self._dataset}")#####
     
         # Update the count of records in the dataset
         self._records_count = len(self._dataset)
+        # print(f"TRACE: Table.init > readTable _records_count set as {self._records_count}")#####

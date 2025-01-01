@@ -24,10 +24,14 @@ def list_block_devices(disk: str | None = None,
     Returns:
         str: The output of the 'lsblk' command.
     """
+    # print(f"TRACE: CMD > listBlockDevices called with {disk}, {columns}, {show_dependents}")#####
     # Construct the command based on the parameters
     deps = "" if show_dependents else " --nodeps"
+    # print(f"TRACE: CMD > listBlockDevices.deps: {deps}")#####
     output = "" if not columns else f" --output {','.join(columns)}"
+    # print(f"TRACE: CMD > listBlockDevices.output: {output}")#####
     path = "" if disk is None else f" /dev/{disk}"
+    # print(f"TRACE: CMD > listBlockDevices.path: {path}")#####
     
     # Run the constructed 'lsblk' command and return its output.
     return run_command("lsblk" + deps + output + path)
@@ -87,16 +91,21 @@ def run_command(command: str,
         RuntimeError: If the command fails, an exception is raised with 
             the error message.
     """
+    # print(f"TRACE: CMD > runCommand called with {command}, {capture_output}, {use_shell}")#####
     if capture_output:
+        # print(f"TRACE: CMD > runCommand.capture_output == True")#####
         result = subprocess.run(command, capture_output=True, stdout=None, 
                                 stderr=None, shell=use_shell, text=True)
     else:
+        # print(f"TRACE: CMD > runCommand.capture_output == False")#####
         result = subprocess.run(command, capture_output=False, 
                                 stdout=sys.stdout, stderr=sys.stderr, 
                                 shell=use_shell, text=True)
+    # print(f"TRACE: CMD > runCommand.result: {result}")#####
 
     # Check for command failure and raise an error with the appropriate message.
     if result.returncode != 0:
+        # print(f"TRACE: CMD > runCommand.result.returncode != 0")#####
         error_message = (result.stderr.strip() 
                          if capture_output else "Command failed.")
         raise RuntimeError(error_message)
