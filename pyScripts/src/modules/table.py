@@ -59,7 +59,7 @@ class Table:
             ValueError: If neither or both 'table_data' and 
                 'table_string' are provided.
         """
-        print(f"TRACE: Table.init called with {table_data}, {table_string}, {title}, {rjust_columns}")#####
+        # print(f"TRACE: Table.init called with {table_data}, {table_string}, {title}, {rjust_columns}")#####
         # Type validation
         if not (table_data is None or 
                 (isinstance(table_data, list) and 
@@ -87,10 +87,10 @@ class Table:
         
         # Assign validated attributes        
         if table_data:
-            print(f"TRACE: Table.init.table_data == True")#####
+            # print(f"TRACE: Table.init.table_data == True")#####
             self._capitalize_keys(table_data)
         else:
-            print(f"TRACE: Table.init.table_data == False")#####
+            # print(f"TRACE: Table.init.table_data == False")#####
             self._read_table(table_string)
         
         self._title = title.upper() if title else None
@@ -204,15 +204,21 @@ class Table:
             is_menu (bool, optional): Whether the table is being 
                 displayed as a menu. Defaults to False.
         """
+        # print(f"TRACE: Table.putTable called with {is_menu} >>>>>>>>>>>>>>>>>>")#####
         if is_menu:
+            # print(f"TRACE: Table.putTable.isMenu == True .....................")#####
             self._number_records()
+            # print(f"TRACE: Table.putTable numberRecords executed")#####
         self._calculate_widths()
+        # print(f"TRACE: Table.putTable calculateWidths executed")#####
         # Create an instance of Console_Table with the current 
         # instance's data
         table = ConsoleTable(self)
+        # print(f"TRACE: Table.putTable.table: {table}")#####
 
         # Display the table using the provided Terminal object
         table.display()
+        # print(f"TRACE: Table.putTable ConsoleTable.display executed")#####
 
     def resize_columns(self, width_limit: int) -> None:
         """Resize column widths to fit within the specified width limit.
@@ -220,6 +226,9 @@ class Table:
             width_limit (int): The maximum allowable width for the 
                 table.
         """
+        # print(f"TRACE: Table.resizeColumns called with {width_limit} >>>>>>>>>")#####
+        # print(f"TRACE: Table.resizeColumns start _column_widths: {self._column_widths}")#####
+        # print(f"TRACE: Table.resizeColumns start _table_width: {self._table_width}")#####
         # Calculate the total width to trim
         trim_length = self._table_width - width_limit
         # Continue trimming column widths until the trim length is 
@@ -235,6 +244,8 @@ class Table:
             trim_length -= 1
             # Update the current table width
             self._table_width -= 1
+        # print(f"TRACE: Table.resizeColumns end _column_widths: {self._column_widths}")#####
+        # print(f"TRACE: Table.resizeColumns end _table_width: {self._table_width}")#####
 
     # Private Methods
     def _add_rjust_col_label(self, label: str | list[str] | set[str]) -> None:
@@ -242,10 +253,15 @@ class Table:
         Args:
             label: A string, list, or set of labels to add.
         """
+        # print(f"TRACE: Table.putTable > numberRecords > addRjustColLabel called with {label} >>>")#####
         if isinstance(label, (list, set)):
+            # print(f"TRACE: Table.putTable > numberRecords > addRjustColLabel.lable is set | list ...")#####
             self._right_justified_columns.update(l.upper() for l in label)
+            # print(f"TRACE: Table.putTable > numberRecords > addRjustColLabel _right_justified_columns set as {self._right_justified_columns}")#####
         else:
+            # print(f"TRACE: Table.putTable > numberRecords > addRjustColLabel.lable is str ...")#####
             self._right_justified_columns.add(label.upper())
+            # print(f"TRACE: Table.putTable > numberRecords > addRjustColLabel _right_justified_columns set as {self._right_justified_columns}")#####
 
     def _calculate_widths(self) -> None:
         """Calculate the width of each column and the total table width 
@@ -255,13 +271,16 @@ class Table:
             Updates self._table_width with the total width of the table 
                 including column separators.
         """
+        # print(f"TRACE: Table.putTable > calculateWidth called >>>>>>>>>>>>>>>>")#####
         self._column_widths = {
             key: max(len(key), 
                      max(len(str(record[key])) for record in self._dataset))
             for key in self._dataset[0].keys()
         }
+        # print(f"TRACE: Table.putTable > calculateWidth _column_widths set as {self._column_widths}")#####
         self._table_width = (sum(self._column_widths.values()) 
                              + 2 * (len(self._column_widths) - 1))
+        # print(f"TRACE: Table.putTable > calculateWidth _table_width set as {self._table_width}")#####
 
     def _capitalize_keys(self, data: list[dict[str, str]]) -> None:
         """Convert all dictionary keys in the dataset to uppercase.
@@ -374,12 +393,14 @@ class Table:
         column labels to ensure proper right-justification for the index 
         column.
         """
+        # print(f"TRACE: Table.putTable > numberRecords called >>>>>>>>>>>>>>>>>")#####
         # Add a numerical index to each record, starting from 1
         self._dataset = [{"#": i + 1, **record} 
                          for i, record in enumerate(self._dataset)]
         # Update the column label for the index to ensure right-
         # justification
         self._add_rjust_col_label("#")
+        # print(f"TRACE: Table.putTable > numberRecords addRjustColLabel executed")#####
 
     def _read_table(self, table_string: str) -> None:
         """Parse a table from a string input and store it as a dataset.

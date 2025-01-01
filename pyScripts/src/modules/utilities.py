@@ -44,4 +44,20 @@ def snake_to_camel(snake_str: str) -> str:
     """
     segments = snake_str.split('_')
     return segments[0] + ''.join(segment.capitalize() for segment in segments[1:])
-    
+
+
+def truncate_string(strng: str, max_lngth: int) -> str:
+    """
+    Truncate a string to a specified maximum length, adding ellipses
+    if the string is truncated.
+
+    Args:
+        strng (str): The string to truncate.
+        max_lngth (int): The maximum allowed length, including ellipses.
+
+    Returns:
+        str: The truncated string with ellipses if necessary.
+    """
+    if len(str(strng)) > max_lngth:
+        return strng[:max_lngth - 3] + "..."
+    return strng
