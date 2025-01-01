@@ -10,7 +10,7 @@ authors = [
     {name = "Bryant Smith"},
     {email = "bryant@7s4e.org"},
 ]
-license = {text = "MIT License, Copyright (c) 2024 7s4e"}
+license = {text = "MIT License, Copyright (c) 2025 7s4e"}
 dependencies = ["blessed"]
 readme = "README.md"
 requires-python = ">=3.9"
