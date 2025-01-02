@@ -104,7 +104,6 @@ def get_disk() -> str:
 def main() -> str:
     Console.clear_stdscr()
     print(get_disk())
-    return 0
 
 
 if __name__ == "__main__":
