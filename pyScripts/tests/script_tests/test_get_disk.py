@@ -1,5 +1,5 @@
 import pytest
-import scripts.get_disk_scr as gd
+import scripts.get_disk_script as gd
 from modules import Table
 
 
