@@ -4,49 +4,41 @@ Commands Module
 This module provides a set of functions for the Linux environment.
 
 Imports:
-    - Standard library:
-        - subprocess: For running shell commands.
-        - sys: For redirecting command output to the standard output.
-    - Local modules:
-        - Table: A helper class for parsing and managing table-like 
-          command output.
+    Standard library:
+        subprocess: For running shell commands.
+        sys: For redirecting command output to the standard output.
+    Local modules:
+        Table: A helper class for parsing and managing table-like 
+            command output.
 
 Functions:
-    - list_block_devices: Generate and execute the `lsblk` command to 
-        list block devices with optional filters.
-        
-    - run_badblocks: Execute the `badblocks` command to check a disk for 
+    list_block_devices: Generate and execute the `lsblk` command to list 
+        block devices with optional filters.
+    run_badblocks: Execute the `badblocks` command to check a disk for 
         bad sectors, with options for destructive and non-destructive 
         modes.
-
-    - run_command: Execute an arbitrary shell command and optionally 
+    run_command: Execute an arbitrary shell command and optionally 
         capture its output.
-
-    - unmount_disk: Unmount all mount points associated with a specified 
+    unmount_disk: Unmount all mount points associated with a specified 
         disk.
 """
-# Standard library imports
-import subprocess
+from subprocess import run
 import sys
 
-# Local module imports
 from .table import Table
 
 
-def list_block_devices(disk: str | None = None, 
-                       columns: list[str] = list(),
+def list_block_devices(disk: str | None = None, columns: list[str] = list(), 
                        show_dependents: bool = True) -> str:
     """Generate and run the 'lsblk' command to list block devices with 
         optional filters.
 
     Args:
-        disk (str | None, optional): The specific disk to query (e.g., 
-            'sda'). If None, all disks are listed. Defaults to None.
-        columns (list[str], optional): A list of columns to include in 
-            the output. Defaults to an empty list.
-        show_dependents (bool, optional): If True, include dependent 
-            devices (e.g., partitions). If False, append '--nodeps' to 
-            exclude them. Defaults to True.
+        disk: The specific disk to query (e.g., 'sda'). If 'disk' is 
+            None, all disks are listed.
+        columns: A list of columns to include in the output.
+        show_dependents: If True, include dependent devices (e.g., 
+            partitions). If False, append '--nodeps' to exclude them.
 
     Returns:
         str: The output of the 'lsblk' command.
@@ -60,21 +52,19 @@ def list_block_devices(disk: str | None = None,
     return run_command("lsblk" + deps + output + path)
 
 
-def run_badblocks(disk: str, 
-                  non_destructive: bool = True, 
+def run_badblocks(disk: str, non_destructive: bool = True, 
                   capture_output: bool = False) -> str | None:
     """Run the `badblocks` command on a specified disk to check for bad 
         sectors.
 
     Args:
-        disk (str): The disk identifier (e.g., 'sdb') on which to run 
+        disk: The disk identifier (e.g., 'sdb') on which to run 
             `badblocks`.
-        non_destructive (bool, optional): If True, run `badblocks` in 
-            non-destructive mode; if False, run in destructive write 
-            mode. Defaults to True.
-        capture_output (bool, optional): If True, capture and return the 
-            command's output as a string; if False, redirect the output 
-            to the standard output. Defaults to False.
+        non_destructive: If True, run `badblocks` in non-destructive 
+            mode; if False, run in destructive write mode.
+        capture_output: If True, capture and return the command's output 
+            as a string; if False, redirect the output to the standard 
+            output.
 
     Returns:
         str | None: The standard output from the command if 
@@ -94,17 +84,15 @@ def run_badblocks(disk: str,
     return None
 
 
-def run_command(command: str, 
-                capture_output: bool = True,
+def run_command(command: str, capture_output: bool = True, 
                 use_shell: bool = True) -> str | None:
     """Execute a shell command and return the output or print to stdout.
 
     Args:
-        command (str): The command to run.
-        capture_output (bool, optional): Whether to capture the output 
-            or print to stdout. Defaults to True.
-        use_shell (bool, optional): Whether to use the shell to execute 
-            the command. Defaults to True
+        command: The command to run.
+        capture_output: Whether to capture the output or print to 
+            stdout.
+        use_shell: Whether to use the shell to execute the command.
 
     Returns:
         str | None: The standard output from the command if 
@@ -114,15 +102,15 @@ def run_command(command: str,
         RuntimeError: If the command fails, an exception is raised with 
             the error message.
     """
+    # Execute shell command
     if capture_output:
-        result = subprocess.run(command, capture_output=True, stdout=None, 
-                                stderr=None, shell=use_shell, text=True)
+        result = run(command, capture_output=True, stdout=None, stderr=None, 
+                     shell=use_shell, text=True)
     else:
-        result = subprocess.run(command, capture_output=False, 
-                                stdout=sys.stdout, stderr=sys.stderr, 
-                                shell=use_shell, text=True)
+        result = run(command, capture_output=False, stdout=sys.stdout, 
+                     stderr=sys.stderr, shell=use_shell, text=True)
 
-    # Check for command failure and raise an error with the appropriate message.
+    # Check for command failure and raise RuntimeError with message.
     if result.returncode != 0:
         error_message = (result.stderr.strip() 
                          if capture_output else "Command failed.")
@@ -136,7 +124,7 @@ def unmount_disk(disk: str) -> None:
     """Unmount all mount points associated with a specified disk.
 
     Args:
-        disk (str): The disk identifier (e.g., 'sda1').
+        disk: The disk identifier (e.g., 'sda1').
     """
     # Get the list of mount points for the given disk using 'lsblk'
     output = run_command(f"lsblk --output PATH,MOUNTPOINT /dev/{disk}")

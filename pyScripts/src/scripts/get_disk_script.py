@@ -102,7 +102,7 @@ def get_disk() -> str:
 
 
 def main() -> str:
-    Console.clear_stdscr()
+    Console.clear_screen()
     print(get_disk())
 
 
