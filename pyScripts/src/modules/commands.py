@@ -1,3 +1,30 @@
+"""
+Commands Module
+
+This module provides a set of functions for the Linux environment.
+
+Imports:
+    - Standard library:
+        - subprocess: For running shell commands.
+        - sys: For redirecting command output to the standard output.
+    - Local modules:
+        - Table: A helper class for parsing and managing table-like 
+          command output.
+
+Functions:
+    - list_block_devices: Generate and execute the `lsblk` command to 
+        list block devices with optional filters.
+        
+    - run_badblocks: Execute the `badblocks` command to check a disk for 
+        bad sectors, with options for destructive and non-destructive 
+        modes.
+
+    - run_command: Execute an arbitrary shell command and optionally 
+        capture its output.
+
+    - unmount_disk: Unmount all mount points associated with a specified 
+        disk.
+"""
 # Standard library imports
 import subprocess
 import sys
