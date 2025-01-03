@@ -1,8 +1,9 @@
 # Standard library imports
 from __future__ import annotations  # Postpone evaluation of annotations
-from typing import Any, TYPE_CHECKING
 import re
+import sys
 import textwrap
+from typing import Any, TYPE_CHECKING
 
 # Third-party import
 from blessed import Terminal
@@ -18,8 +19,10 @@ BORDERS = {"top": {"left": "╔", "fill": "═", "right": "╗"},
            "bottom": {"left": "╚", "fill": "═", "right": "╝"}, 
            "side": "║"}
 
-FORMATTING_ALLOWANCE = {"blue": len("[blue][/blue]"), 
+FORMATTING_ALLOWANCE = {"blink": len("[blink][/blink]"), 
+                        "blue": len("[blue][/blue]"), 
                         "red": len("[red][/red]"), 
+                        "reverse": len("[reverse][/reverse]"), 
                         "yellow": len("[yellow][/yellow]")}
 
 
@@ -146,6 +149,7 @@ class ConsolePrompt(ConsoleBase):
         self._validate_bool = validate_bool
         self._validate_integer = validate_integer
         self._integer_validation = integer_validation
+        self._error_count = {"yes/no": 0, "NaN": 0, "OOR": 0, "OOL": 0}
 
     # Public Method
     def call(self) -> Any:
@@ -170,9 +174,16 @@ class ConsolePrompt(ConsoleBase):
         while not valid:
             self._get_response()
             valid = self._validate_response()
+        self._error_count = {error: 0 for error in self._error_count}
         return self._validated_response
 
     # Private Methods
+    def _back_n_lines(self, n: int) -> None:
+        for i in range(n):
+            sys.stdout.write("\033[F")  # ANSI escape code to move up
+            sys.stdout.write("\033[K")  # ANSI escape code to clear line
+        sys.stdout.flush()
+
     def _check_bool_validity(self) -> bool:
         """Validate the user's boolean response based on 'y' or 'n' 
             input.
@@ -190,8 +201,10 @@ class ConsolePrompt(ConsoleBase):
         if self._user_response.lower() in {"y", "n"}:
             self._validated_response = self._user_response.lower() == "y"
             return True
-
-        self._put_alert("Respond with 'y' or 'n'")
+        
+        self._error_count["yes/no"] += 1
+        self._put_alert("Respond with 'y' or 'n'", 
+                        self._error_count["yes/no"])
         return False
 
     def _check_integer_validity(self) -> bool:
@@ -210,23 +223,27 @@ class ConsolePrompt(ConsoleBase):
             bool: True if the response is valid, False otherwise.
         """
         if not bool(re.fullmatch(r'-?[0-9]+', self._user_response)):
-            self._put_alert("Enter a valid number")
+            self._error_count["NaN"] += 1
+            self._put_alert("Enter a valid number", self._error_count["NaN"])
             return False
         response = int(self._user_response)
         match self._integer_validation:
             case int() as range:
                 if response < 0 or response >= range:
-                    self._put_alert("Response is out of range")
+                    self._error_count["OOR"] += 1
+                    self._put_alert("Response is out of range", 
+                                    self._error_count["OOR"])
                     return False
             case tuple() as limits:
                 low, high = limits
                 if response < low or response > high:
+                    self._error_count["OOL"] += 1
                     self._put_alert(f"Enter a number between {low} and " +
-                                        f"{high}")
+                                    f"{high}", self._error_count["OOL"])
                     return False
             case None: pass
         self._validated_response = str(response)
-        return True            
+        return True
 
     def _get_response(self) -> None:
         """Prompt the user and capture their response.
@@ -270,7 +287,7 @@ class ConsolePrompt(ConsoleBase):
                             initial_indent=padding, subsequent_indent=padding), 
               end=" " if leave_cursor_inline else "\n", flush=True)
 
-    def _put_alert(self, alert: str) -> None:
+    def _put_alert(self, alert: str, count: int) -> None:
         """Display an alert message to the user in red.
 
         This method prints the provided alert message to the console in 
@@ -279,7 +296,20 @@ class ConsolePrompt(ConsoleBase):
         Args:
             alert: The alert message to be displayed.
         """
-        self._print_message(self._trm.red(alert), FORMATTING_ALLOWANCE["red"], 
+        self._back_n_lines(min(count, 2))
+        if count >= 1:
+            alert = self._trm.red(alert)
+            required_allowance = FORMATTING_ALLOWANCE["red"]
+        if count >= 2:
+            alert = self._trm.reverse(alert)
+            required_allowance += FORMATTING_ALLOWANCE["reverse"]
+        if count >= 3:
+            alert = self._trm.blink(alert)
+            required_allowance += FORMATTING_ALLOWANCE["blink"]
+        if count >= 4:
+            alert = (self._trm.red(f"'{self._user_response}' is invalid. ") + 
+                     alert)
+        self._print_message(alert, required_allowance, 
                             leave_cursor_inline=False)
 
     def _put_prompt(self, leave_cursor_inline: bool) -> None:
@@ -297,7 +327,6 @@ class ConsolePrompt(ConsoleBase):
         self._print_message(self._trm.yellow(self._prompt), 
                             FORMATTING_ALLOWANCE["yellow"], 
                             leave_cursor_inline=leave_cursor_inline)
-
 
     def _read_keystroke(self) -> None:
         """Captures a single keystroke from the user, waiting for a 

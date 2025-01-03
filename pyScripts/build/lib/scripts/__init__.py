@@ -1,1 +1,0 @@
-from .get_disk_scr import get_disk
