@@ -41,6 +41,13 @@ def get_disks() -> Table:
     return disks
 
 
+def prompt_check(caller):
+    msg = "Press 'q' to quit, or check disks and press any key to continue..."
+    prmpt = ConsolePrompt(msg, expect_keystroke=True)
+    rspns = prmpt.call()
+    utl.abort(rspns in {"q", "Q"}, caller)
+    
+
 def select_disk(disks: Table) -> str:
     """Prompt the user to select a disk from a list of disks.
 
@@ -74,11 +81,7 @@ def get_disk() -> str:
         count = disks.count_records()
 
         if count == 0:
-            no_disk_msg = ("Press 'q' to quit, or connect a device and " +
-                           "press any key to continue...")
-            no_disk_alert = ConsolePrompt(no_disk_msg, expect_keystroke=True)
-            response = no_disk_alert.call()
-            utl.abort(response in {"q", "Q"}, caller_info["file"])
+            prompt_check(caller_info["file"])
             continue
 
         disk = (disks.get_record(0)["NAME"] 
@@ -93,10 +96,7 @@ def get_disk() -> str:
                                                  validate_bool=True)
             if unmount_confirmation.call():
                 cmd.unmount_disk(disk)
-            check_disk_msg = "Check device and press any key..."
-            check_disk_alert = ConsolePrompt(check_disk_msg, 
-                                             expect_keystroke=True)
-            check_disk_alert.call()
+            prompt_check(caller_info["file"])
 
     return disk
 
