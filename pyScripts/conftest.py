@@ -1,17 +1,12 @@
 import sys
 import os
 
-# Add the root project directory to sys.path for proper imports
+# Project paths
 project_root = os.path.abspath(os.path.dirname(__file__))
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
-
-# Add the modules directory to sys.path for module imports
 modules_path = os.path.join(project_root, "src/modules")
-if modules_path not in sys.path:
-    sys.path.insert(0, modules_path)
-
-# Add the scripts directory to sys.path for script imports
 scripts_path = os.path.join(project_root, "src/scripts")
-if scripts_path not in sys.path:
-    sys.path.insert(0, scripts_path)
+
+# Add directories to sys.path for proper imports
+for path in [project_root, modules_path, scripts_path]:
+    if path not in sys.path:
+        sys.path.insert(0, path)
