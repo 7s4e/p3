@@ -84,6 +84,7 @@ BORDERS = {"top": {"left": "╔", "fill": "═", "right": "╗"},
 
 FORMATTING_ALLOCATION = {"blink": len("[blink][/blink]"), 
                         "blue": len("[blue][/blue]"), 
+                        "green": len("[green][/green]"), 
                         "red": len("[red][/red]"), 
                         "reverse": len("[reverse][/reverse]"), 
                         "yellow": len("[yellow][/yellow]")}
@@ -161,7 +162,7 @@ class ConsolePrompt(ConsoleBase):
         _e_ct: A tally of various errors until validation.
         _exp_kst: Flag indicating if a keystroke is expected.
         _int_vld: Validation criteria for integers.
-        _trm: blessed.Terminal inherited from ConsoleBase
+        _trm: blessed.Terminal inherited from ConsoleBase.
         _val_bool: Flag indicating if boolean validation is 
             enabled.
         _val_int: Flag indicating if integer validation is 
@@ -182,7 +183,6 @@ class ConsolePrompt(ConsoleBase):
         _val_resp: Validate the user's input based on the specified 
             criteria.
     """
-
     def __init__(self, cue: str, expect_keystroke: bool = False, 
                  validate_bool: bool = False, validate_integer: bool = False, 
                  integer_validation: int | tuple[int, int] | None = None
@@ -240,9 +240,9 @@ class ConsolePrompt(ConsoleBase):
         Get, validate, and return user input.
 
         Returns:
-            Any: The validated response from the user, which could be a 
-                string, integer, or boolean, depending on the validation 
-                type.
+            Any validated response from the user, which could be a 
+            string, integer, or boolean, depending on the validation 
+            type.
         """
         # Execute validation loop
         valid = False
@@ -266,14 +266,8 @@ class ConsolePrompt(ConsoleBase):
         
         Args:
             n: The number of lines to move back and clear.
-        
-        Raises:
-            ValueError: If `n` is negative, as moving backwards a 
-                negative number of lines is invalid.
         """
-        if n < 0:
-            raise ValueError("Number of lines cannot be negative.")
-        for i in range(n):
+        for _ in range(n):
             stdout.write("\033[F")
             stdout.write("\033[K")
         stdout.flush()
@@ -283,10 +277,10 @@ class ConsolePrompt(ConsoleBase):
         Validate user's response as 'yes' or 'no'.
 
         Side effect:
-            _vld_resp: sets boolean as validated response.
+            _vld_resp: Set boolean as validated response.
 
         Returns:
-            bool: True if the response is valid, False otherwise.
+            A boolean, True if the response is valid, False otherwise.
         """
         # Valid response sets _vld_response attribute
         if self._user_resp.lower() in {"y", "n"}:
@@ -308,10 +302,10 @@ class ConsolePrompt(ConsoleBase):
             [0-9]+: matches one or more repetitions of any single digit
 
         Side effect:
-            _vld_resp: sets integer as validated response.
+            _vld_resp: Set integer as validated response.
 
         Returns:
-            bool: True if the response is valid, False otherwise.
+            A boolean, True if the response is valid, False otherwise.
         """
         # Invalid alert if not a number
         if not bool(fullmatch(r'-?[0-9]+', self._user_resp)):
@@ -441,14 +435,14 @@ class ConsolePrompt(ConsoleBase):
         key is pressed, the response is stored as an empty string.
 
         Side effect:
-            _user_resp: sets user response.
+            _user_resp: Set user response.
         """
         # Initialize values
         key = None
         miskey_ct = -1
         self._user_resp = ""
 
-        # While loop with contexts filtering for printable characters
+        # While loop within contexts filtering for printable characters
         with self._trm.cbreak(), self._trm.hidden_cursor():
             while key is None or not (32 <= code <= 126 or code == 10):
                 key = self._trm.inkey()
@@ -463,57 +457,64 @@ class ConsolePrompt(ConsoleBase):
         self._user_resp = str(key if code != 10 else "")
 
     def _read_str(self) -> None:
-        """Read a user input string character by character, handling 
-            backspace and printable characters, and store the final 
-            input in `_user_response`.
-
-        This method operates in raw mode using the `cbreak()` context of 
-        the terminal, allowing it to capture each keystroke as the user 
-        types. Backspace characters remove the last typed character from 
-        the display and the internal response, while printable 
-        characters (ASCII codes 32-126) are appended to the response and 
-        printed in green. The input ends when the Enter key (ASCII code 
-        10) is pressed.
-
-        Attributes:
-            _user_response (str): The final user input string captured.
         """
+        Capture string, handling printable chars, backspaces, and Enter.
+
+        This method operates in raw mode using the terminal's `cbreak` 
+        context, allowing it to process input character by character. 
+        Printable characters are displayed in green as they are typed, 
+        backspaces remove the last character from the response, and 
+        pressing Enter finalizes the input.
+
+        Side effect:
+            _user_resp: Set user response.
+        """
+        # Initialize values
         key = None
         response = []
 
         with self._trm.cbreak():
-            while key is None or key_code != 10:  # Wait New Line/Enter
+            # Wait Enter key
+            while key is None or code != 10:
                 key = self._trm.inkey()
+
+                # Get ASCII decimal code
                 try:
-                    key_code = ord(key)
+                    code = ord(key)
+                
+                # Reset key if code unavailable
                 except:
                     key = None
+                
                 else:
-                    if key_code == 8 or key_code == 127:  # Backspace
-                        if response:
-                            response.pop()
-                            bckspce_sequence = ("\b \b" * 
-                                                len(self._trm.green("x")))
-                            print(bckspce_sequence, end="", flush=True)
-                    elif 32 <= key.code <= 126:  # Printable chars
+                    # Simulate backspace on existing string
+                    if response and (code == 8 or code == 127):
+                        response.pop()
+                        backspace_ct = 1 + FORMATTING_ALLOCATION["green"]
+                        sequence = "\b \b" * backspace_ct
+                        print(sequence, end="", flush=True)
+                    
+                    # Put printable character in green
+                    elif 32 <= key.code <= 126:
                         response.append(str(key))
                         formatted_char = self._trm.green(str(key))
                         print(formatted_char, end="", flush=True)
-            print()  # Move to next line after Enter
-
+            
+            # Print new line upon Enter
+            print()
+        
+        # Set user response
         self._user_resp = "".join(response)
 
-
     def _val_resp(self) -> bool:
-        """Validate the response based on the defined validation type.
+        """
+        Validate user response according to validation parameters.
 
-        This method checks the response using either a boolean or 
-        integer validation, depending on the internal flags 
-        `_val_bool` or `_val_int`. If neither flag is set, 
-        it defaults to returning `True`.
-
+        Side effect:
+            _vld_resp: Validate user response if no parameters given.
+        
         Returns:
-            bool: The result of the validation check, or True if no 
+            The boolean result of the validation check, or True if no 
             validation is required.
         """
         if self._val_bool:
@@ -525,262 +526,226 @@ class ConsolePrompt(ConsoleBase):
 
 
 class ConsoleTable(ConsoleBase):
-    """A class to represent a terminal-based table.
+    """
+    A class for rendering tables in the console with styled formatting.
+
+    This class extends `ConsoleBase` to provide functionality for 
+    displaying data tables in a structured, visually appealing format. 
+    It handles dynamic resizing based on terminal dimensions, formatting 
+    of rows and columns, and supports styled output such as underlined 
+    headings and color-coded borders.
 
     Args:
-        data: An instance of the `Table` class containing the data to be 
-            displayed in the terminal.
-
+        table: An instance of Table to be rendered.
+    
     Attributes:
-        _trm: blessed.Terminal inherited from ConsoleBase
-        _data: The table data provided at initialization.
-        _borders: A dictionary defining the table's border characters.
+        _col_wds: A map of columns to their widths.
+        _data: The table data as a Table object.
+        _disp_wd: The width for display in console.
+        _mrg_sz: The size of margin required to center the table in 
+            console.
+        _tbl_wd: The width required for table columns and padding.
+        _trm: blessed.Terminal inherited from ConsoleBase.
 
     Methods:
-        display(): Display the table on the terminal.
-        _draw_row(row_type, index): Draw a specific row in the table.
-        _draw_table(record_count): Draw the full table structure.
-        _get_row_ends(row_type, is_line_type): Get row ends and padding.
-        _get_row_content(row_type, index): Retrieve text content for a 
-            row.
-        _process_row_content(row_type, content, rjust_col): Process row 
-            content into formatted text cells.
-        _set_dimensions(): Set display and table dimensions based on 
-            terminal width.
+        display: Public method to render the table to the console.
+        _drw_rw: Render a specific type of table row.
+        _drw_tb: Render the table by sequentially drawing each row.
+        _get_rw_cntnt: Retrieve content for a specific row type.
+        _get_rw_ends: Retrieve the left and right borders, and the 
+            padding for a row, depending on its type.
+        _proc_rw_cntnt: Style the row content based on its type and 
+            justify base on column.
+        _set_dims: Calculate table dimensions and adjust column widths 
+            to fit within the terminal display.
     """
-
-    def __init__(self, data: Table) -> None:
-        # Lazy import avoids circular import and enables runtime type 
-        # validation
-        from modules.table import Table  # for test_console_table_constructor.py
-        if not isinstance(data, Table):
-            raise TypeError("Expected `Table` for 'data'")
+    def __init__(self, table: Table) -> None:
+        # Lazy import avoids circular import at runtime type validation
+        from modules.table import Table
+        if not isinstance(table, Table):
+            raise TypeError("Expected `Table` for 'table'")
         
         # Base initialization and attribute assignment
         super().__init__()
-        self._data = data
-
+        self._data = table
 
     # Public Method
     def display(self) -> None:
-        """Display the table on the terminal.
-
-        This method initializes the terminal settings, adjusts the table 
-        dimensions, and draws the table on the screen by rendering its 
-        borders, title, headings, and records.
-
-        Args:
-            con: An instance of the `Terminal` class, used to handle 
-                terminal display settings and styling.
-        """
-        self._set_dimensions()
-        self._draw_table(self._data.count_records())
+        """Display the table on the console."""
+        self._set_dims()
+        self._drw_tbl(self._data.count_records())
 
     # Private Methods
-    def _draw_row(self, row_type: str, index: int | None = None) -> None:
-        """Draw a specific row in the table based on the row type.
-
-        This method draws different types of rows such as borders (top, 
-        inner, bottom), and text rows (title, headings, or a record). 
-        The row content is dynamically generated based on the 
-        `row_type`. For "record" rows, the content can be right-
-        justified based on column definitions.
+    def _drw_rw(self, rw_tp: str, idx: int | None = None) -> None:
+        """
+        Render a specific row type with styling.
 
         Args:
-            row_type: A string indicating the type of row to draw. Valid 
-                types include "top", "inner", "bottom" (for line types) 
-                and "title", "headings", "record" (for text types).
-            index: An integer index is required when drawing a "record" 
-                row to specify which record to draw. Defaults to None.
+            rw_tp: The type of row to draw.
+            idx: The index of the record row if applicable.
         """
-        line_types = ["top", "inner", "bottom"]
-        text_types = ["title", "headings", "record"]
-    
-        rjust_col = (self._data.get_rjust_columns() 
-                     if row_type == "record" else {})
+        # Define row type categories
+        is_line_type = rw_tp in {"top", "inner", "bottom"}
+        is_text_type = rw_tp in {"title", "headings", "record"}
 
-        margin = " " * self._margin_size
+        # Determine justification for record rows
+        rjust_cols = (self._data.get_rjust_columns() 
+                     if rw_tp == "record" else {})
+        
+        # Get components for rendering the row
+        margin = " " * self._mrg_sz
+        left, right, gap = self._get_rw_ends(rw_tp, is_line_type)
 
-        left, right, gap = self._get_row_ends(row_type, 
-                                              row_type in line_types)
-
-        content = (self._get_row_content(row_type, index)
-                   if row_type in text_types
-                   else BORDERS[row_type]["fill"])
-
-        cells = (self._process_row_content(row_type, content, rjust_col)
-                 if row_type in text_types
-                 else [
-                     f"{self._trm.blue(content * (self._table_width + 2))}"])
-
+        # Retrieve row content based on type
+        content = (self._get_rw_cntnt(rw_tp, idx) 
+                   if is_text_type else BORDERS[rw_tp]["fill"])
+        
+        # Process content into styled cells or line fillers
+        cells = (self._proc_rw_cntnt(rw_tp, content, rjust_cols) 
+                 if is_text_type 
+                 else [self._trm.blue(content * (self._tbl_wd + 2))])
+        
+        # Construct and print the row
         print(f"{margin}{left}{gap}{'  '.join(cells)}{gap}{right}")
-
-    def _draw_table(self, record_count: int) -> None:
-        """Draw full table with borders, title, headings, and records.
-
-        This method draws the table structure by sequentially rendering 
-        the top border, title row, inner border, headings, and a 
-        specified number of records. It finishes by rendering the bottom 
-        border of the table.
-
-        Args:
-            record_count: The number of record rows to draw.
+    
+    def _drw_tbl(self, rec_ct: int) -> None:
         """
-        self._draw_row("top")
-        self._draw_row("title")
-        self._draw_row("inner")
-        self._draw_row("headings")
-        for i in range(record_count):
-            self._draw_row("record", i)
-        self._draw_row("bottom")
-
-    def _get_row_content(self, 
-                         row_type: str, 
-                         index: int | None = None) -> str | dict[str, str]:
-        """Retrieve the text content for a specific type of table row.
-
-        This method returns the text content for the specified 
-        `row_type`, which can be the table's title, headings, or a 
-        specific data record. For "record" rows, an `index` must be 
-        provided to retrieve the appropriate row data.
+        Render the entire table by sequentially drawing each row type.
 
         Args:
-            row_type: The type of row to retrieve. Can be "title", 
+            rec_ct: Number of record rows to draw.
+        """
+        # Header rows
+        header_sequence = ["top", "title", "inner", "headings"]
+        for row_type in header_sequence:
+            self._drw_rw(row_type)
+        
+        # Record rows
+        for i in range(rec_ct):
+            self._drw_rw("record", i)
+        
+        # Bottom row
+        self._drw_rw("bottom")
+    
+    def _get_rw_cntnt(self, rw_tp: str, idx: int | None = None
+                      ) -> str | dict[str, str]:
+        """
+        Retrieve the text content for a specific type of table row.
+
+        Args:
+            rw_tp: The type of row to retrieve, either "title", 
                 "headings", or "record".
-            index: The index of the record to retrieve, required if 
-                `row_type` is "record".
+            idx: The index of the record to retrieve, if "record" type.
         
         Returns:
-            The content of the row, either as:
-                - A string for "title" row.
-                - A dictionary of column headers for "headings" row.
-                - A dictionary representing a specific data record for 
-                    "record" row.
-        
-        Raises:
-            ValueError: If `row_type` is "record" and no `index` is 
-                provided.
+            Row content, either a string for the "title" row, or a 
+            dictionary for "headings" and "record".
         """
-        match row_type:
+        match rw_tp:
             case "title":
                 return self._data.get_title()
             case "headings":
                 return self._data.get_headings()
             case "record":
-                return self._data.get_record(index)
+                return self._data.get_record(idx)
 
-    def _get_row_ends(self, 
-                      row_type: str, 
-                      is_line_type: bool) -> tuple[str, str, str]:
-        """Generate a row's left and right ends  and the inner padding.
-
-        This function returns the left and right end characters for a 
-        row based on whether the `row_type` is a line type or not. If 
-        the row is a line type, the left and right ends are styled as 
-        borders from the `BORDERS` dictionary, otherwise, both 
-        left and right are a default 'side' border. Non-line, text-type 
-        rows have a single space as padding.
+    def _get_rw_ends(self, rw_tp: str, is_ln_tp: bool
+                     ) -> tuple[str, str, str]:
+        """
+        Retrieve the left and right borders and padding for a row.
 
         Args:
-            row_type: The type of the row, used to determine the border style.
-            is_line_type: A boolean flag indicating if the row is a line type
-                (used for borders) or a content row.
+            rw_tp: The type of the row to determine border style.
+            is_ln_tp: A boolean flag indicating whether the row is a 
+                line type (used for borders) or a content row.
 
         Returns:
-            A tuple of three strings:
-                - The left border (styled).
-                - The right border (styled).
-                - The padding between cells (either a space or an empty 
-                    string).
+            A tuple of three strings: the left border (styled), the 
+            right border (styled), and the inner padding within the 
+            outside border.
         """
-        if is_line_type:
-            left_end = f"{self._trm.blue(BORDERS[row_type]['left'])}"
-            right_end = f"{self._trm.blue(BORDERS[row_type]['right'])}"
+        # Table borders
+        if is_ln_tp:
+            left_end = f"{self._trm.blue(BORDERS[rw_tp]['left'])}"
+            right_end = f"{self._trm.blue(BORDERS[rw_tp]['right'])}"
             padding = ""
+        
+        # Text borders
         else:
             left_end = right_end = f"{self._trm.blue(BORDERS['side'])}"
             padding = " "
+        
         return left_end, right_end, padding
 
-    def _process_row_content(self, 
-                             row_type: str, 
-                             content: str | dict[str, str], 
-                             rjust_col: set) -> list[str]:
+    def _proc_rw_cntnt(self, rw_tp: str, cont: str | dict[str, str], 
+                       rjust_cols: set) -> list[str]:
         """Process the content of a table row into formatted text cells.
 
-        Depending on the `row_type`, this method processes and formats 
-        text content for each cell of the row. For the title row, it 
-        centers the text and applies a terminal reverse effect. For 
-        headings, it centers the text and underlines it. For other rows 
-        [records], it adjusts the text alignment based on the column 
-        width, right-justifying the columns in `rjust_col`.
-
         Args:
-            row_type: The type of row being processed. Can be "title", 
-                "headings", or other string representing a regular data 
-                row ["records"].
-            content: Either a string (for title row) or a dictionary 
-                where keys are column names and values are the cell 
-                content.
-            rjust_col: A set of keys representing columns that should be 
-                right-justified.
+            rw_tp: The type of row to process, either "title", 
+                "headings", "record".
+            cont: Either a string (for title row) or a dictionary with 
+                content mapped to column names.
+            rjust_cols: A set of keys representing columns to be right-
+                justified.
 
         Returns:
             A list of formatted strings, each representing a cell in the 
             row.
         """
+        # Initialize list
         cells = []
 
-        if row_type == "title":
-            # Format the title row by centering the content and applying 
-            # reverse style.
-            cntnt = truncate_string(content, self._table_width)
-            cell = f"{self._trm.reverse(cntnt.center(self._table_width))}"
+        # Title content
+        if rw_tp == "title":
+            cont = truncate_string(cont, self._tbl_wd)
+            cell = f"{self._trm.reverse(cont.center(self._tbl_wd))}"
             cells.append(cell)
+        
         else:
-            # Iterate over content dictionary and format each cell.
-            for key, value in content.items():
-                width = self._column_widths[key]
-                vlu = truncate_string(value, width)
-                if row_type == "headings":
-                    # Center and underline heading text.
-                    cell = f"{self._trm.underline(str(vlu).center(width))}"
-                else:
-                    # Right-justify or left-justify based on column key.
-                    cell = (f"{str(vlu).rjust(width)}" if key in rjust_col 
-                            else f"{str(vlu).ljust(width)}")
+            # Iterate headings and record content
+            for key, value in cont.items():
+                width = self._col_wds[key]
+                value = truncate_string(value, width)
+
+                # Cell content for headings
+                cell = (f"{self._trm.underline(str(value).center(width))}" 
+                        if rw_tp == "headings" 
+
+                        # Right-justified cell content for records
+                        else (f"{str(value).rjust(width)}" 
+                              if key in rjust_cols 
+                              
+                              # Left-justified cell content for records
+                              else f"{str(value).ljust(width)}"))
+                
+                # Build headings and record content
                 cells.append(cell)
         
         return cells
 
-    def _set_dimensions(self) -> None:
-        """Set display and table dimensions based on the terminal width.
-
-        This method determines the display width and table width 
-        relative to the terminal's current width. If the table width 
-        exceeds the available display space, it resizes the columns to 
-        fit within the display. The column widths are then updated for 
-        rendering the table.
+    def _set_dims(self) -> None:
+        """
+        Set display and table dimensions based on the terminal width.
 
         Side effects:
-            - Updates `self._display_width` to the terminal width, 
-                capped at 79.
-            - Updates `self._margin_size` to center the content if 
-                necessary.
-            - Updates `self._table_width` based on the current table 
-                data.
-            - Resizes table columns if the table width exceeds available 
-                space.
-            - Updates `self._column_widths` to reflect the resized table 
-                layout.
+            _disp_wd: Sets the display width, constrained by terminal 
+                size or a maximum of 79 characters.
+            _mrg_sz: Sets margin required to center the table.
+            _tbl_wd: Sets width required for table columns and inner 
+                padding.
+            _col_wds: Sets width of each column.
         """
-        self._display_width = min(self._trm.width, 79)
-        self._margin_size = (self._trm.width - self._display_width) // 2
-        self._table_width = self._data.get_table_width()
+        # Set display and table dimensions
+        self._disp_wd = min(self._trm.width, 79)
+        self._mrg_sz = (self._trm.width - self._disp_wd) // 2
+        self._tbl_wd = self._data.get_table_width()
 
-        table_space = self._display_width - 4  # For borders and padding
-        if self._table_width > table_space:
+        # Adjust table dimensions
+        table_space = self._disp_wd - 4  # For borders and padding
+        if self._tbl_wd > table_space:
             self._data.resize_columns(table_space)
-            self._table_width = self._data.get_table_width()
-
-        self._column_widths = self._data.get_column_widths()
+            self._tbl_wd = self._data.get_table_width()
+        
+        # Set column dimensions
+        self._col_wds = self._data.get_column_widths()
