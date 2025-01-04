@@ -21,8 +21,7 @@ def confirm_disk(disk: str) -> bool:
     partitions = Table(title="selected device", table_string=output)
     print()
     partitions.put_table()
-    disk_confirmation = ConsolePrompt(prompt, 
-                                      expect_keystroke=True, 
+    disk_confirmation = ConsolePrompt(prompt, expect_keystroke=True, 
                                       validate_bool=True)
     return disk_confirmation.call()
 

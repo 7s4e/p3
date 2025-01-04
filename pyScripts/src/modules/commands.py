@@ -30,8 +30,8 @@ from .table import Table
 
 def list_block_devices(disk: str | None = None, columns: list[str] = list(), 
                        show_dependents: bool = True) -> str:
-    """Generate and run the 'lsblk' command to list block devices with 
-        optional filters.
+    """
+    Generate and run the 'lsblk' command with optional filters.
 
     Args:
         disk: The specific disk to query (e.g., 'sda'). If 'disk' is 
@@ -54,8 +54,8 @@ def list_block_devices(disk: str | None = None, columns: list[str] = list(),
 
 def run_badblocks(disk: str, non_destructive: bool = True, 
                   capture_output: bool = False) -> str | None:
-    """Run the `badblocks` command on a specified disk to check for bad 
-        sectors.
+    """
+    Run the `badblocks` command to check for bad sectors.
 
     Args:
         disk: The disk identifier (e.g., 'sdb') on which to run 
@@ -86,7 +86,8 @@ def run_badblocks(disk: str, non_destructive: bool = True,
 
 def run_command(command: str, capture_output: bool = True, 
                 use_shell: bool = True) -> str | None:
-    """Execute a shell command and return the output or print to stdout.
+    """
+    Execute a shell command and return the output or print to stdout.
 
     Args:
         command: The command to run.
@@ -121,7 +122,8 @@ def run_command(command: str, capture_output: bool = True,
 
 
 def unmount_disk(disk: str) -> None:
-    """Unmount all mount points associated with a specified disk.
+    """
+    Unmount all mount points associated with a specified disk.
 
     Args:
         disk: The disk identifier (e.g., 'sda1').

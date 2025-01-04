@@ -57,9 +57,10 @@ Classes:
 
 Constants:
     BORDERS (dict): Defines the border characters for table layout.
-    FORMATTING_ALLOWANCE (dict): Defines the length of formatting
+    FORMATTING_ALLOCATION (dict): Defines the length of formatting
         sequences for different styles.
 """
+# Standard library imports
 from __future__ import annotations
 from re import fullmatch
 from sys import stdout
@@ -81,7 +82,7 @@ BORDERS = {"top": {"left": "╔", "fill": "═", "right": "╗"},
            "bottom": {"left": "╚", "fill": "═", "right": "╝"}, 
            "side": "║"}
 
-FORMATTING_ALLOWANCE = {"blink": len("[blink][/blink]"), 
+FORMATTING_ALLOCATION = {"blink": len("[blink][/blink]"), 
                         "blue": len("[blue][/blue]"), 
                         "red": len("[red][/red]"), 
                         "reverse": len("[reverse][/reverse]"), 
@@ -89,7 +90,8 @@ FORMATTING_ALLOWANCE = {"blink": len("[blink][/blink]"),
 
 
 class ConsoleBase:
-    """A base class for managing terminal-based user interfaces.
+    """
+    A base class for managing terminal-based user interfaces.
 
     This class initializes a `Terminal` object to interact with the 
     terminal for input/output operations. It can be extended to provide 
@@ -104,7 +106,8 @@ class ConsoleBase:
 
 
 class Console(ConsoleBase):
-    """A class for handling terminal operations.
+    """
+    A class for handling terminal operations.
 
     This class inherits from `ConsoleBase` and provides static methods 
     manipulating the terminal screen.
@@ -136,7 +139,8 @@ class Console(ConsoleBase):
 
 
 class ConsolePrompt(ConsoleBase):
-    """A class to manage console prompts and user input validation.
+    """
+    A class to manage console prompts and user input validation.
 
     This class facilitates prompting the user for input via the console, 
     with options for validating boolean and integer responses. It can 
@@ -145,11 +149,12 @@ class ConsolePrompt(ConsoleBase):
 
     Args:
         cue: The message to display to the user.
-        exp_kst: If True, expect a single keystroke input.
-        val_bool: If True, validate the input as a boolean ('y' or 'n').
-        val_int: If True, validate the input as an integer.
-        int_vld: Defines integer validation criteria. Can be an upper 
-            limit (int) or a range (tuple of two ints).
+        expect_keystroke: If True, expect a single keystroke input.
+        validate_bool: If True, validate the input as a boolean ('y' or 
+            'n').
+        validate_integer: If True, validate the input as an integer.
+        integer_validation: Defines integer validation criteria. Can be 
+            an upper limit (int) or a range (tuple of two ints).
 
     Attributes:
         _cue: The message to display to the user.
@@ -178,55 +183,61 @@ class ConsolePrompt(ConsoleBase):
             criteria.
     """
 
-    def __init__(self, cue: str, exp_kst: bool = False, 
-                 val_bool: bool = False, val_int: bool = False, 
-                 int_vld: int | tuple[int, int] | None = None) -> None:
+    def __init__(self, cue: str, expect_keystroke: bool = False, 
+                 validate_bool: bool = False, validate_integer: bool = False, 
+                 integer_validation: int | tuple[int, int] | None = None
+                 ) -> None:
 
         # Type validation
         if not isinstance(cue, str):
             raise TypeError("Expected `str` for 'cue'")
-        if not isinstance(exp_kst, bool):
-            raise TypeError("Expected `bool` for 'exp_kst'")
-        if not isinstance(val_bool, bool):
-            raise TypeError("Expected `bool` for 'val_bool'")
-        if not isinstance(val_int, bool):
-            raise TypeError("Expected `bool` for 'val_int'")
-        if (int_vld is not None 
-            and not (isinstance(int_vld, int) 
-                     and not isinstance(int_vld, bool)
-                     or isinstance(int_vld, tuple))):
+        if not isinstance(expect_keystroke, bool):
+            raise TypeError("Expected `bool` for 'expect_keystroke'")
+        if not isinstance(validate_bool, bool):
+            raise TypeError("Expected `bool` for 'validate_bool'")
+        if not isinstance(validate_integer, bool):
+            raise TypeError("Expected `bool` for 'validate_integer'")
+        if (integer_validation is not None 
+            and not (isinstance(integer_validation, int) 
+                     and not isinstance(integer_validation, bool)
+                     or isinstance(integer_validation, tuple))):
             raise TypeError("Expected `int`, `tuple[int, int]`, or `None` " +
-                            "for 'int_vld'")
+                            "for 'integer_validation'")
 
         # Value validation
-        if val_bool and val_int:
-            raise ValueError("Both 'val_bool' and 'val_int' cannot be `True`")
-        if int_vld is not None:
-            if not val_int:
-                raise ValueError("With 'int_vld', 'val_int' must be `True`")
-            if isinstance(int_vld, int):
-                if int_vld < 0:
-                    raise ValueError("Range for 'int_vld' must be positive")
+        if validate_bool and validate_integer:
+            raise ValueError("Both 'validate_bool' and 'validate_integer' " + 
+                             "cannot be `True`")
+        if integer_validation is not None:
+            if not validate_integer:
+                raise ValueError("With 'integer_validation', " + 
+                                 "'validate_integer' must be `True`")
+            if isinstance(integer_validation, int):
+                if integer_validation < 0:
+                    raise ValueError("Range for 'integer_validation' must "
+                                     "be positive")
             else:
-                if len(int_vld) != 2:
-                    raise ValueError("The 'int_vld' `tuple` must have two " +
-                                     "elements")
-                if int_vld[0] > int_vld[1]:
-                    raise ValueError("The second value of the 'int_vld' " +
-                                     "`tuple` cannot be less than the first")
+                if len(integer_validation) != 2:
+                    raise ValueError("The 'integer_validation' `tuple` " + 
+                                     "must have two elements")
+                if integer_validation[0] > integer_validation[1]:
+                    raise ValueError("The second value of the " + 
+                                     "'integer_validation' `tuple` cannot " + 
+                                     "be less than the first")
 
         # Initialize base and assign validated attributes
         super().__init__()
         self._cue = cue
-        self._exp_kst = exp_kst
-        self._val_bool = val_bool
-        self._val_int = val_int
-        self._int_vld = int_vld
+        self._exp_kst = expect_keystroke
+        self._val_bool = validate_bool
+        self._val_int = validate_integer
+        self._int_vld = integer_validation
         self._e_ct = {"yes/no": 0, "NaN": 0, "OOR": 0, "OOL": 0}
 
     # Public Method
     def call(self) -> Any:
-        """Get, validate, and return user input.
+        """
+        Get, validate, and return user input.
 
         Returns:
             Any: The validated response from the user, which could be a 
@@ -245,61 +256,82 @@ class ConsolePrompt(ConsoleBase):
 
     # Private Methods
     def _back_n_lines(self, n: int) -> None:
+        """
+        Move cursor back `n` lines and clear each line.
+
+        This method uses ANSI escape codes to move the cursor up 
+        (`\033[F`) and to clear the contents of each line (`\033[K`). 
+        The changes are flushed to the terminal to ensure immediate 
+        application.
+        
+        Args:
+            n: The number of lines to move back and clear.
+        
+        Raises:
+            ValueError: If `n` is negative, as moving backwards a 
+                negative number of lines is invalid.
+        """
+        if n < 0:
+            raise ValueError("Number of lines cannot be negative.")
         for i in range(n):
             stdout.write("\033[F")
             stdout.write("\033[K")
         stdout.flush()
 
     def _chk_bool_vld(self) -> bool:
-        """Validate the user's boolean response based on 'y' or 'n' 
-            input.
-
-        This method checks whether the user's response is a valid 'y' or 
-        'n'. If the input is valid, it converts 'y' to `True` and 'n' to 
-        `False`, storing the result in `_response`. If the input is 
-        invalid, an alert is displayed prompting the user to respond 
-        with 'y' or 'n'.
-
-        Returns:
-            bool: True if the response is valid ('y' or 'n'), False 
-                otherwise.
         """
-        if self._user_response.lower() in {"y", "n"}:
-            self._vld_resp = self._user_response.lower() == "y"
-            return True
-        
-        self._e_ct["yes/no"] += 1
-        self._put_alert("Respond with 'y' or 'n'", 
-                        self._e_ct["yes/no"])
-        return False
+        Validate user's response as 'yes' or 'no'.
 
-    def _chk_int_vld(self) -> bool:
-        """Validate the user's integer response based on the expected 
-            criteria.
-
-        This method validates the user's response, ensuring it is a 
-        valid integer and meets the conditions specified by 
-        `_int_vld`. The validation can either check for any 
-        integer, a maximum bound, or a range of values.
-
-        If the validation fails, an alert is displayed with the 
-        appropriate message.
+        Side effect:
+            _vld_resp: sets boolean as validated response.
 
         Returns:
             bool: True if the response is valid, False otherwise.
         """
-        if not bool(fullmatch(r'-?[0-9]+', self._user_response)):
+        # Valid response sets _vld_response attribute
+        if self._user_resp.lower() in {"y", "n"}:
+            self._vld_resp = self._user_resp.lower() == "y"
+            return True
+        
+        # Invalid response alerts user        
+        self._e_ct["yes/no"] += 1
+        self._put_alert("Respond with 'y' or 'n'", self._e_ct["yes/no"])
+        return False
+
+    def _chk_int_vld(self) -> bool:
+        """
+        Validate user's response against available criterion.
+
+        The method uses regular expression for matching:
+            r'...': denotes raw literal string
+            -?: indicates optional negative sign
+            [0-9]+: matches one or more repetitions of any single digit
+
+        Side effect:
+            _vld_resp: sets integer as validated response.
+
+        Returns:
+            bool: True if the response is valid, False otherwise.
+        """
+        # Invalid alert if not a number
+        if not bool(fullmatch(r'-?[0-9]+', self._user_resp)):
             self._e_ct["NaN"] += 1
             self._put_alert("Enter a valid number", self._e_ct["NaN"])
             return False
-        response = int(self._user_response)
+        
+        # Integer validated against integer validation attribute
+        response = int(self._user_resp)
         match self._int_vld:
+
+            # Criterion is single integer defining range
             case int() as range:
                 if response < 0 or response >= range:
                     self._e_ct["OOR"] += 1
                     self._put_alert("Response is out of range", 
                                     self._e_ct["OOR"])
                     return False
+            
+            # Crierion is tuple of lower and upper limits
             case tuple() as limits:
                 low, high = limits
                 if response < low or response > high:
@@ -307,122 +339,128 @@ class ConsolePrompt(ConsoleBase):
                     self._put_alert(f"Enter a number between {low} and " +
                                     f"{high}", self._e_ct["OOL"])
                     return False
+            
+            # No integer validation criteria
             case None: pass
+        
+        # Valid response sets _vld_response attribute
         self._vld_resp = str(response)
         return True
 
     def _get_resp(self) -> None:
-        """Prompt the user and capture their response.
-
-        This method displays a prompt to the user and captures either a 
-        single keystroke or a full string input, depending on the 
-        `_exp_kst` flag. The response is stored in the 
-        `_response` attribute.
-
-        If `_exp_kst` is True, a keystroke is read and stored; 
-        otherwise, a string input is captured.
-        """
+        """Prompt the user and capture input."""
+        # If keystroke expected, read it after prompting
         if self._exp_kst:
-            self._put_prompt(leave_cursor_inline=False)
+            self._put_prompt(keep_cur_inline=False)
             self._read_kst()
+        
+        # If string expected, show it inline with cue.
         else:
-            self._put_prompt(leave_cursor_inline=True)
+            self._put_prompt(keep_cur_inline=True)
             self._read_str()
 
-    def _print_message(self, message: str, formatting_allowance: int, 
-                       leave_cursor_inline: bool) -> None:
-        """Print a centered, wrapped message to the console.
-
-        This method displays a message centered within the console 
-        width. If the message is longer than the display width, it is 
-        wrapped. The cursor can either remain inline with the message or 
-        move to the next line based on the `leave_cursor_inline` 
-        argument.
+    def _print_message(self, msg: str, fmt_alloc: int, keep_cur_inline: bool
+                       ) -> None:
+        """
+        Print left-justfied, wrapped message in center of console.
 
         Args:
-            message: The message to be printed.
-            leave_cursor_inline: If True, the cursor remains inline with 
+            msg: The message to be printed.
+            fmt_alloc: Allocation required for formatting text styles
+            keep_cur_inline: If True, the cursor remains inline with 
                 a trailing space after the message. If False, the cursor 
                 moves to the next line after printing.
         """
+        # Set width to display message and padding to center width
         display_width = min(self._trm.width, 79)
         padding = " " * ((self._trm.width - display_width) // 2)
-        print(fill(message, 
-                   width=(display_width + formatting_allowance + 
-                          len(padding)), 
-                   initial_indent=padding,
-                   subsequent_indent=padding), 
-              end=" " if leave_cursor_inline else "\n",
+
+        # Print textwrapped, padded message and deposit cursor
+        print(fill(msg, width=(display_width + fmt_alloc + len(padding)), 
+                   initial_indent=padding, subsequent_indent=padding), 
+              end=" " if keep_cur_inline else "\n",
               flush=True)
 
-    def _put_alert(self, alert: str, count: int) -> None:
-        """Display an alert message to the user in red.
-
-        This method prints the provided alert message to the console in 
-        red. The cursor moves to the next line after being displayed.
+    def _put_alert(self, alert: str, err_ct: int) -> None:
+        """
+        Display alert message with escalating formatting.
 
         Args:
             alert: The alert message to be displayed.
+            err_ct: The number of times alert is triggered without 
+                validation.
         """
-        self._back_n_lines(min(count, 2))
-        if count >= 1:
+        # Delete cue or both cue and last alert message
+        self._back_n_lines(min(err_ct, 2))
+
+        # First alert in red
+        if err_ct >= 1:
             alert = self._trm.red(alert)
-            required_allowance = FORMATTING_ALLOWANCE["red"]
-        if count >= 2:
+            fmt_alloc = FORMATTING_ALLOCATION["red"]
+        
+        # Second alert adds reverse-video effect
+        if err_ct >= 2:
             alert = self._trm.reverse(alert)
-            required_allowance += FORMATTING_ALLOWANCE["reverse"]
-        if count >= 3:
+            fmt_alloc += FORMATTING_ALLOCATION["reverse"]
+        
+        # Third alert adds blinking effect
+        if err_ct >= 3:
             alert = self._trm.blink(alert)
-            required_allowance += FORMATTING_ALLOWANCE["blink"]
-        if count >= 4:
-            alert = (self._trm.red(f"'{self._user_response}' is invalid. ") + 
+            fmt_alloc += FORMATTING_ALLOCATION["blink"]
+        
+        # Subsequent alerts show invalid input
+        if err_ct >= 4:
+            alert = (self._trm.red(f"'{self._user_resp}' is invalid. ") + 
                      alert)
-        self._print_message(alert, required_allowance, 
-                            leave_cursor_inline=False)
+        
+        # Alert printed
+        if err_ct > 0:
+            self._print_message(alert, fmt_alloc, keep_cur_inline=False)
 
-    def _put_prompt(self, leave_cursor_inline: bool) -> None:
-        """Display the prompt message to the user.
-
-        This method prints the prompt message to the console in bright 
-        yellow. The cursor's position after displaying the prompt is 
-        determined by the `leave_cursor_inline` argument.
+    def _put_prompt(self, keep_cur_inline: bool) -> None:
+        """
+        Display the prompt cue to the user.
 
         Args:
-            leave_cursor_inline: If True, the cursor remains inline with 
+            keep_cur_inline: If True, the cursor remains inline with 
                 a trailing space; if False, it moves to the next line 
                 after the prompt.
         """
         self._print_message(self._trm.yellow(self._cue), 
-                            FORMATTING_ALLOWANCE["yellow"], 
-                            leave_cursor_inline=leave_cursor_inline)
+                            FORMATTING_ALLOCATION["yellow"], 
+                            keep_cur_inline=keep_cur_inline)
 
     def _read_kst(self) -> None:
-        """Captures a single keystroke from the user, waiting for a 
-            printable character or the Enter key, and stores the result 
-            in `_user_response`.
-        
-        This method operates in raw mode using the `cbreak()` and 
-        `hidden_cursor()` contexts of the terminal, allowing it to read 
-        user input without displaying the cursor. It continues to 
-        capture keystrokes until a valid character (ASCII codes 32-126) 
-        or the Enter key (ASCII code 10) is detected. If the Enter key 
-        is pressed, an empty string is stored in `_user_response`.
-
-        Attributes:
-            _user_response (str): The captured keystroke, or an empty 
-                string if the Enter key is pressed.
         """
-        key = None
+        Read a single keystroke, filtering for printable characters.
 
+        This method captures input in raw mode using the `cbreak` and 
+        `hidden_cursor` contexts to disable line buffering and hide the 
+        cursor. It ensures that only printable ASCII characters (codes 
+        32 to 126) or the Enter key (code 10) are accepted. If the Enter 
+        key is pressed, the response is stored as an empty string.
+
+        Side effect:
+            _user_resp: sets user response.
+        """
+        # Initialize values
+        key = None
+        miskey_ct = -1
+        self._user_resp = ""
+
+        # While loop with contexts filtering for printable characters
         with self._trm.cbreak(), self._trm.hidden_cursor():
-            while key is None or not (32 <= key_code <= 126 or key_code == 10):
+            while key is None or not (32 <= code <= 126 or code == 10):
                 key = self._trm.inkey()
                 try:
-                    key_code = ord(key)
+                    code = ord(key)
                 except:
                     key = None
-
-        self._user_response = str(key if key_code != 10 else "")
+                    miskey_ct += 1
+                    self._put_alert("Input not printable", miskey_ct)
+        
+        # Set user response
+        self._user_resp = str(key if code != 10 else "")
 
     def _read_str(self) -> None:
         """Read a user input string character by character, handling 
@@ -463,7 +501,7 @@ class ConsolePrompt(ConsoleBase):
                         print(formatted_char, end="", flush=True)
             print()  # Move to next line after Enter
 
-        self._user_response = "".join(response)
+        self._user_resp = "".join(response)
 
 
     def _val_resp(self) -> bool:
@@ -482,7 +520,7 @@ class ConsolePrompt(ConsoleBase):
             return self._chk_bool_vld()
         if self._val_int:
             return self._chk_int_vld()
-        self._vld_resp = self._user_response
+        self._vld_resp = self._user_resp
         return True
 
 
