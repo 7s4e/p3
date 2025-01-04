@@ -185,7 +185,7 @@ class Table:
         """Return the width of the table."""
         return self._tbl_wd
 
-    def get_ttl(self) -> str:
+    def get_title(self) -> str:
         """Return the title of the table."""
         return self._ttl
 
