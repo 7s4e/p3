@@ -1,12 +1,51 @@
 #!/usr/bin/env python3
+"""
+Disk Selection Script
+
+This script facilitates the process of selecting and confirming a connected 
+disk. It provides a menu-driven interface for listing connected devices, 
+selecting a disk, and confirming the selection. The user is repeatedly 
+prompted to connect and select a disk until a disk is successfully confirmed.
+
+Functions:
+    check_disk(caller): Prompts the user to check disk connections and offers 
+        the option to quit the script.
+    confirm_disk(disk): Prompts the user to confirm the selection of a disk.
+    get_disks(): Retrieves a list of currently connected disks.
+    select_disk(disks): Prompts the user to select a disk from a list.
+    get_disk(): Main function to handle the disk selection and confirmation 
+        process.
+    main(): Clears the screen and initiates the disk selection process.
+
+Usage:
+    Run this script directly to initiate the disk selection process. The script 
+    can be integrated into other tools by importing the `get_disk` function.
+"""
 # Local module imports
 from modules import commands as cmd
 from modules import utilities as utl
 from modules import Console, ConsolePrompt, Menu, Table
 
 
+def check_disk(caller):
+    """
+    Prompt user to check device connections and present option to quit.
+
+    Args:
+        caller: The calling file name.
+
+    Exit:
+        The script terminates at user's discretion.
+    """
+    msg = "Press 'q' to quit, or check disks and press any key to continue..."
+    prmpt = ConsolePrompt(msg, expect_keystroke=True)
+    rspns = prmpt.call()
+    utl.abort(rspns in {"q", "Q"}, caller)
+    
+
 def confirm_disk(disk: str) -> bool:
-    """Prompt the user to confirm the selection of a disk.
+    """
+    Prompt the user to confirm the selection of a disk.
 
     Args:
         disk: The name of the disk to confirm.
@@ -27,7 +66,8 @@ def confirm_disk(disk: str) -> bool:
 
 
 def get_disks() -> Table:
-    """Retrieve a list of connected disks.
+    """
+    Retrieve a list of connected disks.
 
     Returns:
         A list of dictionaries containing disk information.
@@ -40,15 +80,9 @@ def get_disks() -> Table:
     return disks
 
 
-def prompt_check(caller):
-    msg = "Press 'q' to quit, or check disks and press any key to continue..."
-    prmpt = ConsolePrompt(msg, expect_keystroke=True)
-    rspns = prmpt.call()
-    utl.abort(rspns in {"q", "Q"}, caller)
-    
-
 def select_disk(disks: Table) -> str:
-    """Prompt the user to select a disk from a list of disks.
+    """
+    Prompt the user to select a disk from a list of disks.
 
     Args:
         disks: A list of dictionaries containing disk information.
@@ -64,7 +98,8 @@ def select_disk(disks: Table) -> str:
 
 
 def get_disk() -> str:
-    """Main function to select and confirm a disk.
+    """
+    Main function to select and confirm a disk.
 
     Continuously prompts the user to connect and select a disk until
     a disk is confirmed. Offers to unmount the disk if not confirmed.
@@ -80,7 +115,7 @@ def get_disk() -> str:
         count = disks.count_records()
 
         if count == 0:
-            prompt_check(caller_info["file"])
+            check_disk(caller_info["file"])
             continue
 
         disk = (disks.get_record(0)["NAME"] 
@@ -95,7 +130,7 @@ def get_disk() -> str:
                                                  validate_bool=True)
             if unmount_confirmation.call():
                 cmd.unmount_disk(disk)
-            prompt_check(caller_info["file"])
+            check_disk(caller_info["file"])
 
     return disk
 
