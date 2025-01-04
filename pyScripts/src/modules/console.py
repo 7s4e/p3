@@ -64,8 +64,7 @@ from blessed import Terminal
 
 # Local imports
 from .utilities import snake_to_camel, truncate_string
-if TYPE_CHECKING:
-    from .table import Table
+if TYPE_CHECKING: from .table import Table
 
 
 # Constants
@@ -509,10 +508,8 @@ class ConsolePrompt(ConsoleBase):
             The boolean result of the validation check, or True if no 
             validation is required.
         """
-        if self._val_bool:
-            return self._chk_bool_vld()
-        if self._val_int:
-            return self._chk_int_vld()
+        if self._val_bool: return self._chk_bool_vld()
+        if self._val_int: return self._chk_int_vld()
         self._vld_resp = self._user_resp
         return True
 
@@ -609,12 +606,10 @@ class ConsoleTable(ConsoleBase):
         """
         # Header rows
         header_sequence = ["top", "title", "inner", "headings"]
-        for row_type in header_sequence:
-            self._drw_rw(row_type)
+        for row_type in header_sequence: self._drw_rw(row_type)
         
         # Record rows
-        for i in range(rec_ct):
-            self._drw_rw("record", i)
+        for i in range(rec_ct): self._drw_rw("record", i)
         
         # Bottom row
         self._drw_rw("bottom")
@@ -634,12 +629,9 @@ class ConsoleTable(ConsoleBase):
             dictionary for "headings" and "record".
         """
         match rw_tp:
-            case "title":
-                return self._data.get_title()
-            case "headings":
-                return self._data.get_headings()
-            case "record":
-                return self._data.get_record(idx)
+            case "title": return self._data.get_title()
+            case "headings": return self._data.get_headings()
+            case "record": return self._data.get_record(idx)
 
     def _get_rw_ends(self, rw_tp: str, is_ln_tp: bool
                      ) -> tuple[str, str, str]:
