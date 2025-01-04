@@ -1,3 +1,19 @@
+"""
+Table Module
+
+This module defines a `Table` class that allows for the creation and 
+manipulation of data in a table.
+
+Imports:
+    Local module:
+        from console import ConsoleTable: A class for handling display 
+            of the table.
+
+Class:
+    Table: A class representing a table of data, with methods to create 
+        and report on the table.
+
+"""
 # Local module import
 from .console import ConsoleTable
 
@@ -5,12 +21,25 @@ from .console import ConsoleTable
 class Table:
     """
     A class to represent and manipulate a table of data.
+
     The `Table` class allows for the creation of tables either from a 
-    list of dictionaries (where each dictionary represents a row of 
-    data) or from a string representation of a table. The class provides 
-    various methods for filtering, formatting, and retrieving table 
-    data. It also handles right-justification of specified columns and 
-    can display the table in a console-friendly format.
+    list of dictionaries (where each dictionary represents a table 
+    record) or from a string representation of a table. The class 
+    provides various methods for filtering, formatting, and retrieving 
+    table data.
+
+    Args:
+        table_data: A list of dictionaries representing the table data. 
+            Each dictionary corresponds to a row, with keys as column 
+            labels and values as the corresponding cell data.
+        table_string: A string representation of the table.
+        title: The title of the table, which will be converted to 
+            uppercase.
+        rjust_columns: A string, list, or set of strings representing 
+            the columns to be right-justified.
+    
+
+
     Attributes:
         _dataset (list[dict[str, str]]): The table data as a list of 
             dictionaries.
@@ -39,26 +68,10 @@ class Table:
         resize_columns: Resize column widths to fit within a specified 
             width limit.
 """
-    def __init__(self, 
-                 table_data: list[dict[str, str]] | None = None, 
-                 table_string: str | None = None, 
-                 title: str | None = None, 
+    def __init__(self, table_data: list[dict[str, str]] | None = None, 
+                 table_string: str | None = None, title: str | None = None, 
                  rjust_columns: str | list[str] | set[str] | None = None
                  ) -> None:
-        """Initialize the Table instance.
-        Args:
-            table_data: A list of dictionaries representing the table 
-                data. Each dictionary corresponds to a row, with keys as 
-                column labels and values as the corresponding cell data.
-            table_string: A string representation of the table.
-            title: The title of the table, which will be converted to 
-                uppercase.
-            rjust_columns: A string, list, or set of strings representing
-                the columns to be right-justified.
-        Raises:
-            ValueError: If neither or both 'table_data' and 
-                'table_string' are provided.
-        """
         # Type validation
         if not (table_data is None or 
                 (isinstance(table_data, list) and 

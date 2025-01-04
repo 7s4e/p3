@@ -14,7 +14,7 @@ Imports:
             prompts with validation for user responses.
         from table import Table: A helper class managing table data.
 
-Classes:
+Class:
     Menu: A class representing a menu with options and user input 
         handling.
 
