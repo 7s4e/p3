@@ -5,45 +5,37 @@ This module defines classes for handling console-based user interactions
 and displaying formatted tables in a terminal.
 
 Imports:
-    - Standard library:
-        - subprocess: For running shell commands.
-        - sys: For redirecting command output to the standard output.
-    - Local modules:
-        - Table: A helper class for parsing and managing table-like 
-          command output.
+    Standard library:
+        from __future__ import annotations: Postpones the evaluation of 
+            type annotations, allowing forward references without string 
+            literals.
+        from re import fullmatch: Provides support for regular 
+            expressions, enabling pattern matching and text 
+            manipulation.
+        from sys import stdout: Provides access to the standard output 
+            stream, used for printing to the terminal.
+        from textwrap import fill: Provides text wrapping functionality 
+            for formatting text, especially for console output.
+        from typing import Any, TYPE_CHECKING:
+            Any: Represents any valid Python object type in type 
+                annotations.
+            TYPE_CHECKING: Used for conditional imports to prevent 
+                circular dependencies during runtime, primarily for type 
+                checking.
 
-
-Imports:
-    - Standard library:
-        - from __future__ import annotations: Postpones the evaluation 
-          of type annotations, allowing forward references without 
-          string literals.
-        - from re import fullmatch: Provides support for regular expressions, 
-          enabling pattern matching and text manipulation.
-        - from sys import stdout: Provides access to the standard output 
-          stream, used for printing to the terminal.
-        - from textwrap import fill: Provides text wrapping functionality 
-          for formatting text, especially for console output.
-        - from typing import Any, TYPE_CHECKING:
-            - Any: Represents any valid Python object type in type 
-              annotations.
-            - TYPE_CHECKING: Used for conditional imports to prevent 
-              circular dependencies during runtime, primarily for type 
-              checking.
-
-    - Third-party:
-        - from blessed import Terminal: Manages terminal output, 
-          including color handling, cursor movement, and screen 
-          clearing.
-
-    - Local modules:
-        - snake_to_camel: A utility function for converting snake_case 
-          strings to camelCase.
-        - truncate_string: A utility function for truncating strings to 
-          a specified length.
-        - if TYPE_CHECKING:
-            - Table: Conditionally imported for static type checking to 
-              avoid circular imports at runtime.
+    Third-party:
+        from blessed import Terminal: Manages terminal output, including 
+            color handling, cursor movement, and screen clearing.
+    
+    Local modules:
+        from utilities import snake_to_camel, truncate_string
+            snake_to_camel: A utility function for converting snake_case 
+                strings to camelCase.
+            truncate_string: A utility function for truncating strings 
+                to a specified length.
+        if TYPE_CHECKING:
+            from table import Table: Conditionally imported for static 
+                type checking to avoid circular imports at runtime.
 
 Classes:
     ConsoleBase: The base class that initiates an instance of the 
