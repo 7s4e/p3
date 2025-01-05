@@ -23,12 +23,14 @@ __all__:
 from . import commands, utilities
 
 # Importing classes
-from .console import Console, ConsolePrompt, ConsoleTable
+from .console import Console, ConsoleAnyKeyPrompt, ConsoleBoolPrompt
+from .console import ConsoleFreeFormPrompt, ConsoleIntegerPrompt, ConsoleTable
 from .menu import Menu
 from .table import Table
 
 # Explicitly defining public API
 __all__ = ["commands", "utilities", 
-           "Console", "ConsolePrompt", "ConsoleTable", 
+           "Console", "ConsoleAnyKeyPrompt", "ConsoleBoolPrompt", 
+           "ConsoleFreeFormPrompt", "ConsoleIntegerPrompt", "ConsoleTable", 
            "Menu", 
            "Table"]
