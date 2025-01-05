@@ -8,19 +8,19 @@ def test_abort(mocker, signal):
     # Setup
     mck_script = "mock_script.py"
     exit_code = 10
-    mck_print = mocker.patch("builtins.print")
-    mck_exit = mocker.patch("sys.exit")
+    mck_pnt = mocker.patch("builtins.print")
+    mck_ext = mocker.patch("sys.exit")
 
     # Execute
     utl.abort(signal, mck_script)
 
     # Verify
     if signal:
-        mck_print.assert_called_once_with(f"Aborted {mck_script}")
-        mck_exit.assert_called_once_with(exit_code)
+        mck_pnt.assert_called_once_with(f"Aborted {mck_script}")
+        mck_ext.assert_called_once_with(exit_code)
     else:
-        mck_print.assert_not_called()
-        mck_exit.assert_not_called()
+        mck_pnt.assert_not_called()
+        mck_ext.assert_not_called()
 
 
 # Test getCallerInfo
@@ -67,10 +67,10 @@ def test_get_caller_info(call_level, expected_function):
 @pytest.mark.parametrize("str_in, exp_out", [("get_disk", "getDisk")])
 def test_snake_to_camel(str_in, exp_out):
     # Execute
-    result = utl.snake_to_camel(str_in)
+    act_out = utl.snake_to_camel(str_in)
 
     # Veriry
-    assert result == exp_out
+    assert act_out == exp_out
 
 
 # Test truncateString
@@ -90,7 +90,7 @@ def test_truncate_string(max, exp_out):
     string = "Lorem ipsum odor amet, consectetuer adipiscing elit."
 
     # Execute
-    result = utl.truncate_string(string, max)
+    act_out = utl.truncate_string(string, max)
 
     # Verify
-    assert result == exp_out
+    assert act_out == exp_out

@@ -3,7 +3,7 @@ from modules import Table
 
 
 @pytest.fixture
-def table_inst():
+def T_inst():
     tbl_data = [{"First": "abc", "Second": "123"}, 
                 {"First": "", "Second": "456"}, 
                 {"First": "xyz", "Second": "789"}]
@@ -12,10 +12,10 @@ def table_inst():
     return Table(table_data=tbl_data, title=title, rjust_columns=rj_col)
 
 @pytest.fixture
-def tbl_inst_with_wds(table_inst):
-    table_inst._column_widths = {"FIRST": 5, "SECOND": 6}
-    table_inst._table_width = 13
-    return table_inst
+def T_wth_wds(T_inst):
+    T_inst._col_wds = {"FIRST": 5, "SECOND": 6}
+    T_inst._tbl_wd = 13
+    return T_inst
 
 
 """Modify Table Methods"""
@@ -48,13 +48,13 @@ def tbl_inst_with_wds(table_inst):
         )
     ]
 )
-def test_filter_nonempty(table_inst, filter_key, exp_dataset, exp_count):
+def test_filter_nonempty(T_inst, filter_key, exp_dataset, exp_count):
     # Execute
-    table_inst.filter_nonempty(filter_key)
+    T_inst.filter_nonempty(filter_key)
 
     # Verify
-    assert table_inst._dataset == exp_dataset
-    assert table_inst._records_count == exp_count
+    assert T_inst._ds == exp_dataset
+    assert T_inst._rec_ct == exp_count
 
 
 # Test filterStartwith
@@ -84,19 +84,19 @@ def test_filter_nonempty(table_inst, filter_key, exp_dataset, exp_count):
         )
     ]
 )
-def test_filter_startswith(table_inst, filter_key, value_prefix, exp_dataset, 
+def test_filter_startswith(T_inst, filter_key, value_prefix, exp_dataset, 
                            exp_count):
     # Execute
-    table_inst.filter_startswith(filter_key, value_prefix)
+    T_inst.filter_startswith(filter_key, value_prefix)
 
     # Verify
-    assert table_inst._dataset == exp_dataset
-    assert table_inst._records_count == exp_count
+    assert T_inst._ds == exp_dataset
+    assert T_inst._rec_ct == exp_count
 
 
 # Test resizeColumns
 @pytest.mark.parametrize(
-    "width_limit, exp_col_widths, exp_tbl_width",
+    "width_limit, exp_col_wds, exp_tbl_wd",
     [
         # Test case 1: Trim table width by 1
         (12, {"FIRST": 5, "SECOND": 5}, 12),
@@ -114,14 +114,13 @@ def test_filter_startswith(table_inst, filter_key, value_prefix, exp_dataset,
         (8, {"FIRST": 3, "SECOND": 3}, 8)
     ]
 )
-def test_resize_columns(tbl_inst_with_wds, width_limit, exp_col_widths, 
-                        exp_tbl_width):
+def test_resize_columns(T_wth_wds, width_limit, exp_col_wds, exp_tbl_wd):
     # Execute
-    tbl_inst_with_wds.resize_columns(width_limit)
+    T_wth_wds.resize_columns(width_limit)
 
     # Verify
-    assert tbl_inst_with_wds._column_widths == exp_col_widths
-    assert tbl_inst_with_wds._table_width == exp_tbl_width
+    assert T_wth_wds._col_wds == exp_col_wds
+    assert T_wth_wds._tbl_wd == exp_tbl_wd
 
 
 """Display Table Methods"""
@@ -136,61 +135,60 @@ def test_resize_columns(tbl_inst_with_wds, width_limit, exp_col_widths,
         # (False, "")
     ]
 )
-def test_put_table(mocker, tbl_inst_with_wds, menu_flag, record_number):
+def test_put_table(mocker, T_wth_wds, menu_flag, record_number):
     # Setup patches
-    mocker.patch.object(tbl_inst_with_wds, "_number_records", 
-                        return_value=record_number)
-    mocker.patch.object(tbl_inst_with_wds, "_calculate_widths")
-    mock_con_tbl = mocker.patch("modules.table.ConsoleTable")
-    mocker.patch.object(mock_con_tbl.return_value, "display")
+    mocker.patch.object(T_wth_wds, "_num_recs", return_value=record_number)
+    mocker.patch.object(T_wth_wds, "_set_wds")
+    mck_CT = mocker.patch("modules.table.ConsoleTable")
+    mocker.patch.object(mck_CT.return_value, "display")
 
     # Execute
-    tbl_inst_with_wds.put_table(is_menu=menu_flag)
+    T_wth_wds.put_table(menu_flag)
 
     # Verify calls
     if menu_flag:
-        tbl_inst_with_wds._number_records.assert_called_once()
-    tbl_inst_with_wds._calculate_widths.assert_called_once()
-    mock_con_tbl.assert_called_once_with(tbl_inst_with_wds)
-    mock_con_tbl.return_value.display.assert_called_once()
+        T_wth_wds._num_recs.assert_called_once()
+    T_wth_wds._set_wds.assert_called_once()
+    mck_CT.assert_called_once_with(T_wth_wds)
+    mck_CT.return_value.display.assert_called_once()
 
 
-# Test calculateWidths
-def test_calculate_widths(table_inst):
+# Test setWidths
+def test_set_wds(T_inst):
     # Execute
-    table_inst._calculate_widths()
+    T_inst._set_wds()
 
     # Verify
-    assert table_inst._column_widths == {"FIRST": 5, "SECOND": 6}
-    assert table_inst._table_width == 13
+    assert T_inst._col_wds == {"FIRST": 5, "SECOND": 6}
+    assert T_inst._tbl_wd == 13
 
 
 # Test numberRecords
-def test_number_records(table_inst):
+def test_num_recs(T_inst):
     # Execute
-    table_inst._number_records()
+    T_inst._num_recs()
 
     # Verify
-    assert table_inst._dataset == [{"#": 1, "FIRST": "abc", "SECOND": "123"}, 
-                                   {"#": 2, "FIRST": "", "SECOND": "456"}, 
-                                   {"#": 3, "FIRST": "xyz", "SECOND": "789"}]
-    assert table_inst._right_justified_columns == {"#", "SECOND"}
+    assert T_inst._ds == [{"#": 1, "FIRST": "abc", "SECOND": "123"}, 
+                          {"#": 2, "FIRST": "", "SECOND": "456"}, 
+                          {"#": 3, "FIRST": "xyz", "SECOND": "789"}]
+    assert T_inst._rj_cols == {"#", "SECOND"}
 
 
 """Getter Methods"""
 # Test countRecords, getColumnWidths, getHeadings, getRjustColumns, 
 #   getTableWidth, and getTitle
-def test_basic_getters(table_inst):
+def test_basic_getters(T_inst):
     # Setup
-    table_inst._calculate_widths()
+    T_inst._set_wds()
 
     # Execute
-    records_count = table_inst.count_records()
-    column_widths = table_inst.get_column_widths()
-    headings = table_inst.get_headings()
-    rjust_cols = table_inst.get_rjust_columns()
-    table_width = table_inst.get_table_width()
-    title = table_inst.get_title()
+    records_count = T_inst.count_records()
+    column_widths = T_inst.get_column_widths()
+    headings = T_inst.get_headings()
+    rjust_cols = T_inst.get_rjust_columns()
+    table_width = T_inst.get_table_width()
+    title = T_inst.get_title()
 
     # Verify
     assert records_count == 3
@@ -221,13 +219,13 @@ def test_basic_getters(table_inst):
         (-1, {"FIRST": "", "SECOND": ""}, True)
     ]
 )
-def test_get_record(table_inst, index_in, exp_record, exception):
+def test_get_record(T_inst, index_in, exp_record, exception):
     # Execute with exception
     if exception:
         with pytest.raises(IndexError):
-            table_inst.get_record(index_in)
+            T_inst.get_record(index_in)
     
     # Execute without acception
     else:
-        result = table_inst.get_record(index_in)
+        result = T_inst.get_record(index_in)
         assert result == exp_record

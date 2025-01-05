@@ -128,34 +128,30 @@ def test_menu_constructor(mocker, options, title, prompt, exp_count,
     else:
     # Setup mock Table
         if isinstance(options, list):
-            mock_tbl = mocker.Mock(spec=Table)
-            tbl_patch = mocker.patch("modules.table.Table",
-                                     # not modules.menu.menu.Table with 
-                                     # Menu.__init__() import
-                                     return_value=mock_tbl)
+            mck_T = mocker.Mock(spec=Table)
+            T_ptch = mocker.patch("modules.table.Table", return_value=mck_T)
     
     # Setup countRecords and setPrompt mocks
-            tbl_obj = mock_tbl
+            T_obj = mck_T
         else:
-            tbl_obj = options
-        mocker.patch.object(tbl_obj, "count_records", return_value=exp_count)
+            T_obj = options
+        mocker.patch.object(T_obj, "count_records", return_value=exp_count)
         mocker.patch.object(Menu, "set_prompt")
     
     # Execute
-        mnu = Menu(options, title, prompt)
+        M_inst = Menu(options, title, prompt)
 
     # Verify options assignment
         if isinstance(options, list):
-            tbl_patch.assert_called_once_with(title=title, 
-                                              table_data=[{"OPTION": option} 
-                                                          for option 
-                                                          in options])
+            T_ptch.assert_called_once_with(title=title, 
+                                           table_data=[{"OPTION": option} 
+                                                       for option in options])
         else:
-            assert mnu._options == options
+            assert M_inst._opts == options
     
     # Verify count assignment
-        mnu._options.count_records.assert_called_once()
-        assert mnu._count == exp_count
+        M_inst._opts.count_records.assert_called_once()
+        assert M_inst._ct == exp_count
     
     # Verify setPrompt call
-        mnu.set_prompt.assert_called_once_with(prompt)
+        M_inst.set_prompt.assert_called_once_with(prompt)

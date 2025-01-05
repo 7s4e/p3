@@ -25,7 +25,7 @@ Functions:
 from subprocess import run
 import sys
 
-from .table import Table
+from modules.table import Table
 
 
 def list_block_devices(disk: str | None = None, columns: list[str] = list(), 

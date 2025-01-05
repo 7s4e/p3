@@ -41,7 +41,7 @@ ROW_CONTENT = {
 
 
 @pytest.fixture
-def mock_console(mocker):
+def mck_Tm(mocker):
     mck = mocker.Mock(spec=Terminal)
     mck.blue = mocker.Mock(side_effect=lambda x: f"<blue>{x}</blue>")
     mck.reverse = mocker.Mock(side_effect=lambda x: (f"<reverse>{x}" + 
@@ -51,7 +51,7 @@ def mock_console(mocker):
     return mck
 
 @pytest.fixture
-def mock_data(mocker):
+def mck_Tb(mocker):
     mck = mocker.Mock(spec=Table)
     mck.get_title.return_value = ROW_CONTENT["raw"]["ttl"]
     mck.get_headings.return_value = ROW_CONTENT["raw"]["hdg"]
@@ -62,31 +62,30 @@ def mock_data(mocker):
     return mck
 
 @pytest.fixture
-def table_inst(mock_data, mock_console):
-    instnc = ConsoleTable(mock_data)
-    instnc._trm = mock_console
-    instnc._column_widths = mock_data.get_column_widths.return_value
-    instnc._table_width = mock_data.get_table_width.return_value
-    return instnc
+def CT_inst(mck_Tb, mck_Tm):
+    inst = ConsoleTable(mck_Tb)
+    inst._trm = mck_Tm
+    inst._col_wds = mck_Tb.get_column_widths.return_value
+    inst._tbl_wd = mck_Tb.get_table_width.return_value
+    return inst
 
 
 # Test display
 @pytest.mark.parametrize("record_count", [0, 1, 9])
-def test_display(mocker, mock_data, record_count):
+def test_display(mocker, mck_Tb, record_count):
     # Setup
-    con_tbl = ConsoleTable(mock_data)
-    mocker.patch.object(con_tbl, "_set_dimensions")
-    mocker.patch.object(con_tbl, "_draw_table")
-    mocker.patch.object(con_tbl._data, "count_records", 
-                        return_value=record_count)
+    CT_inst = ConsoleTable(mck_Tb)
+    mocker.patch.object(CT_inst, "_set_dims")
+    mocker.patch.object(CT_inst, "_drw_tbl")
+    mocker.patch.object(CT_inst._data, "count_records", return_value=record_count)
 
     # Execute
-    con_tbl.display()
+    CT_inst.display()
 
     # Verify
-    con_tbl._set_dimensions.assert_called_once()
-    con_tbl._data.count_records.assert_called_once()
-    con_tbl._draw_table.assert_called_once_with(record_count)
+    CT_inst._set_dims.assert_called_once()
+    CT_inst._data.count_records.assert_called_once()
+    CT_inst._drw_tbl.assert_called_once_with(record_count)
 
 
 # Test drawRow
@@ -155,33 +154,30 @@ def test_display(mocker, mock_data, record_count):
         )
     ]
 )
-def test_draw_row(mocker, table_inst, mock_data, row_type, ends_in, raw_in, 
-                  proc_in, record_idx, is_line_type, exp_out, capfd):
+def test_drw_rw(mocker, CT_inst, mck_Tb, row_type, ends_in, raw_in, proc_in, 
+                record_idx, is_line_type, exp_out, capfd):
     # Setup mock methods
-    mocker.patch.object(table_inst, "_get_row_ends", return_value=ends_in)
-    mocker.patch.object(table_inst, "_get_row_content", return_value=raw_in)
-    mocker.patch.object(table_inst, "_process_row_content", 
-                        return_value=proc_in)
+    mocker.patch.object(CT_inst, "_get_rw_ends", return_value=ends_in)
+    mocker.patch.object(CT_inst, "_get_rw_cntnt", return_value=raw_in)
+    mocker.patch.object(CT_inst, "_proc_rw_cntnt", return_value=proc_in)
     
     # Setup attribute and method argument
-    table_inst._margin_size = 0
-    rjust_col = (mock_data.get_rjust_columns.return_value 
+    CT_inst._mrg_sz = 0
+    rjust_col = (mck_Tb.get_rjust_columns.return_value 
                  if row_type == "record" else {})
 
     # Execute
-    table_inst._draw_row(row_type, record_idx)
+    CT_inst._drw_rw(row_type, record_idx)
     out, err = capfd.readouterr()
 
     # Verify method calls
     if row_type == "record":
-        table_inst._data.get_rjust_columns.assert_called_once()
-    table_inst._get_row_ends.assert_called_once_with(row_type, is_line_type)
+        CT_inst._data.get_rjust_columns.assert_called_once()
+    CT_inst._get_rw_ends.assert_called_once_with(row_type, is_line_type)
     if row_type in ["title", "headings", "record"]:
-        table_inst._get_row_content.assert_called_once_with(row_type, 
-                                                            record_idx)
-        table_inst._process_row_content.assert_called_once_with(row_type, 
-                                                                raw_in, 
-                                                                rjust_col)
+        CT_inst._get_rw_cntnt.assert_called_once_with(row_type, record_idx)
+        CT_inst._proc_rw_cntnt.assert_called_once_with(row_type, raw_in, 
+                                                       rjust_col)
     
     # Verify output    
     assert out == exp_out
@@ -190,12 +186,12 @@ def test_draw_row(mocker, table_inst, mock_data, row_type, ends_in, raw_in,
 
 # Test drawTable
 @pytest.mark.parametrize("record_count", [0, 1, 9])
-def test_draw_table(mocker, table_inst, record_count):
+def test_drw_tbl(mocker, CT_inst, record_count):
     # Setup
-    mocker.patch.object(table_inst, "_draw_row")
+    mocker.patch.object(CT_inst, "_drw_rw")
 
     # Execute
-    table_inst._draw_table(record_count)
+    CT_inst._drw_tbl(record_count)
 
     # Verify
     exp_calls = [call("top"), 
@@ -204,8 +200,8 @@ def test_draw_table(mocker, table_inst, record_count):
                  call("headings"), 
                  *[call("record", i) for i in range(record_count)], 
                  call("bottom")]
-    table_inst._draw_row.assert_has_calls(exp_calls)
-    assert table_inst._draw_row.call_count == len(exp_calls)
+    CT_inst._drw_rw.assert_has_calls(exp_calls)
+    assert CT_inst._drw_rw.call_count == len(exp_calls)
 
 
 # Test getRowContent
@@ -217,26 +213,26 @@ def test_draw_table(mocker, table_inst, record_count):
         ("record", 0)        # Test case 3: Record
     ]
 )
-def test_get_row_content(table_inst, mock_data, row_type, record_idx):
+def test_get_rw_cntnt(CT_inst, mck_Tb, row_type, record_idx):
     # Execute
-    result = table_inst._get_row_content(row_type, record_idx)
+    act_out = CT_inst._get_rw_cntnt(row_type, record_idx)
 
     # Verify
     match row_type:
         case "title":
-            table_inst._data.get_title.assert_called_once()
-            assert result == mock_data.get_title.return_value
+            CT_inst._data.get_title.assert_called_once()
+            assert act_out == mck_Tb.get_title.return_value
         case "headings":
-            table_inst._data.get_headings.assert_called_once()
-            assert result == mock_data.get_headings.return_value
+            CT_inst._data.get_headings.assert_called_once()
+            assert act_out == mck_Tb.get_headings.return_value
         case "record":
-            table_inst._data.get_record.assert_called_once_with(record_idx)
-            assert result == mock_data.get_record.return_value
+            CT_inst._data.get_record.assert_called_once_with(record_idx)
+            assert act_out == mck_Tb.get_record.return_value
 
 
 # Test getRowEnds
 @pytest.mark.parametrize(
-    "row_type, is_line_type, expected", 
+    "row_type, is_line_type, exp_out", 
     [
         # Test case 1: Top line
         ("top", True, ROW_ENDS["top"]), 
@@ -251,17 +247,17 @@ def test_get_row_content(table_inst, mock_data, row_type, record_idx):
         ("text", False, ROW_ENDS["txt"])
     ]
 )
-def test_get_row_ends(table_inst, row_type, is_line_type, expected):
+def test_get_rw_ends(CT_inst, row_type, is_line_type, exp_out):
     # Execute
-    result = table_inst._get_row_ends(row_type, is_line_type)
+    act_out = CT_inst._get_rw_ends(row_type, is_line_type)
 
     # Verify
-    assert result == expected
+    assert act_out == exp_out
 
 
 # Test processRowContent
 @pytest.mark.parametrize(
-    "row_type, expected", 
+    "row_type, exp_out", 
     [
         # Test case 1: Title row
         ("title", ROW_CONTENT["prc"]["ttl"]), 
@@ -273,22 +269,22 @@ def test_get_row_ends(table_inst, row_type, is_line_type, expected):
         ("record", ROW_CONTENT["prc"]["rec"])
     ]
 )
-def test_process_row_content(mock_data, table_inst, row_type, expected):
+def test_proc_rw_cntnt(mck_Tb, CT_inst, row_type, exp_out):
     # Setup
     match row_type:
         case "title":
-            content = mock_data.get_title.return_value
+            content = mck_Tb.get_title.return_value
         case "headings":
-            content = mock_data.get_headings.return_value
+            content = mck_Tb.get_headings.return_value
         case "record":
-            content = mock_data.get_record.return_value
-    rjust_col = mock_data.get_rjust_columns.return_value
+            content = mck_Tb.get_record.return_value
+    rjust_col = mck_Tb.get_rjust_columns.return_value
     
     # Execute
-    result = table_inst._process_row_content(row_type, content, rjust_col)
+    act_out = CT_inst._proc_rw_cntnt(row_type, content, rjust_col)
 
     # Verify
-    assert result == expected
+    assert act_out == exp_out
 
 
 # Test setDimensions
@@ -301,25 +297,25 @@ def test_process_row_content(mock_data, table_inst, row_type, expected):
         (79, [34], [10, 10, 10], 79)       # Test case 4: Narrow table
     ]
 )
-def test_set_dimensions(mock_console, mock_data, table_inst, term_wd, 
-                        tbl_wds, col_wds, dply_wd):
+def test_set_dims(mck_Tm, mck_Tb, CT_inst, term_wd, tbl_wds, col_wds, 
+                  dply_wd):
     # Setup
-    mock_console.width = term_wd
-    mock_data.get_table_width.side_effect = tbl_wds
-    mock_data.get_column_widths.return_value = col_wds
+    mck_Tm.width = term_wd
+    mck_Tb.get_table_width.side_effect = tbl_wds
+    mck_Tb.get_column_widths.return_value = col_wds
 
     # Execute
-    table_inst._set_dimensions()
+    CT_inst._set_dims()
 
     # Verify function process
-    assert table_inst._data.get_table_width.call_count == len(tbl_wds)
-    resize_called = table_inst._data.resize_columns.call_count > 0
+    assert CT_inst._data.get_table_width.call_count == len(tbl_wds)
+    resize_called = CT_inst._data.resize_columns.call_count > 0
     if resize_called:
-        table_inst._data.resize_columns.assert_called_once_with(dply_wd - 4)
-    table_inst._data.get_column_widths.assert_called_once()
+        CT_inst._data.resize_columns.assert_called_once_with(dply_wd - 4)
+    CT_inst._data.get_column_widths.assert_called_once()
 
     # Verify function results
-    assert table_inst._display_width == dply_wd
-    assert table_inst._margin_size == (term_wd - dply_wd) // 2
-    assert table_inst._table_width == tbl_wds[-1]
-    assert table_inst._column_widths == col_wds
+    assert CT_inst._disp_wd == dply_wd
+    assert CT_inst._mrg_sz == (term_wd - dply_wd) // 2
+    assert CT_inst._tbl_wd == tbl_wds[-1]
+    assert CT_inst._col_wds == col_wds

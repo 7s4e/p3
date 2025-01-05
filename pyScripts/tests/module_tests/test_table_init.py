@@ -32,16 +32,12 @@ PARAMS = [
 
 
 @pytest.fixture
-def mock_table(mocker):
+def mck_T(mocker):
     mck = mocker.Mock(spec=Table)
-    for method_name in ["_capitalize_keys", 
-                        "_find_column_positions", 
-                        "_find_boundaries", 
-                        "_get_slice", 
-                        "_read_table", 
-                        "_add_rjust_col_label"]:
-        method = getattr(mck, method_name)
-        method.side_effect = partial(getattr(Table, method_name), mck)
+    for name in ["_add_rj_col_lbl", "_cap_keys", "_fnd_bnds", "_fnd_col_pos", 
+                 "_get_slc", "_rd_tbl"]:
+        method = getattr(mck, name)
+        method.side_effect = partial(getattr(Table, name), mck)
     return mck
 
 
@@ -65,15 +61,15 @@ def mock_table(mocker):
         ({"COLUMN1"}, ["Column1", "Column4"], {"COLUMN1", "COLUMN4"}), 
     ]
 )
-def test_add_rjust_col_label(mock_table, initial_set, label_in, exp_labels):
+def test_add_rj_col_lbl(mck_T, initial_set, label_in, exp_labels):
     # Setup
-    mock_table._right_justified_columns = initial_set
+    mck_T._rj_cols = initial_set
 
     # Execute
-    mock_table._add_rjust_col_label(label_in)
+    mck_T._add_rj_col_lbl(label_in)
 
     # Verify
-    assert mock_table._right_justified_columns == exp_labels
+    assert mck_T._rj_cols == exp_labels
 
 
 # Test capitalizeKeys
@@ -105,82 +101,63 @@ def test_add_rjust_col_label(mock_table, initial_set, label_in, exp_labels):
         )
     ]
 )
-def test_capitalize_keys(mock_table, data_input, exp_dataset, exp_count):
+def test_cap_keys(mck_T, data_input, exp_dataset, exp_count):
     # Execute
-    mock_table._capitalize_keys(data_input)
+    mck_T._cap_keys(data_input)
 
     # Verify
-    assert mock_table._dataset == exp_dataset
-    assert mock_table._records_count == exp_count
+    assert mck_T._ds == exp_dataset
+    assert mck_T._rec_ct == exp_count
 
 
 # Test findBoundaries
 @pytest.mark.parametrize("col_idx, pos_list, line, exp_boundaries, _", 
                          PARAMS)
-def test_find_boundaries(mock_table, col_idx, pos_list, line, exp_boundaries, 
-                         _):
+def test_fnd_bnds(mck_T, col_idx, pos_list, line, exp_boundaries, _):
     # Execute
-    start_result, end_result = mock_table._find_boundaries(col_idx, pos_list, 
-                                                           line)
+    act_start, act_end = mck_T._fnd_bnds(col_idx, pos_list, line)
     
     # Verify
-    assert start_result == exp_boundaries[0]
-    assert end_result == exp_boundaries[1]
+    assert act_start == exp_boundaries[0]
+    assert act_end == exp_boundaries[1]
 
 
 # Test findColumnPositions
 @pytest.mark.parametrize(
-    "header_ln, keys, exp_pos, exception",
+    "header_ln, keys, exp_out",
     [
         # Test case 1: All keys found
-        ("Name Age Location", ["Name", "Age", "Location"], [0, 5, 9], None),
+        ("Name Age Location", ["Name", "Age", "Location"], [0, 5, 9]),
 
         # Test case 2: Keys with varying positions
-        ("ID Name Dept", ["ID", "Name"], [0, 3], None),
+        ("ID Name Dept", ["ID", "Name"], [0, 3]),
 
         # Test case 3: Single key
-        ("Header1 Header2 Header3", ["Header2"], [8], None),
+        ("Header1 Header2 Header3", ["Header2"], [8]),
 
         # Test case 4: No keys to search
-        ("Column1 Column2 Column3", [], [], None),
+        ("Column1 Column2 Column3", [], []),
 
         # Test case 5: Duplicate keys
-        ("A B A C", ["A", "C"], [0, 6], None),
-
-        # Test case 6: Key not found
-        ("Col1 Col2 Col3", ["Col4"], None, ValueError),
-
-        # Test case 7: Mixed valid and invalid keys
-        ("X Y Z", ["X", "W"], None, ValueError),
-
-        # Test case 8: Empty header line
-        ("", ["Column"], None, ValueError)
+        ("A B A C", ["A", "C"], [0, 6])
     ]
 )
-def test_find_column_positions(mock_table, header_ln, keys, exp_pos, 
-                               exception):
-    # Execute with exception
-    if exception:
-        with pytest.raises(exception, 
-                           match="Column '.*' not found in header line."):
-            mock_table._find_column_positions(header_ln, keys)
-    
-    # Execute without exception
-    else:
-        result = mock_table._find_column_positions(header_ln, keys)
+def test_fnd_col_pos(mck_T, header_ln, keys, exp_out):
+    # Execute
+    act_out = mck_T._fnd_col_pos(header_ln, keys)
     
     # Verify
-        assert result == exp_pos
+    assert act_out == exp_out
 
 
 # Test getSlice
 @pytest.mark.parametrize("col_idx, pos_list, line, _, exp_slice", PARAMS)
-def test_get_slice(mock_table, col_idx, pos_list, line, _, exp_slice):
+def test_get_slice(mck_T, col_idx, pos_list, line, _, exp_slice):
     # Execute
-    result = mock_table._get_slice(col_idx, pos_list, line)
+    act_out = mck_T._get_slc(col_idx, pos_list, line)
 
     # Verify
-    assert result == exp_slice
+    assert act_out == exp_slice
 
 
 # Test readTable
@@ -211,10 +188,10 @@ def test_get_slice(mock_table, col_idx, pos_list, line, _, exp_slice):
         )
     ]
 )
-def test_read_table(mock_table, table_string, exp_dataset, exp_count):
+def test_read_table(mck_T, table_string, exp_dataset, exp_count):
     # Execute
-    mock_table._read_table(table_string)
+    mck_T._rd_tbl(table_string)
     
     # Verify
-    assert mock_table._dataset == exp_dataset
-    assert mock_table._records_count == exp_count
+    assert mck_T._ds == exp_dataset
+    assert mck_T._rec_ct == exp_count

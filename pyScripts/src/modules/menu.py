@@ -83,7 +83,7 @@ class Menu:
         Returns:
             The selected option as any type.
         """
-        return self._selection[key.upper()]
+        return self._sel[key.upper()]
 
     def run(self) -> None:
         """

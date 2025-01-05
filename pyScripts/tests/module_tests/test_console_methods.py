@@ -4,42 +4,42 @@ from modules import Console
 
 
 @pytest.fixture
-def mock_console(mocker):
+def mck_T(mocker):
     return mocker.Mock(spec=Terminal)
 
 @pytest.fixture
-def mock_base(mocker, mock_console):
+def mck_CB(mocker, mck_T):
     base_class = mocker.patch("modules.console.ConsoleBase")
-    base_class.return_value._trm = mock_console
+    base_class.return_value._trm = mck_T
     return base_class
 
 @pytest.fixture
-def print_mock(mocker):
+def pnt_mck(mocker):
     return mocker.patch("builtins.print")
 
 
-def test_clear_stdscr(mock_console, mock_base, print_mock):
+def test_clear_screen(mck_T, mck_CB, pnt_mck):
     # Setup
-    mock_console.home = "home_position"
-    mock_console.clear = "clear_screen"
+    mck_T.home = "home_position"
+    mck_T.clear = "clear_screen"
 
     # Execute
-    Console.clear_stdscr()
+    Console.clear_screen()
 
     # Verify
-    mock_base.assert_called_once()
-    print_mock.assert_called_once_with("home_position" + "clear_screen")
+    mck_CB.assert_called_once()
+    pnt_mck.assert_called_once_with("home_position" + "clear_screen")
 
 
-def test_put_script_banner(mock_console, mock_base, print_mock):
+def test_put_script_banner(mck_T, mck_CB, pnt_mck):
     # Setup
-    mock_console.width = 36
-    mock_console.reverse = lambda text: f"<reverse>{text}</reverse>"
+    mck_T.width = 36
+    mck_T.reverse = lambda text: f"<reverse>{text}</reverse>"
+    exp_pnt_arg = "<reverse>Running mockScript...               </reverse>"
 
     # Execute
     Console.put_script_banner("mock_script")
 
     # Verify
-    mock_base.assert_called_once()
-    exp_out = "<reverse>Running mockScript...               </reverse>"
-    print_mock.assert_called_once_with(exp_out)
+    mck_CB.assert_called_once()
+    pnt_mck.assert_called_once_with(exp_pnt_arg)

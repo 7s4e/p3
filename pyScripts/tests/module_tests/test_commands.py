@@ -4,12 +4,13 @@ from modules import commands as cmd
 
 
 @pytest.fixture
-def run_cmmnd_mock(mocker):
+def rc_mck(mocker):
     return mocker.patch("modules.commands.run_command")
 
 
 # Test listBlockDevices
-@pytest.mark.parametrize("disk, cols, shw_deps, exp_cmnd", 
+@pytest.mark.parametrize(
+    "disk, cols, shw_deps, exp_cmnd", 
     [
         # Test case 1: Command to list block devices
         (None, [], True, "lsblk"),
@@ -28,21 +29,21 @@ def run_cmmnd_mock(mocker):
          "lsblk --nodeps --output NAME,TYPE /dev/sda")
     ]
 )
-def test_list_block_devices(run_cmmnd_mock, disk, cols, shw_deps, exp_cmnd):
+def test_list_block_devices(rc_mck, disk, cols, shw_deps, exp_cmnd):
     # Setup
-    run_cmmnd_mock.return_value = "Mock Block Devices List"
+    rc_mck.return_value = "Mock Block Devices List"
 
     # Execute
-    result = cmd.list_block_devices(disk, cols, shw_deps)
+    act_out = cmd.list_block_devices(disk, cols, shw_deps)
 
     # Verify
-    run_cmmnd_mock.assert_called_once_with(exp_cmnd)
-    assert result == "Mock Block Devices List"
+    rc_mck.assert_called_once_with(exp_cmnd)
+    assert act_out == "Mock Block Devices List"
 
 
 # Test runBadblocks
 @pytest.mark.parametrize(
-    "non_destruct, capt_out, exp_cmnd, mock_out",
+    "non_destruct, capt_out, exp_cmnd, exp_out",
     [
         # Test case 1: Non-destructive command with output
         (
@@ -74,17 +75,16 @@ def test_list_block_devices(run_cmmnd_mock, disk, cols, shw_deps, exp_cmnd):
         )
     ]
 )
-def test_run_badblocks(run_cmmnd_mock, non_destruct, capt_out, exp_cmnd, 
-                       mock_out):
+def test_run_badblocks(rc_mck, non_destruct, capt_out, exp_cmnd, exp_out):
     # Setup
-    run_cmmnd_mock.return_value = mock_out
+    rc_mck.return_value = exp_out
 
     # Execute
-    result = cmd.run_badblocks("sda", non_destruct, capt_out)
+    act_out = cmd.run_badblocks("sda", non_destruct, capt_out)
 
     # Verify
-    run_cmmnd_mock.assert_called_once_with(exp_cmnd, capture_output=capt_out)
-    assert result == mock_out
+    rc_mck.assert_called_once_with(exp_cmnd, capture_output=capt_out)
+    assert act_out == exp_out
 
 
 # Test runCommand
@@ -119,8 +119,8 @@ def test_run_badblocks(run_cmmnd_mock, non_destruct, capt_out, exp_cmnd,
 )
 def test_run_command(mocker, cmnd, mock_rtn, capt_out, exp_out, should_raise):
     # Setup
-    run_mock = mocker.patch("subprocess.run")
-    run_mock.return_value = mocker.MagicMock(**mock_rtn)
+    r_mck = mocker.patch("modules.commands.run")
+    r_mck.return_value = mocker.MagicMock(**mock_rtn)
 
     # Execute exception
     if should_raise:
@@ -129,52 +129,51 @@ def test_run_command(mocker, cmnd, mock_rtn, capt_out, exp_out, should_raise):
     
     # Execute without exception
     else:
-        result = cmd.run_command(cmnd, capt_out, use_shell=True)
+        act_out = cmd.run_command(cmnd, capt_out, use_shell=True)
         
         # Verify method output
-        assert result == exp_out
+        assert act_out == exp_out
     
     # Verify method process
-    run_mock.assert_called_once_with(cmnd, capture_output=capt_out, 
-                                     shell=True, text=True, 
-                                     stdout=(sys.stdout if not capt_out 
-                                             else None),
-                                     stderr=(sys.stderr if not capt_out 
-                                             else None))
+    r_mck.assert_called_once_with(cmnd, capture_output=capt_out, shell=True, 
+                                  text=True, 
+                                  stdout=(sys.stdout if not capt_out 
+                                          else None),
+                                  stderr=(sys.stderr if not capt_out 
+                                          else None))
 
 
 # Test unmountDisk
-def test_unmount_disk(mocker, run_cmmnd_mock):
+def test_unmount_disk(mocker, rc_mck):
     # Setup runCommand mock
-    mock_lsblk_out = ("PATH       MOUNTPOINT\n"
-                      "/dev/sda1  /mnt/point1\n"
-                      "/dev/sda2  /mnt/point2\n")
-    run_cmmnd_mock.side_effect = [mock_lsblk_out,  # First call for lsblk
-                                  None,            # Second call for umount
-                                  None]            # Third call for umount
+    mck_lsblk_out = ("PATH       MOUNTPOINT\n"
+                     "/dev/sda1  /mnt/point1\n"
+                     "/dev/sda2  /mnt/point2\n")
+    rc_mck.side_effect = [mck_lsblk_out,  # First call for lsblk
+                          None,           # Second call for umount
+                          None]           # Third call for umount
     
     # Setup mock Table
-    tbl_patch = mocker.patch("modules.commands.Table")
-    mock_tbl = tbl_patch.return_value
-    mock_tbl.filter_nonempty.return_value = None
-    mock_tbl.count_records.return_value = 2
-    mock_tbl.get_record.side_effect = [{"PATH": "/dev/sda1", 
-                                        "MOUNTPOINT": "/mnt/point1"}, 
-                                       {"PATH": "/dev/sda2", 
-                                        "MOUNTPOINT": "/mnt/point2"}]
+    T_pch = mocker.patch("modules.commands.Table")
+    mck_T = T_pch.return_value
+    mck_T.filter_nonempty.return_value = None
+    mck_T.count_records.return_value = 2
+    mck_T.get_record.side_effect = [{"PATH": "/dev/sda1", 
+                                     "MOUNTPOINT": "/mnt/point1"}, 
+                                    {"PATH": "/dev/sda2", 
+                                     "MOUNTPOINT": "/mnt/point2"}]
 
     # Execute
     cmd.unmount_disk("sda")
 
     # Verify runCommand calls
-    run_cmmnd_mock.assert_any_call("lsblk --output PATH,MOUNTPOINT /dev/sda")
-    run_cmmnd_mock.assert_any_call("sudo umount --verbose /dev/sda1", 
+    rc_mck.assert_any_call("lsblk --output PATH,MOUNTPOINT /dev/sda")
+    rc_mck.assert_any_call("sudo umount --verbose /dev/sda1", 
                                      capture_output=False)
-    run_cmmnd_mock.assert_any_call("sudo umount --verbose /dev/sda2", 
+    rc_mck.assert_any_call("sudo umount --verbose /dev/sda2", 
                                      capture_output=False)
-    assert run_cmmnd_mock.call_count == 3
+    assert rc_mck.call_count == 3
 
     # Verify Table method calls
-    tbl_patch.assert_called_once_with(table_string=mock_lsblk_out)
-    mock_tbl.filter_nonempty.assert_called_once_with("MOUNTPOINT")
-    pass
+    T_pch.assert_called_once_with(table_string=mck_lsblk_out)
+    mck_T.filter_nonempty.assert_called_once_with("MOUNTPOINT")

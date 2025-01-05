@@ -42,8 +42,8 @@ def test_console_table_constructor(data, exception):
         with pytest.raises(exception):
             ConsoleTable(data)
     else:
-        tbl = ConsoleTable(data)
+        CT_inst = ConsoleTable(data)
     
     # Verify
-        assert isinstance(tbl._trm, Terminal)
-        assert tbl._data == data
+        assert isinstance(CT_inst._trm, Terminal)
+        assert CT_inst._data == data

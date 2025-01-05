@@ -193,15 +193,15 @@ def test_console_prompt_constructor(prompt, exp_key, validate_bool,
                           validate_integer=validate_int, 
                           integer_validation=int_validation)
     else:
-        prmpt = ConsolePrompt(prompt, expect_keystroke=exp_key, 
+        CP_inst = ConsolePrompt(prompt, expect_keystroke=exp_key, 
                                 validate_bool=validate_bool, 
                                 validate_integer=validate_int, 
                                 integer_validation=int_validation)
     
     # Verify
-        assert isinstance(prmpt._trm, Terminal)
-        assert prmpt._prompt == prompt
-        assert prmpt._expect_keystroke == exp_key
-        assert prmpt._validate_bool == validate_bool
-        assert prmpt._validate_integer == validate_int
-        assert prmpt._integer_validation == int_validation
+        assert isinstance(CP_inst._trm, Terminal)
+        assert CP_inst._cue == prompt
+        assert CP_inst._exp_kst == exp_key
+        assert CP_inst._val_bool == validate_bool
+        assert CP_inst._val_int == validate_int
+        assert CP_inst._int_vld == int_validation

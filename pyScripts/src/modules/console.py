@@ -167,8 +167,8 @@ class ConsolePrompt(ConsoleBase):
         _chk_int_vld: Validate the user's integer response.
         _get_resp: Get the user's response based on expected input type.
         _print_msg: Print formatted message to stdout.
-        _put_alert: Display an alert message.
-        _put_prompt: Display the cue message.
+        _put_alrt: Display an alert message.
+        _put_prmt: Display the cue message.
         _read_kst: Capture a single keystroke from the user.
         _read_str: Capture a string input from the user.
         _val_resp: Validate the user's input based on the specified 
@@ -280,7 +280,7 @@ class ConsolePrompt(ConsoleBase):
         
         # Invalid response alerts user        
         self._e_ct["yes/no"] += 1
-        self._put_alert("Respond with 'y' or 'n'", self._e_ct["yes/no"])
+        self._put_alrt("Respond with 'y' or 'n'", self._e_ct["yes/no"])
         return False
 
     def _chk_int_vld(self) -> bool:
@@ -301,7 +301,7 @@ class ConsolePrompt(ConsoleBase):
         # Invalid alert if not a number
         if not bool(fullmatch(r'-?[0-9]+', self._user_resp)):
             self._e_ct["NaN"] += 1
-            self._put_alert("Enter a valid number", self._e_ct["NaN"])
+            self._put_alrt("Enter a valid number", self._e_ct["NaN"])
             return False
         
         # Integer validated against integer validation attribute
@@ -312,7 +312,7 @@ class ConsolePrompt(ConsoleBase):
             case int() as range:
                 if response < 0 or response >= range:
                     self._e_ct["OOR"] += 1
-                    self._put_alert("Response is out of range", 
+                    self._put_alrt("Response is out of range", 
                                     self._e_ct["OOR"])
                     return False
             
@@ -321,7 +321,7 @@ class ConsolePrompt(ConsoleBase):
                 low, high = limits
                 if response < low or response > high:
                     self._e_ct["OOL"] += 1
-                    self._put_alert(f"Enter a number between {low} and " +
+                    self._put_alrt(f"Enter a number between {low} and " +
                                     f"{high}", self._e_ct["OOL"])
                     return False
             
@@ -336,23 +336,22 @@ class ConsolePrompt(ConsoleBase):
         """Prompt the user and capture input."""
         # If keystroke expected, read it after prompting
         if self._exp_kst:
-            self._put_prompt(keep_cur_inline=False)
+            self._put_prmt(kp_cur_inline=False)
             self._read_kst()
         
         # If string expected, show it inline with cue.
         else:
-            self._put_prompt(keep_cur_inline=True)
+            self._put_prmt(kp_cur_inline=True)
             self._read_str()
 
-    def _print_message(self, msg: str, fmt_alloc: int, keep_cur_inline: bool
-                       ) -> None:
+    def _pnt_msg(self, msg: str, fmt_alloc: int, kp_cur_inline: bool) -> None:
         """
         Print left-justfied, wrapped message in center of console.
 
         Args:
             msg: The message to be printed.
             fmt_alloc: Allocation required for formatting text styles
-            keep_cur_inline: If True, the cursor remains inline with 
+            kp_cur_inline: If True, the cursor remains inline with 
                 a trailing space after the message. If False, the cursor 
                 moves to the next line after printing.
         """
@@ -363,10 +362,10 @@ class ConsolePrompt(ConsoleBase):
         # Print textwrapped, padded message and deposit cursor
         print(fill(msg, width=(display_width + fmt_alloc + len(padding)), 
                    initial_indent=padding, subsequent_indent=padding), 
-              end=" " if keep_cur_inline else "\n",
+              end=" " if kp_cur_inline else "\n",
               flush=True)
 
-    def _put_alert(self, alert: str, err_ct: int) -> None:
+    def _put_alrt(self, alert: str, err_ct: int) -> None:
         """
         Display alert message with escalating formatting.
 
@@ -400,20 +399,20 @@ class ConsolePrompt(ConsoleBase):
         
         # Alert printed
         if err_ct > 0:
-            self._print_message(alert, fmt_alloc, keep_cur_inline=False)
+            self._pnt_msg(alert, fmt_alloc, kp_cur_inline=False)
 
-    def _put_prompt(self, keep_cur_inline: bool) -> None:
+    def _put_prmt(self, kp_cur_inline: bool) -> None:
         """
         Display the prompt cue to the user.
 
         Args:
-            keep_cur_inline: If True, the cursor remains inline with 
+            kp_cur_inline: If True, the cursor remains inline with 
                 a trailing space; if False, it moves to the next line 
                 after the prompt.
         """
-        self._print_message(self._trm.yellow(self._cue), 
-                            FORMATTING_ALLOCATION["yellow"], 
-                            keep_cur_inline=keep_cur_inline)
+        self._pnt_msg(self._trm.yellow(self._cue), 
+                      FORMATTING_ALLOCATION["yellow"], 
+                      kp_cur_inline=kp_cur_inline)
 
     def _read_kst(self) -> None:
         """
@@ -442,7 +441,7 @@ class ConsolePrompt(ConsoleBase):
                 except:
                     key = None
                     miskey_ct += 1
-                    self._put_alert("Input not printable", miskey_ct)
+                    self._put_alrt("Input not printable", miskey_ct)
         
         # Set user response
         self._user_resp = str(key if code != 10 else "")
