@@ -456,7 +456,7 @@ class ConsoleBooleanPrompt(ConsolePrompt):
         _validate_response: Implementation of abstract method.
         _check_bool: Validate user response as boolean value.
     """
-    def __init__(self, cue: str = "(y/n)? ") -> None:
+    def __init__(self, cue: str = "(y/n)?") -> None:
         super().__init__(cue)
     
     @property
