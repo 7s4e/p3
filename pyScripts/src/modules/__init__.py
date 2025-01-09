@@ -12,7 +12,7 @@ Modules:
 Classes:
     Console: Handles console-related operations.
     ConsoleAnyKeyPrompt: Prompts for any key from user.
-    ConsoleBoolPrompt: Prompts for yes/no response from user.
+    ConsoleBooleanPrompt: Prompts for yes/no response from user.
     ConsoleFreeFormPrompt: Prompts for any response from user.
     ConsoleIntegerPrompt: Prompts for validated integer from user.
     ConsoleTable: Manages console-based table rendering.
@@ -26,14 +26,14 @@ __all__:
 from . import commands, utilities
 
 # Importing classes
-from .console import Console, ConsoleAnyKeyPrompt, ConsoleBoolPrompt
+from .console import Console, ConsoleAnyKeyPrompt, ConsoleBooleanPrompt
 from .console import ConsoleFreeFormPrompt, ConsoleIntegerPrompt, ConsoleTable
 from .menu import Menu
 from .table import Table
 
 # Explicitly defining public API
 __all__ = ["commands", "utilities", 
-           "Console", "ConsoleAnyKeyPrompt", "ConsoleBoolPrompt", 
+           "Console", "ConsoleAnyKeyPrompt", "ConsoleBooleanPrompt", 
            "ConsoleFreeFormPrompt", "ConsoleIntegerPrompt", "ConsoleTable", 
            "Menu", 
            "Table"]

@@ -2,29 +2,33 @@
 """
 Disk Selection Script
 
-This script facilitates the process of selecting and confirming a connected 
-disk. It provides a menu-driven interface for listing connected devices, 
-selecting a disk, and confirming the selection. The user is repeatedly 
-prompted to connect and select a disk until a disk is successfully confirmed.
+This script facilitates the process of selecting and confirming a 
+connected disk. It provides a menu-driven interface for listing 
+connected devices, selecting a disk, and confirming the selection. The 
+user is repeatedly prompted to connect and select a disk until a disk is 
+successfully confirmed.
 
 Functions:
-    check_disk(caller): Prompts the user to check disk connections and offers 
-        the option to quit the script.
-    confirm_disk(disk): Prompts the user to confirm the selection of a disk.
+    check_disk(caller): Prompts the user to check disk connections and 
+        offers the option to quit the script.
+    confirm_disk(disk): Prompts the user to confirm the selection of a 
+        disk.
     get_disks(): Retrieves a list of currently connected disks.
     select_disk(disks): Prompts the user to select a disk from a list.
-    get_disk(): Main function to handle the disk selection and confirmation 
-        process.
+    get_disk(): Main function to handle the disk selection and 
+        confirmation process.
     main(): Clears the screen and initiates the disk selection process.
 
 Usage:
-    Run this script directly to initiate the disk selection process. The script 
-    can be integrated into other tools by importing the `get_disk` function.
+    Run this script directly to initiate the disk selection process. The 
+    script can be integrated into other tools by importing the 
+    `get_disk` function.
 """
 # Local module imports
 from modules import commands as cmd
 from modules import utilities as utl
-from modules import Console, ConsolePrompt, Menu, Table
+from modules import Console, ConsoleAnyKeyPrompt, ConsoleBooleanPrompt
+from modules import Menu, Table
 
 
 def check_disk(caller):
@@ -38,7 +42,7 @@ def check_disk(caller):
         The script terminates at user's discretion.
     """
     msg = "Press 'q' to quit, or check disks and press any key to continue..."
-    prmpt = ConsolePrompt(msg, expect_keystroke=True)
+    prmpt = ConsoleAnyKeyPrompt(msg)
     rspns = prmpt.call()
     utl.abort(rspns in {"q", "Q"}, caller)
     
@@ -53,15 +57,14 @@ def confirm_disk(disk: str) -> bool:
     Returns:
         True if the user confirms, False otherwise.
     """
-    prompt = f"Are you sure you want to select the disk '{disk}'? (y/n) "
+    cue = f"Are you sure you want to select the disk '{disk}'? (y/n) "
     output = cmd.list_block_devices(disk, 
-                                    columns=["NAME", "TYPE", "FSTYPE", "LABEL", 
-                                             "MOUNTPOINTS"])
+                                    columns=["NAME", "TYPE", "FSTYPE", 
+                                             "LABEL", "MOUNTPOINTS"])
     partitions = Table(title="selected device", table_string=output)
     print()
     partitions.put_table()
-    disk_confirmation = ConsolePrompt(prompt, expect_keystroke=True, 
-                                      validate_bool=True)
+    disk_confirmation = ConsoleBooleanPrompt(cue)
     return disk_confirmation.call()
 
 
@@ -124,10 +127,8 @@ def get_disk() -> str:
         if confirm_disk(disk):
             break
         else:
-            unmount_prompt = f"Do you want to unmount '{disk}'? (y/n)"
-            unmount_confirmation = ConsolePrompt(unmount_prompt, 
-                                                 expect_keystroke=True, 
-                                                 validate_bool=True)
+            unmount_cue = f"Do you want to unmount '{disk}'? (y/n)"
+            unmount_confirmation = ConsoleAnyKeyPrompt(unmount_cue)
             if unmount_confirmation.call():
                 cmd.unmount_disk(disk)
             check_disk(caller_info["file"])

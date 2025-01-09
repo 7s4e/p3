@@ -6,35 +6,36 @@ and displaying formatted tables in a terminal.
 
 Imports:
     Standard library:
-        from __future__ import annotations: Postpones the evaluation of 
+        from __future__ import annotations: Postpone the evaluation of 
             type annotations, allowing forward references without string 
             literals.
-        from re import fullmatch: Provides support for regular 
+        from abc import ABC, abstractmethod: Define abstract base 
+            classes and enforce implementation of required methods in 
+            subclasses. 
+        from re import fullmatch: Provide support for regular 
             expressions, enabling pattern matching and text 
             manipulation.
-        from sys import stdout: Provides access to the standard output 
+        from sys import stdout: Provide access to the standard output 
             stream, used for printing to the terminal.
-        from textwrap import fill: Provides text wrapping functionality 
+        from textwrap import fill: Provide text wrapping functionality 
             for formatting text, especially for console output.
         from typing import Any, TYPE_CHECKING:
-            Any: Represents any valid Python object type in type 
+            Any: Represent any valid Python object type in type 
                 annotations.
-            TYPE_CHECKING: Used for conditional imports to prevent 
+            TYPE_CHECKING: Use for conditional imports to prevent 
                 circular dependencies during runtime, primarily for type 
                 checking.
 
     Third-party:
-        from blessed import Terminal: Manages terminal output, including 
+        from blessed import Terminal: Manage terminal output, including 
             color handling, cursor movement, and screen clearing.
     
     Local modules:
         from utilities import snake_to_camel, truncate_string
-            snake_to_camel: A utility function for converting snake_case 
-                strings to camelCase.
-            truncate_string: A utility function for truncating strings 
-                to a specified length.
+            snake_to_camel: Convert snake_case strings to camelCase.
+            truncate_string: Truncate strings to a specified length.
         if TYPE_CHECKING:
-            from table import Table: Conditionally imported for static 
+            from table import Table: Conditionally import for static 
                 type checking to avoid circular imports at runtime.
 
 Classes:
@@ -42,8 +43,16 @@ Classes:
         Terminal class.
     Console: A subclass of ConsoleBase, providing static methods for 
         console-related operations.
-    ConsolePrompt: A subclass of ConsoleBase, responsible for handling 
-        user prompts with validation for user responses.
+    ConsolePrompt: An abstract subclass of ConsoleBase, responsible for 
+        handling user prompts with validation for user responses.
+    ConsoleAnyKeyPrompt: A subclass or ConsolePrompt, prompting the user 
+        to respond with any key.
+    ConsoleBooleanPrompt: A subclass or ConsolePrompt, prompting the user 
+        for a boolean response.
+    ConsoleFreeFormPrompt: A subclass or ConsolePrompt, prompting the 
+        user for a response without validation requirements.
+    ConsoleIntegerPrompt: A subclass or ConsolePrompt, prompting the 
+        user for an integer with an option validation constraint.
     ConsoleTable: A subclass of ConsoleBase, responsible for displaying 
         tables in the terminal.
 
@@ -133,47 +142,37 @@ class Console(ConsoleBase):
 
 class ConsolePrompt(ConsoleBase, ABC):
     """
-    A class to manage console prompts and user input validation.
+    An abstract class to manage console prompts and possible validation.
 
     This class facilitates prompting the user for input via the console, 
-    with options for validating boolean and integer responses. It can 
-    expect either a single keystroke or a full string input, and handle 
-    input validation accordingly.
+    with subclasses providing options for validating boolean and integer 
+    responses. Subclasses may expect either a single keystroke or a full 
+    string input.
 
     Args:
         cue: The message to display to the user.
-        expect_keystroke: If True, expect a single keystroke input.
-        validate_bool: If True, validate the input as a boolean ('y' or 
-            'n').
-        validate_integer: If True, validate the input as an integer.
-        integer_validation: Defines integer validation criteria. Can be 
-            an upper limit (int) or a range (tuple of two ints).
 
     Attributes:
-        _cue: The message to display to the user.
-        _e_ct: A tally of various errors until validation.
-        _exp_kst: Flag indicating if a keystroke is expected.
-        _int_vld: Validation criteria for integers.
-        _trm: blessed.Terminal inherited from ConsoleBase.
-        _val_bool: Flag indicating if boolean validation is 
-            enabled.
-        _val_int: Flag indicating if integer validation is 
-            enabled.
+        _expect_keystroke: Abstract attribute for flag indicating only a 
+            keystroke is expected.
+        _reset_value: Virtual attribute for the default error count.
+        _cue: The message displayed to the user.
+        _error_count: The number of errors since last validation.
+        _user_response: The user's raw response.
         _validated_response: The user's validated response.
 
     Methods:
+        _validate_response: Abstract method to validate the user's 
+            input.
         call: Prompt the user and return the validated response.
         _back_n_lines: Delete and move cursor up 'n' lines.
-        _chk_bool_vld: Validate the user's boolean response.
-        _chk_int_vld: Validate the user's integer response.
         _get_response: Get the user's response based on expected input type.
-        _print_msg: Print formatted message to stdout.
+        _print_message: Print formatted message to stdout.
         _put_alert: Display an alert message.
         _put_prompt: Display the cue message.
         _read_keystroke: Capture a single keystroke from the user.
         _read_string: Capture a string input from the user.
-        _validate_response: Validate the user's input based on the specified 
-            criteria.
+        _reset_error_count: Reset the error count to the default.
     """
     def __init__(self, cue: str = "> ") -> None:
 
@@ -184,23 +183,29 @@ class ConsolePrompt(ConsoleBase, ABC):
         # Initialize base and assign validated attributes
         super().__init__()
         self._cue = cue
+        self._reset_value = 0
+        self._error_count = self._reset_value
         self._user_response = ""
         self._validated_response = None
-        self._error_count_value = 0
-        self._error_count = self._error_count_value
     
     # Abstract methods    
     @property
     @abstractmethod
     def _expect_keystroke(self) -> bool:
-        pass
-
-    @abstractmethod
-    def _reset_error_count(self) -> int | dict[str, int]:
+        """Define whether only a keystroke is expected from the user."""
         pass
 
     @abstractmethod
     def _validate_response(self) -> bool:
+        """
+        Set user's response as validated per subclass definition.
+        
+        Side effect:
+            _validated_response: Set user response as validated.
+        
+        Return:
+            True if subclass definition does not return as False.
+        """
         self._validated_response = self._user_response
         return True
 
@@ -400,35 +405,67 @@ class ConsolePrompt(ConsoleBase, ABC):
         
         # Set user response
         self._user_response = "".join(response)
+    
+    def _reset_error_count(self) -> None:
+        """
+        Reset error count to default value.
+        
+        Side effect:
+            _error_count: Value reset.
+        """
+        self._error_count = self._reset_value
 
 
 class ConsoleAnyKeyPrompt(ConsolePrompt):
+    """
+    An implementation of ConsolePrompt for a single keystroke.
+
+    Args:
+        cue: The message to display to the user.
+
+    Attributes:
+        _expect_keystroke: Implementation of abstract attribute.
+
+    Methods:
+        _validate_response: Implementation of abstract method.
+    """
     def __init__(self, cue: str = "Press any key to continue...") -> None:
         super().__init__(cue)
     
     @property
     def _expect_keystroke(self) -> bool:
+        """Flag indicating only a keystroke is expected."""
         return True
     
-    def _reset_error_count(self) -> int:
-        self._error_count_value = 0
-
     def _validate_response(self) -> bool:
+        """Run base definition without further validation."""
         return super()._validate_response()
 
 
-class ConsoleBoolPrompt(ConsolePrompt):
+class ConsoleBooleanPrompt(ConsolePrompt):
+    """
+    An implementation of ConsolePrompt for a boolean value.
+
+    Args:
+        cue: The message to display to the user.
+
+    Attributes:
+        _expect_keystroke: Implementation of abstract attribute.
+
+    Methods:
+        _validate_response: Implementation of abstract method.
+        _check_bool: Validate user response as boolean value.
+    """
     def __init__(self, cue: str = "(y/n)? ") -> None:
         super().__init__(cue)
     
     @property
     def _expect_keystroke(self) -> bool:
+        """Flag indicating only a keystroke is expected."""
         return True
     
-    def _reset_error_count(self) -> int:
-        self._error_count_value = 0
-
     def _validate_response(self) -> bool:
+        """Validate user response with the check_bool() method."""
         return super()._validate_response() if self._check_bool() else False
     
     def _check_bool(self) -> bool:
@@ -453,35 +490,86 @@ class ConsoleBoolPrompt(ConsolePrompt):
 
 
 class ConsoleFreeFormPrompt(ConsolePrompt):
+    """
+    An implementation of ConsolePrompt without validation.
+
+    Args:
+        cue: The message to display to the user.
+
+    Attributes:
+        _expect_keystroke: Implementation of abstract attribute.
+
+    Methods:
+        _validate_response: Implementation of abstract method.
+    """
     def __init__(self, cue: str) -> None:
         super().__init__(cue)
     
     @property
     def _expect_keystroke(self) -> bool:
+        """Flag indicating a string is expected."""
         return False
     
-    def _reset_error_count(self) -> int:
-        self._error_count_value = 0
-
     def _validate_response(self) -> bool:
+        """Run base definition without further validation."""
         return super()._validate_response()
 
 
 class ConsoleIntegerPrompt(ConsolePrompt):
+    """
+    An implemenation of ConsolePrompt for an interger value.
+
+    Args:
+        cue: The message to display to the user.
+        constraint: Integer validation parameter.
+
+    Attributes:
+        _expect_keystroke: Implementation of abstract attribute.
+        _reset_value: Overridden virtual attribute.
+    
+    Methods:
+        _validate_response: Implementation of abstract method.
+        _check_int: Validate user response as integer value.
+    """
     def __init__(self, cue: str, 
                  constraint: int | tuple[int, int] | None = None) -> None:
+        # Type validation
+        if (constraint is not None 
+            and not (isinstance(constraint, int) 
+                     and not isinstance(constraint, bool) 
+                     or isinstance(constraint, tuple))):
+            raise TypeError("Expected `int`, `tuple[int, int]`, or " + 
+                            "`None` for 'constraint'")
+        
+        # Value validation
+        if constraint is not None:
+            if isinstance(constraint, int):
+                if constraint < 0:
+                    raise ValueError("Range for 'constraint' must be " + 
+                                     "positive")
+            else:
+                if len(constraint) != 2:
+                    raise ValueError("There must be two elements for " + 
+                                     "'constraint', a lower and upper " +
+                                     "limit")
+                if constraint[0] > constraint[1]:
+                    raise ValueError("The second element of " + 
+                                     "'constraint' cannot be less " + 
+                                     "than the first")
+
         super().__init__(cue)
         self._constraint = constraint
         self._error_count_value = {"NaN": 0, "OOR": 0, "OOL": 0}
     
     @property
     def _expect_keystroke(self) -> bool:
-        return
+        """Flag if single digit integer is is expected."""
+        if self._constraint is None: return False
+        if isinstance(self._constraint, int): return self._constraint <= 10
+        return self._constraint[0] >= 0 and self._constraint[1] <= 9
     
-    def _reset_error_count(self) -> dict[str, int]:
-        self._error_count_value = {"NaN": 0, "OOR": 0, "OOL": 0}
-
     def _validate_response(self) -> bool:
+        """Validate user response with the check_int() method."""
         return super()._validate_response() if self._check_int() else False
     
     def _check_int(self) -> bool:
@@ -554,15 +642,15 @@ class ConsoleTable(ConsoleBase):
 
     Methods:
         display: Public method to render the table to the console.
-        _drw_rw: Render a specific type of table row.
+        _draw_row: Render a specific type of table row.
         _drw_tb: Render the table by sequentially drawing each row.
-        _get_rw_cntnt: Retrieve content for a specific row type.
-        _get_rw_ends: Retrieve the left and right borders, and the 
+        _get_row_content: Retrieve content for a specific row type.
+        _get_row_ends: Retrieve the left and right borders, and the 
             padding for a row, depending on its type.
-        _proc_rw_cntnt: Style the row content based on its type and 
-            justify base on column.
-        _set_dims: Calculate table dimensions and adjust column widths 
-            to fit within the terminal display.
+        _process_row_content: Style the row content based on its type 
+            and justify based on column.
+        _set_dimensions: Calculate table dimensions and adjust column 
+            widths to fit within the terminal display.
     """
     def __init__(self, table: Table) -> None:
         # Lazy import avoids circular import at runtime type validation
@@ -577,11 +665,11 @@ class ConsoleTable(ConsoleBase):
     # Public Method
     def display(self) -> None:
         """Display the table on the console."""
-        self._set_dims()
-        self._drw_tbl(self._data.count_records())
+        self._set_dimensions()
+        self._draw_table(self._data.count_records())
 
     # Private Methods
-    def _drw_rw(self, rw_tp: str, idx: int | None = None) -> None:
+    def _draw_row(self, rw_tp: str, idx: int | None = None) -> None:
         """
         Render a specific row type with styling.
 
@@ -599,21 +687,21 @@ class ConsoleTable(ConsoleBase):
         
         # Get components for rendering the row
         margin = " " * self._mrg_sz
-        left, right, gap = self._get_rw_ends(rw_tp, is_line_type)
+        left, right, gap = self._get_row_ends(rw_tp, is_line_type)
 
         # Retrieve row content based on type
-        content = (self._get_rw_cntnt(rw_tp, idx) 
+        content = (self._get_row_content(rw_tp, idx) 
                    if is_text_type else BORDERS[rw_tp]["fill"])
         
         # Process content into styled cells or line fillers
-        cells = (self._proc_rw_cntnt(rw_tp, content, rjust_cols) 
+        cells = (self._process_row_content(rw_tp, content, rjust_cols) 
                  if is_text_type 
                  else [self._trm.blue(content * (self._tbl_wd + 2))])
         
         # Construct and print the row
         print(f"{margin}{left}{gap}{'  '.join(cells)}{gap}{right}")
     
-    def _drw_tbl(self, rec_ct: int) -> None:
+    def _draw_table(self, rec_ct: int) -> None:
         """
         Render the entire table by sequentially drawing each row type.
 
@@ -622,16 +710,16 @@ class ConsoleTable(ConsoleBase):
         """
         # Header rows
         header_sequence = ["top", "title", "inner", "headings"]
-        for row_type in header_sequence: self._drw_rw(row_type)
+        for row_type in header_sequence: self._draw_row(row_type)
         
         # Record rows
-        for i in range(rec_ct): self._drw_rw("record", i)
+        for i in range(rec_ct): self._draw_row("record", i)
         
         # Bottom row
-        self._drw_rw("bottom")
+        self._draw_row("bottom")
     
-    def _get_rw_cntnt(self, rw_tp: str, idx: int | None = None
-                      ) -> str | dict[str, str]:
+    def _get_row_content(self, rw_tp: str, idx: int | None = None
+                         ) -> str | dict[str, str]:
         """
         Retrieve the text content for a specific type of table row.
 
@@ -649,8 +737,8 @@ class ConsoleTable(ConsoleBase):
             case "headings": return self._data.get_headings()
             case "record": return self._data.get_record(idx)
 
-    def _get_rw_ends(self, rw_tp: str, is_ln_tp: bool
-                     ) -> tuple[str, str, str]:
+    def _get_row_ends(self, rw_tp: str, is_ln_tp: bool
+                      ) -> tuple[str, str, str]:
         """
         Retrieve the left and right borders and padding for a row.
 
@@ -677,8 +765,9 @@ class ConsoleTable(ConsoleBase):
         
         return left_end, right_end, padding
 
-    def _proc_rw_cntnt(self, rw_tp: str, cont: str | dict[str, str], 
-                       rjust_cols: set) -> list[str]:
+    def _process_row_content(self, rw_tp: str, 
+                             cont: str | dict[str, str], 
+                             rjust_cols: set) -> list[str]:
         """Process the content of a table row into formatted text cells.
 
         Args:
@@ -724,7 +813,7 @@ class ConsoleTable(ConsoleBase):
         
         return cells
 
-    def _set_dims(self) -> None:
+    def _set_dimensions(self) -> None:
         """
         Set display and table dimensions based on the terminal width.
 

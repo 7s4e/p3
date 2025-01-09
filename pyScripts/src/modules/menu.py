@@ -23,7 +23,7 @@ Class:
 from typing import Any
 
 # Local module import
-from .console import ConsolePrompt
+from .console import ConsoleIntegerPrompt
 from .table import Table
 
 class Menu:
@@ -43,13 +43,14 @@ class Menu:
     Attributes:
         _ct: The number of menu options.
         _opts: Menu options as a `Table` object.
-        _prmt: A `ConsolePrompt` object to manage user interaction.
+        _prmt: A `ConsoleIntegerPrompt` object to manage user 
+            interaction.
         _sel: User-selected option.
 
     Methods:
         get_selection: Get user-selected option from the menu.
         run: Display menun and get user input.
-        set_prompt: Set a `ConsolePrompt` object to manage user 
+        set_prompt: Set a `ConsoleIntegerPrompt` object to manage user 
             interaction.
     """
     def __init__(self, options: list | Table, title: str | None = None, 
@@ -98,7 +99,7 @@ class Menu:
 
     def set_prompt(self, prompt: str | None = None) -> None:
         """
-        Sets the `ConsolePrompt` object for the menu.
+        Sets the `ConsoleIntegerPrompt` object for the menu.
 
         Args:
             prompt: A custom prompt message.
@@ -107,8 +108,6 @@ class Menu:
             _prmt: Set the prompt to manage the menu.
         """
         count = self._ct
-        prompt = (f"Enter number (1-{count}) for selection:" 
-                  if prompt is None else prompt)
-        self._prmt = ConsolePrompt(prompt, expect_keystroke=count < 10, 
-                                   validate_integer=True, 
-                                   integer_validation=(1, count))
+        cue = (f"Enter number (1-{count}) for selection:" 
+               if prompt is None else prompt)
+        self._prmt = ConsoleIntegerPrompt(cue, (1, count))
