@@ -34,6 +34,6 @@ get-disk = "scripts.get_disk_script:main"
 
 [tool.pytest.ini_options]
 testpaths = [
-    "src/module_tests",
-    "src/script_tests"
+    "tests/module_tests",
+    "tests/script_tests"
 ]
