@@ -429,7 +429,8 @@ class ConsoleAnyKeyPrompt(ConsolePrompt):
     Methods:
         _validate_response: Implementation of abstract method.
     """
-    def __init__(self, cue: str = "Press any key to continue...") -> None:
+    def __init__(self, cue: None | str = "Press any key to continue..."
+                 ) -> None:
         super().__init__(cue)
     
     @property
@@ -456,7 +457,7 @@ class ConsoleBooleanPrompt(ConsolePrompt):
         _validate_response: Implementation of abstract method.
         _check_bool: Validate user response as boolean value.
     """
-    def __init__(self, cue: str = "(y/n)?") -> None:
+    def __init__(self, cue: None | str = "(y/n)?") -> None:
         super().__init__(cue)
     
     @property
@@ -502,8 +503,8 @@ class ConsoleFreeFormPrompt(ConsolePrompt):
     Methods:
         _validate_response: Implementation of abstract method.
     """
-    def __init__(self, cue: str) -> None:
-        super().__init__(cue)
+    def __init__(self, cue: str | None = None) -> None:
+        super().__init__() if cue is None else super().__init__(cue)
     
     @property
     def _expect_keystroke(self) -> bool:
@@ -531,7 +532,7 @@ class ConsoleIntegerPrompt(ConsolePrompt):
         _validate_response: Implementation of abstract method.
         _check_int: Validate user response as integer value.
     """
-    def __init__(self, cue: str, 
+    def __init__(self, cue: str | None = None, 
                  constraint: int | tuple[int, int] | None = None) -> None:
         # Type validation
         if (constraint is not None 
@@ -556,10 +557,11 @@ class ConsoleIntegerPrompt(ConsolePrompt):
                     raise ValueError("The second element of " + 
                                      "'constraint' cannot be less " + 
                                      "than the first")
-
-        super().__init__(cue)
+                
+        super().__init__() if cue is None else super().__init__(cue)
         self._constraint = constraint
-        self._error_count_value = {"NaN": 0, "OOR": 0, "OOL": 0}
+        self._reset_value = {"NaN": 0, "OOR": 0, "OOL": 0}
+        self._reset_error_count()
     
     @property
     def _expect_keystroke(self) -> bool:
