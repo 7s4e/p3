@@ -1,6 +1,13 @@
-# import pytest
-# from blessed import keyboard, Terminal
-# from modules import ConsolePrompt
+import pytest
+from blessed import keyboard, Terminal
+from modules import ConsoleAnyKeyPrompt, ConsoleBooleanPrompt
+from modules import ConsoleFreeFormPrompt, ConsoleIntegerPrompt
+
+
+PROMPT_CLASSES = [(ConsoleAnyKeyPrompt, ["Mock cue"]), 
+                  (ConsoleBooleanPrompt, ["Mock cue"]), 
+                  (ConsoleFreeFormPrompt, ["Mock cue"]), 
+                  (ConsoleIntegerPrompt, ["Mock cue", None])]
 
 
 # @pytest.fixture
@@ -35,21 +42,31 @@
 #     return mocker.patch.object(CP_inst, "_put_alrt")
 
 
-# # Test call
-# def test_call(mocker):
-#     # Setup instance and method and attribue mocks
-#     CP_inst = ConsolePrompt("Mock prompt")
-#     gr_mck = mocker.patch.object(CP_inst, "_get_resp")
-#     vr_mck = mocker.patch.object(CP_inst, "_val_resp", side_effect=[False, True])
-#     CP_inst._vld_resp = "mocked response"
-    
-#     # Execute
-#     act_out = CP_inst.call()
+# Test call
+def test_call(mocker):
+    # Setup subclass instances
+    CP_insts = [clss(*args) for clss, args in PROMPT_CLASSES]
 
-#     # Verify method calls and result
-#     assert gr_mck.call_count == 2
-#     assert vr_mck.call_count == 2
-#     assert act_out == "mocked response"
+    # Setup mock methods for each instance
+    grms = [mocker.patch.object(inst, "_get_response") for inst in CP_insts]
+    vrms = [mocker.patch.object(inst, "_validate_response", 
+                                side_effect=[False, True]) 
+            for inst in CP_insts]
+    recms = [mocker.patch.object(inst, "_reset_error_count") 
+             for inst in CP_insts]
+    
+    # Setup common state for all instances
+    for inst in CP_insts: inst._validated_response = "mocked response"
+    
+    # Execute
+    for inst, gr_mck, vr_mck, rec_mck in zip(CP_insts, grms, vrms, recms):
+        act_out = inst.call()
+    
+    # Verify call counts and results
+        assert gr_mck.call_count == 2
+        assert vr_mck.call_count == 2
+        assert rec_mck.call_count == 1
+        assert act_out == "mocked response"
 
 
 # # Test checkBoolValidity
@@ -125,7 +142,7 @@
 #     [(True, False),  # Test case 1: readKeystroke path
 #      (False, True)]  # Test case 2: readString path
 # )
-# def test_get_resp(mocker, CP_inst, keystroke, leave_cur):
+# def test_get_response(mocker, CP_inst, keystroke, leave_cur):
 #     # Setup method mocks
 #     pp_mck = mocker.patch.object(CP_inst, "_put_prmt")
 #     rk_mck = mocker.patch.object(CP_inst, "_read_kst")
@@ -135,7 +152,7 @@
 #     CP_inst._exp_kst = keystroke
 
 #     # Execute
-#     CP_inst._get_resp()
+#     CP_inst._get_response()
 
 #     # Verify method calls
 #     pp_mck.assert_called_once_with(kp_cur_inline=leave_cur)
@@ -323,7 +340,7 @@
 #         # Test case 5: No validation required
 #         (False, False, None, None, True)]
 # )
-# def test_val_resp(mocker, CP_inst, bool_path, int_path, bool_rtn, int_rtn, 
+# def test_validate_response(mocker, CP_inst, bool_path, int_path, bool_rtn, int_rtn, 
 #                   exp_out):
 #     # Setup method mocks
 #     cbv_mck = mocker.patch.object(CP_inst, "_chk_bool_vld", 
@@ -337,7 +354,7 @@
 #     CP_inst._user_resp = "mock response"
 
 #     # Execute
-#     act_out = CP_inst._val_resp()
+#     act_out = CP_inst._validate_response()
 
 #     # Verify result
 #     assert act_out == exp_out

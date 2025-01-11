@@ -55,7 +55,7 @@ def test_console_prompt_constructors(cue, exception):
                 with pytest.raises(exception):
                     prompt_class(cue, *args)
     else:
-        CP_instances = [cls(cue, *args) for cls, args in prompt_classes]
+        CP_instances = [clss(cue, *args) for clss, args in prompt_classes]
 
     # Verify
         for inst in CP_instances:

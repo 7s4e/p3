@@ -115,11 +115,33 @@ class Console(ConsoleBase):
     manipulating the terminal screen.
 
     Methods:
+        back_n_lines: Clears the terminal n rows up from the cursor
         clear_screen: Clears the terminal screen and resets the cursor 
             to the home position.
         put_script_banner: Displays a reverse-video banner with the 
             script name.
     """
+    @staticmethod
+    def back_n_lines(n: int) -> None:
+        """
+        Move cursor back `n` lines and clear each line.
+
+        This method uses ANSI escape codes to move the cursor up 
+        (`\033[F`) and to clear the contents of each line (`\033[K`). 
+        The changes are flushed to the terminal to ensure immediate 
+        application.
+        
+        Args:
+            n: The number of lines to move back and clear.
+        """
+        if not isinstance(n, int): raise TypeError("Expected `int` for 'n'")
+        if n < 0: raise ValueError("The value 'n' must be positive")
+
+        for _ in range(min(n, ConsoleBase()._trm.height)):
+            stdout.write("\033[F")
+            stdout.write("\033[K")
+        stdout.flush()
+
     @staticmethod
     def clear_screen() -> None:
         """Clear terminal screen and reset cursor to the home position.
@@ -136,9 +158,9 @@ class Console(ConsoleBase):
                 banner.
         """
         term = ConsoleBase()._trm
-        script_name = snake_to_camel(script_name)
+        script_name = snake_to_camel(str(script_name))
         print(term.reverse(f"Running {script_name}...".ljust(term.width)))
-
+    
 
 class ConsolePrompt(ConsoleBase, ABC):
     """
@@ -177,7 +199,7 @@ class ConsolePrompt(ConsoleBase, ABC):
     def __init__(self, cue: str = "> ") -> None:
 
         # Type validation
-        if not isinstance(cue, str):
+        if not isinstance(cue, str): 
             raise TypeError("Expected `str` for 'cue'")
 
         # Initialize base and assign validated attributes
@@ -226,22 +248,22 @@ class ConsolePrompt(ConsoleBase, ABC):
                 return self._validated_response
 
     # Private Methods
-    def _back_n_lines(self, n: int) -> None:
-        """
-        Move cursor back `n` lines and clear each line.
+    # def _back_n_lines(self, n: int) -> None:
+    #     """
+    #     Move cursor back `n` lines and clear each line.
 
-        This method uses ANSI escape codes to move the cursor up 
-        (`\033[F`) and to clear the contents of each line (`\033[K`). 
-        The changes are flushed to the terminal to ensure immediate 
-        application.
+    #     This method uses ANSI escape codes to move the cursor up 
+    #     (`\033[F`) and to clear the contents of each line (`\033[K`). 
+    #     The changes are flushed to the terminal to ensure immediate 
+    #     application.
         
-        Args:
-            n: The number of lines to move back and clear.
-        """
-        for _ in range(n):
-            stdout.write("\033[F")
-            stdout.write("\033[K")
-        stdout.flush()
+    #     Args:
+    #         n: The number of lines to move back and clear.
+    #     """
+    #     for _ in range(n):
+    #         stdout.write("\033[F")
+    #         stdout.write("\033[K")
+    #     stdout.flush()
 
     def _get_response(self) -> None:
         """Prompt the user and capture input."""
@@ -287,7 +309,8 @@ class ConsolePrompt(ConsoleBase, ABC):
                 validation.
         """
         # Delete cue or both cue and last alert message
-        self._back_n_lines(min(error_count, 2))
+        Console.back_n_lines(min(error_count, 2))
+        # self._back_n_lines(min(error_count, 2))
 
         # Apply formatting based on error count
         formatting_steps = [(1, lambda msg: self._trm.red(msg), 
