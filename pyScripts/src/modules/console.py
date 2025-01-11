@@ -187,7 +187,6 @@ class ConsolePrompt(ConsoleBase, ABC):
         _validate_response: Abstract method to validate the user's 
             input.
         call: Prompt the user and return the validated response.
-        _back_n_lines: Delete and move cursor up 'n' lines.
         _get_response: Get the user's response based on expected input type.
         _print_message: Print formatted message to stdout.
         _put_alert: Display an alert message.
@@ -210,7 +209,7 @@ class ConsolePrompt(ConsoleBase, ABC):
         self._user_response = ""
         self._validated_response = None
     
-    # Abstract methods    
+    # Abstract methods
     @property
     @abstractmethod
     def _expect_keystroke(self) -> bool:
@@ -248,23 +247,6 @@ class ConsolePrompt(ConsoleBase, ABC):
                 return self._validated_response
 
     # Private Methods
-    # def _back_n_lines(self, n: int) -> None:
-    #     """
-    #     Move cursor back `n` lines and clear each line.
-
-    #     This method uses ANSI escape codes to move the cursor up 
-    #     (`\033[F`) and to clear the contents of each line (`\033[K`). 
-    #     The changes are flushed to the terminal to ensure immediate 
-    #     application.
-        
-    #     Args:
-    #         n: The number of lines to move back and clear.
-    #     """
-    #     for _ in range(n):
-    #         stdout.write("\033[F")
-    #         stdout.write("\033[K")
-    #     stdout.flush()
-
     def _get_response(self) -> None:
         """Prompt the user and capture input."""
         # If keystroke expected, read it after prompting
@@ -310,7 +292,6 @@ class ConsolePrompt(ConsoleBase, ABC):
         """
         # Delete cue or both cue and last alert message
         Console.back_n_lines(min(error_count, 2))
-        # self._back_n_lines(min(error_count, 2))
 
         # Apply formatting based on error count
         formatting_steps = [(1, lambda msg: self._trm.red(msg), 

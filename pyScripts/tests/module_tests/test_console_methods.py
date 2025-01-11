@@ -21,15 +21,13 @@ def pnt_mck(mocker):
 
 @pytest.mark.parametrize(
     "n_lines, exception", 
-    [
-        (1., TypeError), 
-        (-1, ValueError), 
-        (-sys.maxsize, ValueError), 
-        (0, None), 
-        (1, None), 
-        (9, None), 
-        (sys.maxsize, None)
-    ]
+    [(1., TypeError),             # Test case 1: non-integer
+     (-1, ValueError),            # Test case 2: negative
+     (-sys.maxsize, ValueError),  # Test case 3: max negative
+     (0, None),                   # Test case 4: zero boundary
+     (1, None),                   # Test case 5: one line
+     (9, None),                   # Test case 6: multiple lines
+     (sys.maxsize, None)]         # Test case 7: max positive
 )
 def test_back_n_lines(mocker, mck_T, mck_CB, n_lines, exception):
     # Setup

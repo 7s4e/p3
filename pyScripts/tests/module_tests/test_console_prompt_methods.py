@@ -10,36 +10,36 @@ PROMPT_CLASSES = [(ConsoleAnyKeyPrompt, ["Mock cue"]),
                   (ConsoleIntegerPrompt, ["Mock cue", None])]
 
 
-# @pytest.fixture
-# def mck_T(mocker):
-#     mck = mocker.Mock(spec=Terminal)
-#     mck.width = 79
-#     return mck
+@pytest.fixture
+def mck_T(mocker):
+    mck = mocker.Mock(spec=Terminal)
+    mck.width = 79
+    return mck
+
+@pytest.fixture
+def CP_insts(mck_T):
+    insts = [clss(*args) for clss, args in PROMPT_CLASSES]
+    for inst in insts: inst._trm = mck_T
+    return insts
 
 # @pytest.fixture
-# def CP_inst(mck_T):
-#     inst = ConsolePrompt("Test prompt")
-#     inst._trm = mck_T
-#     return inst
-
-# @pytest.fixture
-# def cb_mck(mocker, CP_inst):
-#     mck = mocker.patch.object(CP_inst._trm, "cbreak", mocker.MagicMock())
+# def cb_mck(mocker, CP_insts):
+#     mck = mocker.patch.object(CP_insts._trm, "cbreak", mocker.MagicMock())
 #     mck.return_value.__enter__ = mocker.MagicMock()
 #     mck.return_value.__exit__ = mocker.MagicMock()
 #     return mck
 
 # @pytest.fixture
-# def hc_mck(mocker, CP_inst):
-#     mck = mocker.patch.object(CP_inst._trm, "hidden_cursor", 
+# def hc_mck(mocker, CP_insts):
+#     mck = mocker.patch.object(CP_insts._trm, "hidden_cursor", 
 #                               mocker.MagicMock())
 #     mck.return_value.__enter__ = mocker.MagicMock()
 #     mck.return_value.__exit__ = mocker.MagicMock()
 #     return mck
 
 # @pytest.fixture
-# def pa_mck(mocker, CP_inst):
-#     return mocker.patch.object(CP_inst, "_put_alrt")
+# def pa_mck(mocker, CP_insts):
+#     return mocker.patch.object(CP_insts, "_put_alrt")
 
 
 # Test call
@@ -69,6 +69,34 @@ def test_call(mocker):
         assert act_out == "mocked response"
 
 
+# Test getResponse
+@pytest.mark.parametrize(
+    "exp_kst, leave_cur", 
+    [(True, False),  # Test case 1: readKeystroke path
+     (False, True)]  # Test case 2: readString path
+)
+def test_get_response(mocker, CP_insts, exp_kst, leave_cur):
+    # Setup mock methods for each instance
+    ppms = [mocker.patch.object(inst, "_put_prompt") for inst in CP_insts]
+    rkms = [mocker.patch.object(inst, "_read_keystroke") for inst in CP_insts]
+    rsms = [mocker.patch.object(inst, "_read_string") for inst in CP_insts]
+    
+    # Setup common state for all instances
+    for inst in CP_insts:
+        mocker.patch.object(inst.__class__, "_expect_keystroke", 
+                            new_callable=mocker.PropertyMock, 
+                            return_value=exp_kst)
+
+    # Execute
+    for inst, pp_mck, rk_mck, rs_mck in zip(CP_insts, ppms, rkms, rsms):
+        inst._get_response()
+
+    # Verify method calls
+        pp_mck.assert_called_once_with(kp_cur_inline=leave_cur)
+        assert rk_mck.call_count == (1 if exp_kst else 0)
+        assert rs_mck.call_count == (0 if exp_kst else 1)
+
+
 # # Test checkBoolValidity
 # @pytest.mark.parametrize(
 #     "response, exp_out", 
@@ -80,18 +108,18 @@ def test_call(mocker):
 #         ('y', True), ('Y', True), ('n', True), ('N', True)
 #     ]
 # )
-# def test_chk_bool_vld(CP_inst, pa_mck, response, exp_out):
+# def test_chk_bool_vld(CP_insts, pa_mck, response, exp_out):
 #     # Setup
-#     CP_inst._user_resp = response
+#     CP_insts._user_resp = response
 #     pa_alert_arg = "Respond with 'y' or 'n'"
 
 #     # Execute
-#     act_out = CP_inst._chk_bool_vld()
+#     act_out = CP_insts._chk_bool_vld()
 
 #     # Verify
 #     assert act_out == exp_out
 #     if not exp_out:
-#         pa_mck.assert_called_once_with(pa_alert_arg, CP_inst._e_ct["yes/no"])
+#         pa_mck.assert_called_once_with(pa_alert_arg, CP_insts._e_ct["yes/no"])
 #     else:
 #         pa_mck.assert_not_called()
 
@@ -119,49 +147,21 @@ def test_call(mocker):
 #         ((-7, 7), "-9", False, "Enter a number between -7 and 7", "OOL")
 #     ]
 # )
-# def test_chk_int_vld(CP_inst, pa_mck, int_validation, response, exp_out, 
+# def test_chk_int_vld(CP_insts, pa_mck, int_validation, response, exp_out, 
 #                      alert, error_cat):
 #     # Setup
-#     CP_inst._int_vld = int_validation
-#     CP_inst._user_resp = response
+#     CP_insts._int_vld = int_validation
+#     CP_insts._user_resp = response
 
 #     # Execute
-#     act_out = CP_inst._chk_int_vld()
+#     act_out = CP_insts._chk_int_vld()
 
 #     # Verify
 #     assert act_out == exp_out
 #     if exp_out == True:
-#         assert CP_inst._vld_resp == response
+#         assert CP_insts._vld_resp == response
 #     else:
-#         pa_mck.assert_called_once_with(alert, CP_inst._e_ct[error_cat])
-
-
-# # Test getResponse
-# @pytest.mark.parametrize(
-#     "keystroke, leave_cur", 
-#     [(True, False),  # Test case 1: readKeystroke path
-#      (False, True)]  # Test case 2: readString path
-# )
-# def test_get_response(mocker, CP_inst, keystroke, leave_cur):
-#     # Setup method mocks
-#     pp_mck = mocker.patch.object(CP_inst, "_put_prmt")
-#     rk_mck = mocker.patch.object(CP_inst, "_read_kst")
-#     rs_mck = mocker.patch.object(CP_inst, "_read_str")
-    
-#     # Setup expKeystroke attribute
-#     CP_inst._exp_kst = keystroke
-
-#     # Execute
-#     CP_inst._get_response()
-
-#     # Verify method calls
-#     pp_mck.assert_called_once_with(kp_cur_inline=leave_cur)
-#     if keystroke:
-#         rk_mck.assert_called_once()
-#         rs_mck.assert_not_called()
-#     else:
-#         rk_mck.assert_not_called()
-#         rs_mck.assert_called_once()
+#         pa_mck.assert_called_once_with(alert, CP_insts._e_ct[error_cat])
 
 
 # # Test printMessage
@@ -190,12 +190,12 @@ def test_call(mocker):
 #          "leo consectetur sodales etiam ex gravida eleifend interdum.")
 #     ]
 # )
-# def test_pnt_msg(CP_inst, width, padding, message, is_inline, capfd):
+# def test_pnt_msg(CP_insts, width, padding, message, is_inline, capfd):
 #     # Setup display width
-#     CP_inst._trm.width = width
+#     CP_insts._trm.width = width
 
 #     # Execute and capture
-#     CP_inst._pnt_msg(message, fmt_alloc=0, kp_cur_inline=is_inline)
+#     CP_insts._pnt_msg(message, fmt_alloc=0, kp_cur_inline=is_inline)
 #     out, err = capfd.readouterr()
 
 #     # Verify padding and line break
@@ -207,12 +207,12 @@ def test_call(mocker):
 
 
 # # Test putAlert
-# def test_put_alrt(CP_inst, capfd):
+# def test_put_alrt(CP_insts, capfd):
 #     # Setup terminal color
-#     CP_inst._trm.red = lambda x: f"[red]{x}[/red]"
+#     CP_insts._trm.red = lambda x: f"[red]{x}[/red]"
 
 #     # Execute and capture
-#     CP_inst._put_alrt("Alert message", 1)
+#     CP_insts._put_alrt("Alert message", 1)
 #     out, err = capfd.readouterr()
 
 #     # Verify capture
@@ -224,12 +224,12 @@ def test_call(mocker):
 # @pytest.mark.parametrize("is_inline, end", 
 #                          [(True, " "),     # Test case 1: Inline
 #                           (False, "\n")])  # Test case 2: New line
-# def test_put_prmt(CP_inst, is_inline, end, capfd):
+# def test_put_prompt(CP_insts, is_inline, end, capfd):
 #     # Setup terminal color
-#     CP_inst._trm.yellow = lambda x: f"[yellow]{x}[/yellow]"
+#     CP_insts._trm.yellow = lambda x: f"[yellow]{x}[/yellow]"
 
 #     # Execute and capture
-#     CP_inst._put_prmt(kp_cur_inline=is_inline)
+#     CP_insts._put_prompt(kp_cur_inline=is_inline)
 #     out, err = capfd.readouterr()
 
 #     # Verify capture
@@ -252,19 +252,21 @@ def test_call(mocker):
 
 #         # Test case 8: Non-printable keystrokes
 #         ('a', [keyboard.Keystroke('\x08', 8), keyboard.Keystroke('\x09', 9), 
-#             keyboard.Keystroke('\x1b', 27), keyboard.Keystroke('a', 97)])
+#             keyboard.Keystroke('\x1b', 27), keyboard.Keystroke('
+#a', 97)])
 #     ]
-# )
-# def test_read_kst(mocker, CP_inst, cb_mck, hc_mck, sequence_in, exp_out):
+# ]
+# def test_read_keystroke(mocker, CP_insts, cb_mck, hc_mck, sequence_in, exp_out):
 #     # Setup key iterator; cbreak and hiddenCursor mocks required
 #     key_iter = iter(sequence_in)
-#     mocker.patch.object(CP_inst._trm, "inkey", lambda: next(key_iter))
+#     mocker.patch.object(CP_insts._trm, "inkey", lambda: next(key_iter))
 
-#     # Execute
-#     CP_inst._read_kst()
+#     # Execut
+#e
+#     CP_instsecute_read_keystroke()
 
 #     # Verify output
-#     assert CP_inst._user_resp == exp_out
+#     assert CP_insts._user_resp == exp_out
 
 
 # # Test readString
@@ -296,17 +298,17 @@ def test_call(mocker):
 #         # """
 #     ]
 # )
-# def test_read_str(CP_inst, cb_mck, sequence_in, exp_out, capfd):
+# def test_read_str(CP_insts, cb_mck, sequence_in, exp_out, capfd):
 #     # Setup
-#     CP_inst._trm.inkey.side_effect = sequence_in
-#     CP_inst._trm.green = lambda x: f"[green]{x}[/green]"
+#     CP_insts._trm.inkey.side_effect = sequence_in
+#     CP_insts._trm.green = lambda x: f"[green]{x}[/green]"
 
 #     # Execute and capture
-#     CP_inst._read_str()
+#     CP_insts._read_str()
 #     out, err = capfd.readouterr()
 
 #     # Verify result
-#     assert CP_inst._user_resp == exp_out
+#     assert CP_insts._user_resp == exp_out
     
 #     # Verify capture
 #     exp_stdout = []
@@ -340,21 +342,21 @@ def test_call(mocker):
 #         # Test case 5: No validation required
 #         (False, False, None, None, True)]
 # )
-# def test_validate_response(mocker, CP_inst, bool_path, int_path, bool_rtn, int_rtn, 
+# def test_validate_response(mocker, CP_insts, bool_path, int_path, bool_rtn, int_rtn, 
 #                   exp_out):
 #     # Setup method mocks
-#     cbv_mck = mocker.patch.object(CP_inst, "_chk_bool_vld", 
+#     cbv_mck = mocker.patch.object(CP_insts, "_chk_bool_vld", 
 #                                   return_value=bool_rtn)
-#     civ_mck = mocker.patch.object(CP_inst, "_chk_int_vld", 
+#     civ_mck = mocker.patch.object(CP_insts, "_chk_int_vld", 
 #                                   return_value=int_rtn)
     
 #     # Setup instance attributes
-#     CP_inst._val_bool = bool_path
-#     CP_inst._val_int = int_path
-#     CP_inst._user_resp = "mock response"
+#     CP_insts._val_bool = bool_path
+#     CP_insts._val_int = int_path
+#     CP_insts._user_resp = "mock response"
 
 #     # Execute
-#     act_out = CP_inst._validate_response()
+#     act_out = CP_insts._validate_response()
 
 #     # Verify result
 #     assert act_out == exp_out
@@ -369,4 +371,4 @@ def test_call(mocker):
 #     else:
 #         cbv_mck.assert_not_called()
 #         civ_mck.assert_not_called()
-#         assert CP_inst._vld_resp == CP_inst._user_resp
+#         assert CP_insts._vld_resp == CP_insts._user_resp
