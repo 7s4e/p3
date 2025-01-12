@@ -4,6 +4,7 @@ from jsonschema import validate, ValidationError
 import os
 
 app = Flask(__name__)
+
 app.config['UPLOAD_FOLDER'] = 'uploads'
 
 # Ensure the uploads directory exists
