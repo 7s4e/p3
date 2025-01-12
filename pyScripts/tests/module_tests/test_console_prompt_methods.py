@@ -22,24 +22,28 @@ def CP_insts(mck_T):
     for inst in insts: inst._trm = mck_T
     return insts
 
-# @pytest.fixture
-# def cb_mck(mocker, CP_insts):
-#     mck = mocker.patch.object(CP_insts._trm, "cbreak", mocker.MagicMock())
-#     mck.return_value.__enter__ = mocker.MagicMock()
-#     mck.return_value.__exit__ = mocker.MagicMock()
-#     return mck
+@pytest.fixture
+def cbms(mocker, CP_insts):
+    mcks = [mocker.patch.object(inst._trm, "cbreak", mocker.MagicMock()) 
+            for inst in CP_insts]
+    for mck in mcks:
+        mck.return_value.__enter__ = mocker.MagicMock()
+        mck.return_value.__exit__ = mocker.MagicMock()
+    return mcks
 
-# @pytest.fixture
-# def hc_mck(mocker, CP_insts):
-#     mck = mocker.patch.object(CP_insts._trm, "hidden_cursor", 
-#                               mocker.MagicMock())
-#     mck.return_value.__enter__ = mocker.MagicMock()
-#     mck.return_value.__exit__ = mocker.MagicMock()
-#     return mck
+@pytest.fixture
+def hcms(mocker, CP_insts):
+    mcks = [mocker.patch.object(CP_insts._trm, "hidden_cursor", 
+                                mocker.MagicMock()) 
+            for inst in CP_insts]
+    for mck in mcks:
+        mck.return_value.__enter__ = mocker.MagicMock()
+        mck.return_value.__exit__ = mocker.MagicMock()
+    return mcks
 
 # @pytest.fixture
 # def pa_mck(mocker, CP_insts):
-#     return mocker.patch.object(CP_insts, "_put_alrt")
+#     return mocker.patch.object(CP_insts, "_put_alert")
 
 
 # Test call
@@ -95,6 +99,170 @@ def test_get_response(mocker, CP_insts, exp_kst, leave_cur):
         pp_mck.assert_called_once_with(kp_cur_inline=leave_cur)
         assert rk_mck.call_count == (1 if exp_kst else 0)
         assert rs_mck.call_count == (0 if exp_kst else 1)
+
+
+# Test printMessage
+@pytest.mark.parametrize(
+    "width, padding, is_inline, message", 
+    [
+        # Test case 1: Minimum width
+        (1, " " * 0, False, 
+         "Lorem ipsum odor amet, consectetuer adipiscing elit."), 
+        
+        # Test case 2: Standard width
+        (79, " " * 0, False, 
+         "Lorem ipsum odor amet, consectetuer adipiscing elit."), 
+        
+        # Test case 3: Large width
+        (99, " " * 10, False, 
+         "Lorem ipsum odor amet, consectetuer adipiscing elit."), 
+        
+        # Test case 4: Standard width, inline
+        (79," " * 0, True, 
+         "Lorem ipsum odor amet, consectetuer adipiscing elit."), 
+        
+        # Test case 5: Standard width, text
+        (79," " * 0, True, 
+         "Lorem ipsum odor amet, consectetuer adipiscing elit. Torquent " + 
+         "leo consectetur sodales etiam ex gravida eleifend interdum.")
+    ]
+)
+def test_print_message(CP_insts, width, padding, message, is_inline, capfd):
+    # Setup display width
+    for inst in CP_insts: inst._trm.width = width
+
+    # Execute and capture
+    for inst in CP_insts:
+        inst._print_message(message, fmt_alloc=0, kp_cur_inline=is_inline)
+        out, err = capfd.readouterr()
+
+    # Verify padding and line break
+        text = padding + message
+        ln_break = text.rfind(" ", 0, min(width, 79))
+        assert out.startswith(text[:ln_break if ln_break > 0 else width])
+        assert out.endswith("\n") != is_inline
+        assert err == ""
+
+
+# Test putAlert
+def test_put_alert(CP_insts, capfd):
+    # Setup terminal color
+    for inst in CP_insts: inst._trm.red = lambda x: f"[red]{x}[/red]"
+
+    # Execute and capture
+    for inst in CP_insts:
+        inst._put_alert("Alert message", 1)
+        out, err = capfd.readouterr()
+
+    # Verify capture
+    assert out == "[red]Alert message[/red]\n"
+    assert err == ""
+
+
+# Test putPrompt
+@pytest.mark.parametrize("is_inline, end", 
+                         [(True, " "),     # Test case 1: Inline
+                          (False, "\n")])  # Test case 2: New line
+def test_put_prompt(CP_insts, is_inline, end, capfd):
+    # Setup terminal color
+    for inst in CP_insts: inst._trm.yellow = lambda x: f"[yellow]{x}[/yellow]"
+
+    # Execute and capture
+    for inst in CP_insts:
+        inst._put_prompt(kp_cur_inline=is_inline)
+        out, err = capfd.readouterr()
+
+    # Verify capture
+        assert out.startswith("[yellow]Test prompt[/yellow]")
+        assert out.endswith(end)
+        assert err == ""
+
+
+# Test readKeystroke
+@pytest.mark.parametrize(
+    "exp_out, sequence_in", 
+    [
+        ('', [keyboard.Keystroke('\n', 10)]),   # Test case 1
+        (' ', [keyboard.Keystroke(' ', 32)]),   # Test case 2
+        ('!', [keyboard.Keystroke('!', 33)]),   # Test case 3
+        ('1', [keyboard.Keystroke('1', 49)]),   # Test case 4
+        ('A', [keyboard.Keystroke('A', 65)]),   # Test case 5
+        ('a', [keyboard.Keystroke('a', 97)]),   # Test case 6
+        ('~', [keyboard.Keystroke('~', 126)]),  # Test case 7
+
+        # Test case 8: Non-printable keystrokes
+        ('a', [keyboard.Keystroke('\x08', 8), keyboard.Keystroke('\x09', 9), 
+               keyboard.Keystroke('\x1b', 27), keyboard.Keystroke('a', 97)])
+    ]
+)
+def test_read_keystroke(mocker, CP_insts, cbms, hcms, sequence_in, exp_out):
+    # Setup key iterator; cbreak and hiddenCursor mocks required
+    key_iter = iter(sequence_in)
+    for inst in CP_insts:
+        mocker.patch.object(inst._trm, "inkey", lambda: next(key_iter))
+
+    # Execute
+    for inst, _, _ in zip(CP_insts, cbms, hcms):
+        inst._read_keystroke()
+
+    # Verify output
+        assert inst._user_resp == exp_out
+
+
+# Test readString
+@pytest.mark.parametrize(
+    "exp_out, sequence_in", 
+    [
+        # Test case 1: No use of 'Backspace'
+        ("abc", [keyboard.Keystroke('a', 97), keyboard.Keystroke('b', 98), 
+                 keyboard.Keystroke('c', 99), keyboard.Keystroke('\n', 10)]), 
+        
+        # Test case 2: Mid-stream use of 'Backspace'
+        # ("b", [keyboard.Keystroke('a', 97), keyboard.Keystroke('\x08', 8), 
+        #        keyboard.Keystroke('b', 98), keyboard.Keystroke('\n', 10)]), 
+        # """ > assert out == exp_stdout, f"Expected: {exp_stdout}, Got: 
+        #         {out}"
+        #     E AssertionError: Expected: [green]b[/green], Got: 
+        #         [green]b[/green]
+        #     E assert '[green]a[/green]\x08 \x08\x08 \x08\x08 \x08\x08 \x08
+        #         \x08 \x08\x08 \x08\x08 \x08\x08 \x08\x08 \x08\x08 \x08
+        #         \x08 \x08\x08 \x08\x08 \x08\x08 \x08\x08 \x08\x08 \x08
+        #         [green]b[/green]\n' == '[green]b[/green]\n'
+        # """
+        
+        # Test case 3: Initial use of 'Backspace'
+        # ("ab", [keyboard.Keystroke('\x08', 8), keyboard.Keystroke('a', 97), 
+        #         keyboard.Keystroke('b', 98), keyboard.Keystroke('\n', 8)])
+        # """ > assert console_prompt._user_response == exp_out
+        #     E AssertionError: assert 'a' == 'ab'
+        # """
+    ]
+)
+def test_read_string(CP_insts, cbms, sequence_in, exp_out, capfd):
+    # Setup
+    for inst in CP_insts:
+        inst._trm.inkey.side_effect = sequence_in
+        inst._trm.green = lambda x: f"[green]{x}[/green]"
+
+    # Execute and capture
+    for inst, _ in zip(CP_insts, cbms):
+        inst._read_string()
+        out, err = capfd.readouterr()
+
+    # Verify result
+        assert inst._user_response == exp_out
+    
+    # Verify capture
+        exp_stdout = []
+        for key in sequence_in:
+            if key.code == 8:
+                if exp_stdout:
+                    exp_stdout.pop()
+            elif 32 <= key.code <= 126:
+                exp_stdout.append(f"[green]{str(key)}[/green]")
+        exp_stdout = ''.join(exp_stdout) + '\n'
+        assert out == exp_stdout, f"Expected: {exp_stdout}, Got: {out}"
+        assert err == ""
 
 
 # # Test checkBoolValidity
@@ -162,165 +330,6 @@ def test_get_response(mocker, CP_insts, exp_kst, leave_cur):
 #         assert CP_insts._vld_resp == response
 #     else:
 #         pa_mck.assert_called_once_with(alert, CP_insts._e_ct[error_cat])
-
-
-# # Test printMessage
-# @pytest.mark.parametrize(
-#     "width, padding, is_inline, message", 
-#     [
-#         # Test case 1: Minimum width
-#         (1, " " * 0, False, 
-#          "Lorem ipsum odor amet, consectetuer adipiscing elit."), 
-        
-#         # Test case 2: Standard width
-#         (79, " " * 0, False, 
-#          "Lorem ipsum odor amet, consectetuer adipiscing elit."), 
-        
-#         # Test case 3: Large width
-#         (99, " " * 10, False, 
-#          "Lorem ipsum odor amet, consectetuer adipiscing elit."), 
-        
-#         # Test case 4: Standard width, inline
-#         (79," " * 0, True, 
-#          "Lorem ipsum odor amet, consectetuer adipiscing elit."), 
-        
-#         # Test case 5: Standard width, text
-#         (79," " * 0, True, 
-#          "Lorem ipsum odor amet, consectetuer adipiscing elit. Torquent " + 
-#          "leo consectetur sodales etiam ex gravida eleifend interdum.")
-#     ]
-# )
-# def test_pnt_msg(CP_insts, width, padding, message, is_inline, capfd):
-#     # Setup display width
-#     CP_insts._trm.width = width
-
-#     # Execute and capture
-#     CP_insts._pnt_msg(message, fmt_alloc=0, kp_cur_inline=is_inline)
-#     out, err = capfd.readouterr()
-
-#     # Verify padding and line break
-#     text = padding + message
-#     ln_break = text.rfind(" ", 0, min(width, 79))
-#     assert out.startswith(text[:ln_break if ln_break > 0 else width])
-#     assert out.endswith("\n") != is_inline
-#     assert err == ""
-
-
-# # Test putAlert
-# def test_put_alrt(CP_insts, capfd):
-#     # Setup terminal color
-#     CP_insts._trm.red = lambda x: f"[red]{x}[/red]"
-
-#     # Execute and capture
-#     CP_insts._put_alrt("Alert message", 1)
-#     out, err = capfd.readouterr()
-
-#     # Verify capture
-#     assert out == "[red]Alert message[/red]\n"
-#     assert err == ""
-
-
-# # Test putPrompt
-# @pytest.mark.parametrize("is_inline, end", 
-#                          [(True, " "),     # Test case 1: Inline
-#                           (False, "\n")])  # Test case 2: New line
-# def test_put_prompt(CP_insts, is_inline, end, capfd):
-#     # Setup terminal color
-#     CP_insts._trm.yellow = lambda x: f"[yellow]{x}[/yellow]"
-
-#     # Execute and capture
-#     CP_insts._put_prompt(kp_cur_inline=is_inline)
-#     out, err = capfd.readouterr()
-
-#     # Verify capture
-#     assert out.startswith("[yellow]Test prompt[/yellow]")
-#     assert out.endswith(end)
-#     assert err == ""
-
-
-# # Test readKeystroke
-# @pytest.mark.parametrize(
-#     "exp_out, sequence_in", 
-#     [
-#         ('', [keyboard.Keystroke('\n', 10)]),   # Test case 1
-#         (' ', [keyboard.Keystroke(' ', 32)]),   # Test case 2
-#         ('!', [keyboard.Keystroke('!', 33)]),   # Test case 3
-#         ('1', [keyboard.Keystroke('1', 49)]),   # Test case 4
-#         ('A', [keyboard.Keystroke('A', 65)]),   # Test case 5
-#         ('a', [keyboard.Keystroke('a', 97)]),   # Test case 6
-#         ('~', [keyboard.Keystroke('~', 126)]),  # Test case 7
-
-#         # Test case 8: Non-printable keystrokes
-#         ('a', [keyboard.Keystroke('\x08', 8), keyboard.Keystroke('\x09', 9), 
-#             keyboard.Keystroke('\x1b', 27), keyboard.Keystroke('
-#a', 97)])
-#     ]
-# ]
-# def test_read_keystroke(mocker, CP_insts, cb_mck, hc_mck, sequence_in, exp_out):
-#     # Setup key iterator; cbreak and hiddenCursor mocks required
-#     key_iter = iter(sequence_in)
-#     mocker.patch.object(CP_insts._trm, "inkey", lambda: next(key_iter))
-
-#     # Execut
-#e
-#     CP_instsecute_read_keystroke()
-
-#     # Verify output
-#     assert CP_insts._user_resp == exp_out
-
-
-# # Test readString
-# @pytest.mark.parametrize(
-#     "exp_out, sequence_in", 
-#     [
-#         # Test case 1: No use of 'Backspace'
-#         ("abc", [keyboard.Keystroke('a', 97), keyboard.Keystroke('b', 98), 
-#                  keyboard.Keystroke('c', 99), keyboard.Keystroke('\n', 10)]), 
-        
-#         # Test case 2: Mid-stream use of 'Backspace'
-#         # ("b", [keyboard.Keystroke('a', 97), keyboard.Keystroke('\x08', 8), 
-#         #        keyboard.Keystroke('b', 98), keyboard.Keystroke('\n', 10)]), 
-#         # """ > assert out == exp_stdout, f"Expected: {exp_stdout}, Got: 
-#         #         {out}"
-#         #     E AssertionError: Expected: [green]b[/green], Got: 
-#         #         [green]b[/green]
-#         #     E assert '[green]a[/green]\x08 \x08\x08 \x08\x08 \x08\x08 \x08
-#         #         \x08 \x08\x08 \x08\x08 \x08\x08 \x08\x08 \x08\x08 \x08
-#         #         \x08 \x08\x08 \x08\x08 \x08\x08 \x08\x08 \x08\x08 \x08
-#         #         [green]b[/green]\n' == '[green]b[/green]\n'
-#         # """
-        
-#         # Test case 3: Initial use of 'Backspace'
-#         # ("ab", [keyboard.Keystroke('\x08', 8), keyboard.Keystroke('a', 97), 
-#         #         keyboard.Keystroke('b', 98), keyboard.Keystroke('\n', 8)])
-#         # """ > assert console_prompt._user_response == exp_out
-#         #     E AssertionError: assert 'a' == 'ab'
-#         # """
-#     ]
-# )
-# def test_read_str(CP_insts, cb_mck, sequence_in, exp_out, capfd):
-#     # Setup
-#     CP_insts._trm.inkey.side_effect = sequence_in
-#     CP_insts._trm.green = lambda x: f"[green]{x}[/green]"
-
-#     # Execute and capture
-#     CP_insts._read_str()
-#     out, err = capfd.readouterr()
-
-#     # Verify result
-#     assert CP_insts._user_resp == exp_out
-    
-#     # Verify capture
-#     exp_stdout = []
-#     for key in sequence_in:
-#         if key.code == 8:
-#             if exp_stdout:
-#                 exp_stdout.pop()
-#         elif 32 <= key.code <= 126:
-#             exp_stdout.append(f"[green]{str(key)}[/green]")
-#     exp_stdout = ''.join(exp_stdout) + '\n'
-#     assert out == exp_stdout, f"Expected: {exp_stdout}, Got: {out}"
-#     assert err == ""
 
 
 # # Test validateResponse
