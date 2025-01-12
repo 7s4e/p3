@@ -343,12 +343,17 @@ class ConsolePrompt(ConsoleBase, ABC):
         """
         # Initialize values
         key = None
+        code = 0
         miskey_ct = -1
         self._user_response = ""
+        loop_ct = 0
+        print(f"loop {loop_ct}: key={key}, code={code}")
 
         # While loop within contexts filtering for printable characters
         with self._trm.cbreak(), self._trm.hidden_cursor():
             while key is None or not (32 <= code <= 126 or code == 10):
+                loop_ct += 1
+                print(f"loop {loop_ct}: key={key}, code={code}")
                 key = self._trm.inkey()
                 try:
                     code = ord(key)

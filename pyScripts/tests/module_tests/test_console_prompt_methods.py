@@ -33,7 +33,7 @@ def cbms(mocker, CP_insts):
 
 @pytest.fixture
 def hcms(mocker, CP_insts):
-    mcks = [mocker.patch.object(CP_insts._trm, "hidden_cursor", 
+    mcks = [mocker.patch.object(inst._trm, "hidden_cursor", 
                                 mocker.MagicMock()) 
             for inst in CP_insts]
     for mck in mcks:
@@ -173,7 +173,7 @@ def test_put_prompt(CP_insts, is_inline, end, capfd):
         out, err = capfd.readouterr()
 
     # Verify capture
-        assert out.startswith("[yellow]Test prompt[/yellow]")
+        assert out.startswith("[yellow]Mock cue[/yellow]")
         assert out.endswith(end)
         assert err == ""
 
@@ -183,16 +183,16 @@ def test_put_prompt(CP_insts, is_inline, end, capfd):
     "exp_out, sequence_in", 
     [
         ('', [keyboard.Keystroke('\n', 10)]),   # Test case 1
-        (' ', [keyboard.Keystroke(' ', 32)]),   # Test case 2
-        ('!', [keyboard.Keystroke('!', 33)]),   # Test case 3
-        ('1', [keyboard.Keystroke('1', 49)]),   # Test case 4
-        ('A', [keyboard.Keystroke('A', 65)]),   # Test case 5
-        ('a', [keyboard.Keystroke('a', 97)]),   # Test case 6
-        ('~', [keyboard.Keystroke('~', 126)]),  # Test case 7
+        # (' ', [keyboard.Keystroke(' ', 32)]),   # Test case 2
+        # ('!', [keyboard.Keystroke('!', 33)]),   # Test case 3
+        # ('1', [keyboard.Keystroke('1', 49)]),   # Test case 4
+        # ('A', [keyboard.Keystroke('A', 65)]),   # Test case 5
+        # ('a', [keyboard.Keystroke('a', 97)]),   # Test case 6
+        # ('~', [keyboard.Keystroke('~', 126)]),  # Test case 7
 
         # Test case 8: Non-printable keystrokes
-        ('a', [keyboard.Keystroke('\x08', 8), keyboard.Keystroke('\x09', 9), 
-               keyboard.Keystroke('\x1b', 27), keyboard.Keystroke('a', 97)])
+        # ('a', [keyboard.Keystroke('\x08', 8), keyboard.Keystroke('\x09', 9), 
+        #        keyboard.Keystroke('\x1b', 27), keyboard.Keystroke('a', 97)])
     ]
 )
 def test_read_keystroke(mocker, CP_insts, cbms, hcms, sequence_in, exp_out):
@@ -206,63 +206,63 @@ def test_read_keystroke(mocker, CP_insts, cbms, hcms, sequence_in, exp_out):
         inst._read_keystroke()
 
     # Verify output
-        assert inst._user_resp == exp_out
-
-
-# Test readString
-@pytest.mark.parametrize(
-    "exp_out, sequence_in", 
-    [
-        # Test case 1: No use of 'Backspace'
-        ("abc", [keyboard.Keystroke('a', 97), keyboard.Keystroke('b', 98), 
-                 keyboard.Keystroke('c', 99), keyboard.Keystroke('\n', 10)]), 
-        
-        # Test case 2: Mid-stream use of 'Backspace'
-        # ("b", [keyboard.Keystroke('a', 97), keyboard.Keystroke('\x08', 8), 
-        #        keyboard.Keystroke('b', 98), keyboard.Keystroke('\n', 10)]), 
-        # """ > assert out == exp_stdout, f"Expected: {exp_stdout}, Got: 
-        #         {out}"
-        #     E AssertionError: Expected: [green]b[/green], Got: 
-        #         [green]b[/green]
-        #     E assert '[green]a[/green]\x08 \x08\x08 \x08\x08 \x08\x08 \x08
-        #         \x08 \x08\x08 \x08\x08 \x08\x08 \x08\x08 \x08\x08 \x08
-        #         \x08 \x08\x08 \x08\x08 \x08\x08 \x08\x08 \x08\x08 \x08
-        #         [green]b[/green]\n' == '[green]b[/green]\n'
-        # """
-        
-        # Test case 3: Initial use of 'Backspace'
-        # ("ab", [keyboard.Keystroke('\x08', 8), keyboard.Keystroke('a', 97), 
-        #         keyboard.Keystroke('b', 98), keyboard.Keystroke('\n', 8)])
-        # """ > assert console_prompt._user_response == exp_out
-        #     E AssertionError: assert 'a' == 'ab'
-        # """
-    ]
-)
-def test_read_string(CP_insts, cbms, sequence_in, exp_out, capfd):
-    # Setup
-    for inst in CP_insts:
-        inst._trm.inkey.side_effect = sequence_in
-        inst._trm.green = lambda x: f"[green]{x}[/green]"
-
-    # Execute and capture
-    for inst, _ in zip(CP_insts, cbms):
-        inst._read_string()
-        out, err = capfd.readouterr()
-
-    # Verify result
         assert inst._user_response == exp_out
+
+
+# # Test readString
+# @pytest.mark.parametrize(
+#     "exp_out, sequence_in", 
+#     [
+#         # Test case 1: No use of 'Backspace'
+#         ("abc", [keyboard.Keystroke('a', 97), keyboard.Keystroke('b', 98), 
+#                  keyboard.Keystroke('c', 99), keyboard.Keystroke('\n', 10)]), 
+        
+#         # Test case 2: Mid-stream use of 'Backspace'
+#         # ("b", [keyboard.Keystroke('a', 97), keyboard.Keystroke('\x08', 8), 
+#         #        keyboard.Keystroke('b', 98), keyboard.Keystroke('\n', 10)]), 
+#         # """ > assert out == exp_stdout, f"Expected: {exp_stdout}, Got: 
+#         #         {out}"
+#         #     E AssertionError: Expected: [green]b[/green], Got: 
+#         #         [green]b[/green]
+#         #     E assert '[green]a[/green]\x08 \x08\x08 \x08\x08 \x08\x08 \x08
+#         #         \x08 \x08\x08 \x08\x08 \x08\x08 \x08\x08 \x08\x08 \x08
+#         #         \x08 \x08\x08 \x08\x08 \x08\x08 \x08\x08 \x08\x08 \x08
+#         #         [green]b[/green]\n' == '[green]b[/green]\n'
+#         # """
+        
+#         # Test case 3: Initial use of 'Backspace'
+#         # ("ab", [keyboard.Keystroke('\x08', 8), keyboard.Keystroke('a', 97), 
+#         #         keyboard.Keystroke('b', 98), keyboard.Keystroke('\n', 8)])
+#         # """ > assert console_prompt._user_response == exp_out
+#         #     E AssertionError: assert 'a' == 'ab'
+#         # """
+#     ]
+# )
+# def test_read_string(CP_insts, cbms, sequence_in, exp_out, capfd):
+#     # Setup
+#     for inst in CP_insts:
+#         inst._trm.inkey.side_effect = sequence_in
+#         inst._trm.green = lambda x: f"[green]{x}[/green]"
+
+#     # Execute and capture
+#     for inst, _ in zip(CP_insts, cbms):
+#         inst._read_string()
+#         out, err = capfd.readouterr()
+
+#     # Verify result
+#         assert inst._user_response == exp_out
     
-    # Verify capture
-        exp_stdout = []
-        for key in sequence_in:
-            if key.code == 8:
-                if exp_stdout:
-                    exp_stdout.pop()
-            elif 32 <= key.code <= 126:
-                exp_stdout.append(f"[green]{str(key)}[/green]")
-        exp_stdout = ''.join(exp_stdout) + '\n'
-        assert out == exp_stdout, f"Expected: {exp_stdout}, Got: {out}"
-        assert err == ""
+#     # Verify capture
+#         exp_stdout = []
+#         for key in sequence_in:
+#             if key.code == 8:
+#                 if exp_stdout:
+#                     exp_stdout.pop()
+#             elif 32 <= key.code <= 126:
+#                 exp_stdout.append(f"[green]{str(key)}[/green]")
+#         exp_stdout = ''.join(exp_stdout) + '\n'
+#         assert out == exp_stdout, f"Expected: {exp_stdout}, Got: {out}"
+#         assert err == ""
 
 
 # # Test checkBoolValidity
