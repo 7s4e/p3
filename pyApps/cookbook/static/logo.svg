@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 7s4e.org logo  -->
+
+<svg 
+  width="100%"
+  height="100%"
+  viewBox="0 0 640 640"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <defs>
+    <!-- <style>@import url("../css/styles.css");</style> -->
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color: #777;"/>
+      <stop offset="100%" style="stop-color: #333;" />
+    </linearGradient>
+  </defs>
+
+  <path
+    d="
+      M 39,179 Q 30,48 161,39 T 234,243 T 329,466 
+      C 480,477 428,146 409,378 L 390,610
+    "
+    fill="none"
+    stroke="url(#gradient)"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-opacity="0.7543"
+    stroke-width="43"
+  />
+</svg>
+
+<!-- <stop offset="0%" style="stop-color: var(--light-color, #777);"/>
+<stop offset="100%" style="stop-color: var(--dark-color, #333);" /> -->
+
+<!-- A:39,179;30,48;291,30;177,455;480,477;B:428,146;390,610. -->

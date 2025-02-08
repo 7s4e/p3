@@ -11,8 +11,8 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Load the JSON schema
-# with open('schema.json') as f:
-#     recipe_schema = json.load(f)
+with open('schema.json') as f:
+    recipe_schema = json.load(f)
 
 @app.route('/')
 def index():
@@ -27,7 +27,7 @@ def submit():
         data['steps'] = data['steps'].splitlines()
 
         # Validate against the schema
-        # validate(instance=data, schema=recipe_schema)
+        validate(instance=data, schema=recipe_schema)
 
         # Handle photo upload
         photo = request.files.get('photo')

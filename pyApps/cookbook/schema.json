@@ -1,12 +1,124 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "$id": "https://example.com/schemas/recipe.json",
+  "title": "Recipe",
+  "description": "Adapted from schema.org/Recipe.",
   "type": "object",
   "properties": {
-    "title": {"type": "string"},
-    "ingredients": {"type": "array", "items": {"type": "string"}},
-    "steps": {"type": "array", "items": {"type": "string"}},
-    "category": {"type": "string"},
-    "photo": {"type": "string"}
+    "name": {
+      "type": "string",
+      "description": "The name of the recipe."
+    },
+    "description": {
+      "type": "string",
+      "description": "A description of the recipe."
+    },
+    "image": {
+      "type": "string",
+      "format": "uri",
+      "description": "An image URL of the finished dish."
+    },
+    "author": {
+      "type": "string",
+      "description": "The author of the recipe."
+    },
+    "datePublished": {
+      "type": "string",
+      "format": "date",
+      "description": "The date the recipe was published."
+    },
+    "prepTime": {
+      "type": "string",
+      "description": "The time it takes to prepare the recipe (ISO 8601 duration)."
+    },
+    "cookTime": {
+      "type": "string",
+      "description": "The time it takes to cook the recipe (ISO 8601 duration)."
+    },
+    "totalTime": {
+      "type": "string",
+      "description": "The total time required to prepare and cook the recipe (ISO 8601 duration)."
+    },
+    "recipeYield": {
+      "type": "string",
+      "description": "The quantity produced by the recipe (for example, '4 servings')."
+    },
+    "recipeCategory": {
+      "type": "string",
+      "description": "The category of the recipe (for example, 'Dessert')."
+    },
+    "recipeCuisine": {
+      "type": "string",
+      "description": "The cuisine of the recipe (for example, 'Italian')."
+    },
+    "recipeIngredient": {
+      "type": "array",
+      "description": "A list of ingredients used in the recipe.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "recipeInstructions": {
+      "type": "array",
+      "description": "A list of instructions for making the recipe.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "aggregateRating": {
+      "type": "object",
+      "description": "An aggregate rating for the recipe.",
+      "properties": {
+        "ratingValue": {
+          "type": "number",
+          "description": "The average rating (for example, 4.5)."
+        },
+        "reviewCount": {
+          "type": "number",
+          "description": "The number of reviews."
+        }
+      },
+      "required": ["ratingValue", "reviewCount"]
+    },
+    "nutrition": {
+      "type": "object",
+      "description": "Nutritional information about the recipe.",
+      "properties": {
+        "calories": {
+          "type": "string",
+          "description": "The number of calories (for example, '250 kcal')."
+        },
+        "fatContent": {
+          "type": "string",
+          "description": "The amount of fat (for example, '10 g')."
+        },
+        "carbohydrateContent": {
+          "type": "string",
+          "description": "The amount of carbohydrates (for example, '30 g')."
+        },
+        "proteinContent": {
+          "type": "string",
+          "description": "The amount of protein (for example, '5 g')."
+        }
+      },
+      "required": ["calories"]
+    },
+    "@context": {
+      "type": "string",
+      "const": "https://schema.org",
+      "description": "The JSON-LD context. Must be 'https://schema.org'."
+    },
+    "@type": {
+      "type": "string",
+      "const": "Recipe",
+      "description": "The type of item. Must be 'Recipe'."
+    }
   },
-  "required": ["title", "ingredients", "steps"]
+  "required": [
+    "@context",
+    "@type",
+    "name",
+    "recipeIngredient",
+    "recipeInstructions"
+  ]
 }
