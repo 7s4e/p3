@@ -5,12 +5,9 @@
   "description": "Adapted from schema.org/Recipe.",
   "type": "object",
   "properties": {
-    "name": {
-      "type": "string",
-      "description": "The name of the recipe."
-    },
-    "description": {
-      "type": "string",
+    "name": { "type": "string", "description": "The name of the recipe." },
+    "description": { 
+      "type": "string", 
       "description": "A description of the recipe."
     },
     "image": {
@@ -18,136 +15,107 @@
       "format": "uri",
       "description": "An image URL; use `file://` for local files."
     },
-    "author": {
+    "author": { "type": "string", "description": "Credit to the source." },
+    "date": { "type": "string", "format": "date" },
+    "category": {
       "type": "string",
-      "description": "The author of the recipe."
+      "description": "The category of the recipe (e.g., 'Dessert')."
     },
-    "datePublished": {
+    "cuisine": {
       "type": "string",
-      "format": "date",
-      "description": "The date the recipe was published."
+      "description": "The cuisine of the recipe (e.g., 'Italian')."
     },
-    "recipeCategory": {
-      "type": "string",
-      "description": "The category of the recipe (e.g. 'Dessert')."
-    },
-    "recipeCuisine": {
-      "type": "string",
-      "description": "The cuisine of the recipe (e.g. 'Italian')."
-    },
-    "prepTime": {
-      "type": "string",
-      "format": "duration",
-      "description": "The time it takes to prepare the recipe."
-    },
-    "cookTime": {
-      "type": "string",
-      "format": "duration",
-      "description": "The time it takes to cook the recipe."
-    },
-    "totalTime": {
-      "type": "string",
-      "format": "duration",
-      "description": "The total time to prepare and cook the recipe."
-    },
-    "recipeYield": {
-      "type": "object",
-      "description": "The quantity produced by the recipe (e.g. '4 servings').",
-      "properties": {
-        "quantity": {
-          "type": "number"
-        },
-        "unit": {
-          "type": "string"
-        }
-      },
-      "required": ["quantity", "unit"]
-    },
-    "recipeIngredient": {
-      "type": "object",
-      "description": "An ingredient used in the recipe.",
-      "properties": {
-        "quantity": {
-          "type": "number"
-        },
-        "unit": {
-          "type": "string"
-        },
-        "ingredient": {
-          "type": "string"
-        }
-      },
-      "required": ["ingredient"]
-    },
-    "recipeIngredients": {
+    "prepTime": { "type": "string", "format": "duration" },
+    "cookTime": { "type": "string", "format": "duration" },
+    "totalTime": { "type": "string", "format": "duration" },
+    "ingredients": {
       "type": "array",
-      "description": "A list of ingredients used in the recipe.",
       "items": {
-        "type": "string",
-        "$ref": "#/recipeIngredient"
+        "type": "object",
+        "properties": {
+          "quantity": { "type": "number" },
+          "unit": { "type": "string" },
+          "ingredient": { "type": "string" }
+        },
+        "required": ["ingredient"]
       }
     },
-    "recipeInstructions": {
+    "instructions": {
       "type": "array",
       "description": "A list of instructions for making the recipe.",
-      "items": {
-        "type": "string"
-      }
+      "items": { "type": "string" }
     },
-    "aggregateRating": {
+    "yield": {
       "type": "object",
-      "description": "An aggregate rating for the recipe.",
+      "description": "Yield of recipe (e.g., '4 servings').",
       "properties": {
-        "ratingValue": {
-          "type": "number",
-          "description": "The average rating (for example, 4.5)."
-        },
-        "reviewCount": {
-          "type": "number",
-          "description": "The number of reviews."
-        }
+        "quantity": { "type": "number" },
+        "unit": { "type": "string" }
       },
-      "required": ["ratingValue", "reviewCount"]
+      "required": ["quantity", "unit"]
     },
     "nutrition": {
       "type": "object",
       "description": "Nutritional information about the recipe.",
       "properties": {
-        "calories": {
-          "type": "string",
-          "description": "The number of calories (for example, '250 kcal')."
+        "servingSize": {
+          "type": "object",
+          "properties": {
+            "quantity": { "type": "number" },
+            "unit": { "type": "string" }
+          },
+          "required": ["quantity", "unit"]
         },
-        "fatContent": {
-          "type": "string",
-          "description": "The amount of fat (for example, '10 g')."
+        "calories": { "type": "number", "description": "Calories in kcal." },
+        "totalFat": { "type": "number", "description": "Total fat in g." },
+        "saturatedFat": { 
+          "type": "number", 
+          "description": "Saturated fat in g." 
         },
-        "carbohydrateContent": {
-          "type": "string",
-          "description": "The amount of carbohydrates (for example, '30 g')."
+        "transFat": { "type": "number", "description": "Trans fat in g." },
+        "cholesterol": { 
+          "type": "number", 
+          "description": "Cholesterol in mg." 
         },
-        "proteinContent": {
-          "type": "string",
-          "description": "The amount of protein (for example, '5 g')."
-        }
+        "sodium": { "type": "number", "description": "Sodium in mg." },
+        "totalCarbohydrates ": { 
+          "type": "number", 
+          "description": "Total carbohydrates in g." 
+        },
+        "dietaryFiber": { 
+          "type": "number", 
+          "description": "Dietary fiber in g." 
+        },
+        "totalSugars": { 
+          "type": "number", 
+          "description": "Total sugars in g." 
+        },
+        "addedSugars": { 
+          "type": "number", 
+          "description": "Added sugars in g." 
+        },
+        "protein": { "type": "number", "description": "Protein in g." },
+        "vitaminA": { "type": "number", "description": "Vitamin A in mcg." },
+        "vitaminC": { "type": "number", "description": "Vitamin C in mg." },
+        "vitaminD": { "type": "number", "description": "Vitamin D in mcg." },
+        "vitaminE": { "type": "number", "description": "Vitamin E in mg." },
+        "vitaminK": { "type": "number", "description": "Vitamin K in mcg." },
+        "vitaminB1": { "type": "number", "description": "Thiamin in mg." },
+        "vitaminB2": { "type": "number", "description": "Riboflavin in mg." },
+        "vitaminB3": { "type": "number", "description": "Niacin in mg." },
+        "vitaminB6": { "type": "number", "description": "Vitamin B6 in mg." },
+        "vitaminB9": { "type": "number", "description": "Folate in mcg." },
+        "vitaminB12": { 
+          "type": "number", 
+          "description": "Vitamin B12 in mcg." 
+        },
+        "calcium": { "type": "number", "description": "Calcium in mg." },
+        "iron": { "type": "number", "description": "Iron in mg." },
+        "magnesium": { "type": "number", "description": "Magnesium in mg." },
+        "potassium": { "type": "number", "description": "Potassium in mg." }
       },
-      "required": ["calories"]
-    },
-    "@context": {
-      "type": "string",
-      "const": "https://schema.org",
-      "description": "The JSON-LD context. Must be 'https://schema.org'."
-    },
-    "@type": {
-      "type": "string",
-      "const": "Recipe",
-      "description": "The type of item. Must be 'Recipe'."
+      "required": ["servingSize"]
     }
   },
-  "required": [
-    "@context",
-    "@type",
-    "name",
-    "recipeIngredient",
-    "recipeInstructions"
-  ]
+  "required": ["name", "instructions"]
 }
