@@ -16,7 +16,7 @@
     "image": {
       "type": "string",
       "format": "uri",
-      "description": "An image URL of the finished dish."
+      "description": "An image URL; use `file://` for local files."
     },
     "author": {
       "type": "string",
@@ -27,35 +27,64 @@
       "format": "date",
       "description": "The date the recipe was published."
     },
-    "prepTime": {
-      "type": "string",
-      "description": "The time it takes to prepare the recipe (ISO 8601 duration)."
-    },
-    "cookTime": {
-      "type": "string",
-      "description": "The time it takes to cook the recipe (ISO 8601 duration)."
-    },
-    "totalTime": {
-      "type": "string",
-      "description": "The total time required to prepare and cook the recipe (ISO 8601 duration)."
-    },
-    "recipeYield": {
-      "type": "string",
-      "description": "The quantity produced by the recipe (for example, '4 servings')."
-    },
     "recipeCategory": {
       "type": "string",
-      "description": "The category of the recipe (for example, 'Dessert')."
+      "description": "The category of the recipe (e.g. 'Dessert')."
     },
     "recipeCuisine": {
       "type": "string",
-      "description": "The cuisine of the recipe (for example, 'Italian')."
+      "description": "The cuisine of the recipe (e.g. 'Italian')."
+    },
+    "prepTime": {
+      "type": "string",
+      "format": "duration",
+      "description": "The time it takes to prepare the recipe."
+    },
+    "cookTime": {
+      "type": "string",
+      "format": "duration",
+      "description": "The time it takes to cook the recipe."
+    },
+    "totalTime": {
+      "type": "string",
+      "format": "duration",
+      "description": "The total time to prepare and cook the recipe."
+    },
+    "recipeYield": {
+      "type": "object",
+      "description": "The quantity produced by the recipe (e.g. '4 servings').",
+      "properties": {
+        "quantity": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string"
+        }
+      },
+      "required": ["quantity", "unit"]
     },
     "recipeIngredient": {
+      "type": "object",
+      "description": "An ingredient used in the recipe.",
+      "properties": {
+        "quantity": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "ingredient": {
+          "type": "string"
+        }
+      },
+      "required": ["ingredient"]
+    },
+    "recipeIngredients": {
       "type": "array",
       "description": "A list of ingredients used in the recipe.",
       "items": {
-        "type": "string"
+        "type": "string",
+        "$ref": "#/recipeIngredient"
       }
     },
     "recipeInstructions": {
