@@ -1,0 +1,46 @@
+@startuml key
+salt
+title Recipe Entry
+{
+  {
+    {
+      "name                 "
+      {
+        {
+          "category"
+          "cuisine "
+        } | 
+        {
+          prep: | "  " | ^min^
+          cook: | "  " | ^min^
+        }
+      }
+      {+
+        description
+        .
+        "                     "
+      }
+    } | 
+    {
+      "image URL             "
+      {+
+        .
+        .
+        .                      img
+        .
+        .
+        "                      "
+      }
+    }
+  }
+  {
+    ingredients section
+  }
+  {
+    instructions section
+  }
+  {
+    nutrition section
+  }
+}
+@enduml

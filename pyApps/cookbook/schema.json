@@ -5,9 +5,12 @@
   "description": "Adapted from schema.org/Recipe.",
   "type": "object",
   "properties": {
-    "name": { "type": "string", "description": "The name of the recipe." },
-    "description": { 
-      "type": "string", 
+    "name": {
+      "type": "string",
+      "description": "The name of the recipe."
+    },
+    "description": {
+      "type": "string",
       "description": "A description of the recipe."
     },
     "image": {
@@ -15,8 +18,14 @@
       "format": "uri",
       "description": "An image URL; use `file://` for local files."
     },
-    "author": { "type": "string", "description": "Credit to the source." },
-    "date": { "type": "string", "format": "date" },
+    "author": {
+      "type": "string",
+      "description": "Credit to the source."
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
     "category": {
       "type": "string",
       "description": "The category of the recipe (e.g., 'Dessert')."
@@ -25,34 +34,60 @@
       "type": "string",
       "description": "The cuisine of the recipe (e.g., 'Italian')."
     },
-    "prepTime": { "type": "string", "format": "duration" },
-    "cookTime": { "type": "string", "format": "duration" },
-    "totalTime": { "type": "string", "format": "duration" },
+    "prepTime": {
+      "type": "string",
+      "format": "duration"
+    },
+    "cookTime": {
+      "type": "string",
+      "format": "duration"
+    },
+    "totalTime": {
+      "type": "string",
+      "format": "duration"
+    },
     "ingredients": {
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
-          "quantity": { "type": "number" },
-          "unit": { "type": "string" },
-          "ingredient": { "type": "string" }
+          "quantity": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "ingredient": {
+            "type": "string"
+          }
         },
-        "required": ["ingredient"]
+        "required": [
+          "ingredient"
+        ]
       }
     },
     "instructions": {
       "type": "array",
       "description": "A list of instructions for making the recipe.",
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
     },
     "yield": {
       "type": "object",
       "description": "Yield of recipe (e.g., '4 servings').",
       "properties": {
-        "quantity": { "type": "number" },
-        "unit": { "type": "string" }
+        "quantity": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string"
+        }
       },
-      "required": ["quantity", "unit"]
+      "required": [
+        "quantity",
+        "unit"
+      ]
     },
     "nutrition": {
       "type": "object",
@@ -61,61 +96,130 @@
         "servingSize": {
           "type": "object",
           "properties": {
-            "quantity": { "type": "number" },
-            "unit": { "type": "string" }
+            "quantity": {
+              "type": "number"
+            },
+            "unit": {
+              "type": "string"
+            }
           },
-          "required": ["quantity", "unit"]
+          "required": [
+            "quantity",
+            "unit"
+          ]
         },
-        "calories": { "type": "number", "description": "Calories in kcal." },
-        "totalFat": { "type": "number", "description": "Total fat in g." },
-        "saturatedFat": { 
-          "type": "number", 
-          "description": "Saturated fat in g." 
+        "calories": {
+          "type": "number",
+          "description": "Calories in kcal."
         },
-        "transFat": { "type": "number", "description": "Trans fat in g." },
-        "cholesterol": { 
-          "type": "number", 
-          "description": "Cholesterol in mg." 
+        "totalFat": {
+          "type": "number",
+          "description": "Total fat in g."
         },
-        "sodium": { "type": "number", "description": "Sodium in mg." },
-        "totalCarbohydrates ": { 
-          "type": "number", 
-          "description": "Total carbohydrates in g." 
+        "saturatedFat": {
+          "type": "number",
+          "description": "Saturated fat in g."
         },
-        "dietaryFiber": { 
-          "type": "number", 
-          "description": "Dietary fiber in g." 
+        "transFat": {
+          "type": "number",
+          "description": "Trans fat in g."
         },
-        "totalSugars": { 
-          "type": "number", 
-          "description": "Total sugars in g." 
+        "cholesterol": {
+          "type": "number",
+          "description": "Cholesterol in mg."
         },
-        "addedSugars": { 
-          "type": "number", 
-          "description": "Added sugars in g." 
+        "sodium": {
+          "type": "number",
+          "description": "Sodium in mg."
         },
-        "protein": { "type": "number", "description": "Protein in g." },
-        "vitaminA": { "type": "number", "description": "Vitamin A in mcg." },
-        "vitaminC": { "type": "number", "description": "Vitamin C in mg." },
-        "vitaminD": { "type": "number", "description": "Vitamin D in mcg." },
-        "vitaminE": { "type": "number", "description": "Vitamin E in mg." },
-        "vitaminK": { "type": "number", "description": "Vitamin K in mcg." },
-        "vitaminB1": { "type": "number", "description": "Thiamin in mg." },
-        "vitaminB2": { "type": "number", "description": "Riboflavin in mg." },
-        "vitaminB3": { "type": "number", "description": "Niacin in mg." },
-        "vitaminB6": { "type": "number", "description": "Vitamin B6 in mg." },
-        "vitaminB9": { "type": "number", "description": "Folate in mcg." },
-        "vitaminB12": { 
-          "type": "number", 
-          "description": "Vitamin B12 in mcg." 
+        "totalCarbohydrates ": {
+          "type": "number",
+          "description": "Total carbohydrates in g."
         },
-        "calcium": { "type": "number", "description": "Calcium in mg." },
-        "iron": { "type": "number", "description": "Iron in mg." },
-        "magnesium": { "type": "number", "description": "Magnesium in mg." },
-        "potassium": { "type": "number", "description": "Potassium in mg." }
+        "dietaryFiber": {
+          "type": "number",
+          "description": "Dietary fiber in g."
+        },
+        "totalSugars": {
+          "type": "number",
+          "description": "Total sugars in g."
+        },
+        "addedSugars": {
+          "type": "number",
+          "description": "Added sugars in g."
+        },
+        "protein": {
+          "type": "number",
+          "description": "Protein in g."
+        },
+        "vitaminA": {
+          "type": "number",
+          "description": "Vitamin A in mcg."
+        },
+        "vitaminC": {
+          "type": "number",
+          "description": "Vitamin C in mg."
+        },
+        "vitaminD": {
+          "type": "number",
+          "description": "Vitamin D in mcg."
+        },
+        "vitaminE": {
+          "type": "number",
+          "description": "Vitamin E in mg."
+        },
+        "vitaminK": {
+          "type": "number",
+          "description": "Vitamin K in mcg."
+        },
+        "vitaminB1": {
+          "type": "number",
+          "description": "Thiamin in mg."
+        },
+        "vitaminB2": {
+          "type": "number",
+          "description": "Riboflavin in mg."
+        },
+        "vitaminB3": {
+          "type": "number",
+          "description": "Niacin in mg."
+        },
+        "vitaminB6": {
+          "type": "number",
+          "description": "Vitamin B6 in mg."
+        },
+        "vitaminB9": {
+          "type": "number",
+          "description": "Folate in mcg."
+        },
+        "vitaminB12": {
+          "type": "number",
+          "description": "Vitamin B12 in mcg."
+        },
+        "calcium": {
+          "type": "number",
+          "description": "Calcium in mg."
+        },
+        "iron": {
+          "type": "number",
+          "description": "Iron in mg."
+        },
+        "magnesium": {
+          "type": "number",
+          "description": "Magnesium in mg."
+        },
+        "potassium": {
+          "type": "number",
+          "description": "Potassium in mg."
+        }
       },
-      "required": ["servingSize"]
+      "required": [
+        "servingSize"
+      ]
     }
   },
-  "required": ["name", "instructions"]
+  "required": [
+    "name",
+    "instructions"
+  ]
 }
