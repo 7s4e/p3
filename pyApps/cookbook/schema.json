@@ -19,8 +19,17 @@
       "description": "An image URL; use `file://` for local files."
     },
     "author": {
-      "type": "string",
-      "description": "Credit to the source."
+      "type": "object",
+      "description": "Credit to the source.",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "link": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
     },
     "date": {
       "type": "string",
@@ -58,6 +67,9 @@
             "type": "string"
           },
           "ingredient": {
+            "type": "string"
+          },
+          "state": {
             "type": "string"
           }
         },

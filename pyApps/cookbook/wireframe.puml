@@ -20,6 +20,7 @@ title Recipe Entry
         .
         "                     "
       }
+      "author label         "
     } | 
     {
       "image URL             "
@@ -31,16 +32,31 @@ title Recipe Entry
         .
         "                      "
       }
+      "author link           "
     }
   }
+  ==
   {
-    ingredients section
+    Qty | Unit | Ingredient | State (opt)
+    "  " | ^unit^ | "                      " | "           " | .
+    "  " | ^unit^ | "                      " | "           " | [+]
+  }
+  ==
+  {
+     # | Step
+    1. | {+
+           instructions
+           .
+           "                                         "
+         } | [+]
+
+  }
+  ==
+  {
+    Serving size: | "  " | ^unit^ | . | . | . | . | total servings: | "  "
   }
   {
-    instructions section
-  }
-  {
-    nutrition section
+    ^nutrition element^ | [+]
   }
 }
 @enduml
