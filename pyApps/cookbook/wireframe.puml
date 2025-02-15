@@ -58,5 +58,8 @@ title Recipe Entry
   {
     ^nutrition element^ | [+]
   }
+  {
+    [submit]
+  }
 }
 @enduml
