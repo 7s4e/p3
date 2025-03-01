@@ -27,10 +27,181 @@
       container.appendChild(div);
     }
   </script>
+  <style>
+    div.altfldset {
+      margin-block: 0.325em 0em;
+      margin-inline: 2px;
+      border-width: 2px;
+      border-style: groove;
+      padding-block: 0.625em;
+      padding-inline: 0.75em;
+    }
+    div.classtimes {
+      display: block;
+    }
+    div.timeline {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background-color: lightyellow;
+    }
+    input {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    label {
+      width: 36px;
+      text-align: right;
+    }
+    section {
+      background-color: lightblue;
+    }
+    span {
+      display: inline-block;
+      width: 40px;
+    }
+    textarea {
+      width: 100%;
+      height: 50px;
+      box-sizing: border-box;
+      resize: vertical;
+    }
+    @media (min-width: 305px) {
+      div.classtimes {
+        display: flex;
+        justify-content: space-between;
+      }
+    }
+    @media (min-width: 580px) {
+      div.columns {
+        display: flex;
+        align-items: stretch;
+      }
+      div.imgcol {
+        flex: 1;  /* stretches column width */
+        display: flex;
+        flex-direction: column;
+      }
+      div.imgwrap {
+        flex: 1;  /* stretches border height */
+      }
+    }
+  </style>
 </head>
 <body>
-  <h2>Recipe Entry</h2>
-  <form>
+  <header>header</header>
+  <main>
+    <form action="/submit" method="POST">
+      <h1>Recipe Entry Form</h1>
+      <section>
+        <h2>Details</h2>
+        <div class="columns">
+          <div class="txtcol">
+            <div class="altfldset">
+              <input type="text" name="name" placeholder="Recipe Name" required>
+              <textarea name="description" placeholder="description"></textarea>
+            </div>
+            <div class="classtimes">
+              <fieldset>
+                <legend>classification</legend>
+                <input type="text" name="category" placeholder="category (e.g. breakfast, dessert)">
+                <input type="text" name="cuisine" placeholder="cuisine (e.g. Italian, Mexican)">
+              </fieldset>
+              <fieldset>
+                <legend>times</legend>
+                <div class="timeline">
+                  <label>prep:</label>
+                  <span>
+                    <input type="number" min="0" name="prepTimeDuration">
+                  </span>
+                  <select name="prepTimeUnits">
+                    <option value="minutes" selected>min</option>
+                    <option value="hours">hr</option>
+                    <option value="days">day</option>
+                  </select>
+                </div>
+                <div class="timeline">
+                  <label>cook:</label>
+                  <span>
+                    <input type="number" min="0" name="cookTimeDuration">
+                  </span>
+                  <select name="cookTimeUnits">
+                    <option value="minutes" selected>min</option>
+                    <option value="hours">hr</option>
+                    <option value="days">day</option>
+                  </select>
+                </div>
+              </fieldset>
+            </div>
+            <fieldset>
+              <legend>attribution</legend>
+              <input type="text" name="author" placeholder="Recipe source">
+              <input type="url" name="link" placeholder="Recipe link (e.g. https://example.com/recipe)">
+              <input type="url" name="image" placeholder="Image link (https://example.com/image)">
+            </fieldset>
+          </div>
+          <div class="imgcol">
+            <div class="altfldset imgwrap">
+              <figure>img</figure>
+            </div>
+          </div>
+      </section>
+      <section>
+        <h2>Ingredients</h2>
+      </section>
+      <section>
+        <h2>Instructions</h2>
+      </section>
+      <section>
+        <h2>Nutrition</h2>
+      </section>
+    </form>
+  </main>
+  <footer>footer</footer>
+
+  <!-- 
+  <div class="block">
+    <div class="section">
+      <div class="side">
+      </div>
+      <div class="side">
+        <div class="segment">
+        </div>
+        <div class="segment">
+        </div>
+      </div>
+    </div>
+    <div id="image"></div>
+  </div>
+
+
+  <div class="block">
+  </div>
+  <div class="block">
+  </div>
+  <div class="block">
+  </div> -->
+<!-- 
+  <form action="/submit" method="POST">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required>
+    
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required>
+    
+    <button type="submit">Submit</button>
+  </form>
+<input type="text"> - General text input.
+<input type="email"> - Email validation.
+<input type="password"> - Secure password input.
+<input type="number"> - Accepts only numeric input.
+<input type="date"> - Date picker.
+<input type="file"> - File uploads.
+<input type="checkbox"> & <input type="radio"> - Multiple choice inputs.
+<input type="text" name="username" required pattern="[A-Za-z]{3,10}" title="Only letters, 3-10 characters">
+-->
+  <!-- <form action="/submit" method="post">
     <div id="overview" class="section">
       <div id="details">
         <div id="name"><label>Name: <input type="text" name="name" required></label></div>
@@ -66,6 +237,6 @@
       <label>Calories (kcal): <input type="number" name="calories"></label>
     </div>
     <button type="submit">Submit</button>
-  </form>
+  </form> -->
 </body>
 </html>
