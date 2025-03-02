@@ -6,6 +6,15 @@
   <title>Recipe Entry</title>
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='logo.svg') }}"/> 
   <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        const fractions = [1/8, 1/4, 1/3, 3/8, 1/2, 5/8, 2/3, 3/4, 7/8];
+        const input = document.getElementById("fractionInput");
+
+        input.addEventListener("input", function() {
+          let closest = fractions.reduce((prev, curr) => Math.abs(curr - input.value) < Math.abs(prev - input.value) ? curr : prev);
+          input.value = closest;
+        });
+      });
     function addIngredient() {
       const container = document.getElementById('ingredients');
       const div = document.createElement('div');
@@ -28,7 +37,7 @@
     }
   </script>
   <style>
-    div.altfldset {
+    .fldset-clone {
       margin-block: 0.325em 0em;
       margin-inline: 2px;
       border-width: 2px;
@@ -36,14 +45,22 @@
       padding-block: 0.625em;
       padding-inline: 0.75em;
     }
-    div.classtimes {
-      display: block;
+    .fraction-entry {
+      display: inline-block;
+      width: 8ch;
     }
-    div.timeline {
+    .ingredient-column {
+      width: 100%;
+    }
+    .time-line {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 2px;
+    }
+    .whole-entry {
+      display: inline-block;
+      width: 6ch;
     }
     input {
       width: 100%;
@@ -56,10 +73,14 @@
     section {
       background-color: skyblue;
     }
-    span {
+    /* span {
       display: inline-block;
-      width: 40px;
-    }
+      width: 6ch;
+    } */
+    /* table {
+      width: 100%;
+      table-layout: auto;
+    } */
     textarea {
       width: 100%;
       height: 50px;
@@ -67,23 +88,23 @@
       resize: vertical;
     }
     @media (min-width: 305px) {
-      div.classtimes {
+      #class-time-group {
         display: flex;
         justify-content: space-between;
       }
     }
     @media (min-width: 580px) {
-      div.columns {
-        display: flex;
-        align-items: stretch;
-      }
-      div.imgcol {
+      #image-column {
         flex: 1;  /* stretches column width */
         display: flex;
         flex-direction: column;
       }
-      div.imgwrap {
+      #image-wrapper {
         flex: 1;  /* stretches border height */
+      }
+      .column-layout {
+        display: flex;
+        align-items: stretch;
       }
     }
   </style>
@@ -96,10 +117,10 @@
 
       <section>
         <h2>Details</h2>
-        <div class="columns">
+        <div class="column-layout">
           <div class="txtcol">
 
-            <div class="altfldset">
+            <div class="fldset-clone">
               <input 
                 type="text" 
                 name="name" 
@@ -112,7 +133,7 @@
               ></textarea>
             </div>
 
-            <div class="classtimes">
+            <div id="class-time-group">
               <fieldset>
                 <legend>classification</legend>
                 <input 
@@ -129,9 +150,9 @@
 
               <fieldset>
                 <legend>times</legend>
-                <div class="timeline">
+                <div class="time-line">
                   <label>prep:</label>
-                  <span>
+                  <span class="whole-entry">
                     <input type="number" min="0" name="prepTimeDuration">
                   </span>
                   <select name="prepTimeUnits">
@@ -141,9 +162,9 @@
                   </select>
                 </div>
 
-                <div class="timeline">
+                <div class="time-line">
                   <label>cook:</label>
-                  <span>
+                  <span class="whole-entry">
                     <input type="number" min="0" name="cookTimeDuration">
                   </span>
                   <select name="cookTimeUnits">
@@ -175,8 +196,8 @@
             </fieldset>
           </div>
 
-          <div class="imgcol">
-            <div class="altfldset imgwrap">
+          <div id="image-column">
+            <div id="image-wrapper" class="fldset-clone">
               <figure>img</figure>
             </div>
           </div>
@@ -184,62 +205,72 @@
 
       <section>
         <h2>Ingredients</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Qty</th><th>Unit</th><th>Ingredient</th><th>State</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><span><input type="number" min="0" name="qty1"></span></td>
-              <td>
-                <select name="unit1">
-                  <optgroup label="Count-based">
-                    <option value="bunch">bunch</option>
-                    <option value="clove">clove</option>
-                    <option value="head">head</option>
-                    <option value="stick">stick</option>
-                    <option value="dozen">dozen</option>
-                    <option value="each" selected>ea</option>
-                  </optgroup>
+        <div class="fldset-clone">
+          <table>
+            <thead>
+              <tr>
+                <th>Qty</th>
+                <th>Unit</th>
+                <th class="ingredient-column">Ingredient</th>
+                <th>State</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <span class="fraction-entry">
+                    <input type="number" min="0" step="0.01" name="qty1">
+                  </span>
+                </td>
+                <td>
+                  <select name="unit1">
+                    <optgroup label="Count-based">
+                      <option value="bunch">bunch</option>
+                      <option value="clove">clove</option>
+                      <option value="head">head</option>
+                      <option value="stick">stick</option>
+                      <option value="dozen">dozen</option>
+                      <option value="each" selected>ea</option>
+                    </optgroup>
                 
-                  <optgroup label="Mass">
-                    <option value="kilogram">kg</option>
-                    <option value="gram">g</option>
-                    <option value="milligram">mg</option>
-                    <option value="pound">lb</option>
-                    <option value="ounce">oz</option>
-                  </optgroup>
+                    <optgroup label="Mass">
+                      <option value="kilogram">kg</option>
+                      <option value="gram">g</option>
+                      <option value="milligram">mg</option>
+                      <option value="pound">lb</option>
+                      <option value="ounce">oz</option>
+                    </optgroup>
                 
-                  <optgroup label="Volume">
-                    <option value="liter">L</option>
-                    <option value="milliliter">mL</option>
-                    <option value="gallon">gal</option>
-                    <option value="quart">qt</option>
-                    <option value="pint">pt</option>
-                    <option value="cup">c</option>
-                    <option value="fluid ounce">fl oz</option>
-                    <option value="tablespoon">tbsp</option>
-                    <option value="teaspoon">tsp</option>
-                  </optgroup>
+                    <optgroup label="Volume">
+                      <option value="liter">L</option>
+                      <option value="milliliter">mL</option>
+                      <option value="gallon">gal</option>
+                      <option value="quart">qt</option>
+                      <option value="pint">pt</option>
+                      <option value="cup">c</option>
+                      <option value="fluid ounce">fl oz</option>
+                      <option value="tablespoon">tbsp</option>
+                      <option value="teaspoon">tsp</option>
+                    </optgroup>
                 
-                  <optgroup label="Small Volume">
-                    <option value="tad">tad</option>
-                    <option value="dash">dash</option>
-                    <option value="pinch">pinch</option>
-                    <option value="smidgen">smidgen</option>
-                    <option value="drop">drop</option>
-                  </optgroup>
-                </select>
+                    <optgroup label="Small Volume">
+                      <option value="tad">tad</option>
+                      <option value="dash">dash</option>
+                      <option value="pinch">pinch</option>
+                      <option value="smidgen">smidgen</option>
+                      <option value="drop">drop</option>
+                    </optgroup>
+                  </select>
+                </td>
+                <td><input type="text" name="ingredient-1" ></td>
+                <td><input type="text" name="state-1"></td>
+                <td><button>+</button></td>
               </td>
-              <td><input type="text" name="ingredient-1" style="width: 100%;"></td>
-              <td><input type="text" name="state-1"></td>
-              <td><button>+</button></td>
-            </td>
-            </tr>
-          </tbody>
-        </table>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section>
@@ -253,73 +284,12 @@
   </main>
   <footer>footer</footer>
 
-  <!-- 
-  <div class="block">
-    <div class="section">
-      <div class="side">
-      </div>
-      <div class="side">
-        <div class="segment">
-        </div>
-        <div class="segment">
-        </div>
-      </div>
-    </div>
-    <div id="image"></div>
-  </div>
-
-
-  <div class="block">
-  </div>
-  <div class="block">
-  </div>
-  <div class="block">
-  </div> -->
 <!-- 
-  <form action="/submit" method="POST">
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name" required>
-    
-    <label for="email">Email:</label>
-    <input type="email" id="email" name="email" required>
-    
-    <button type="submit">Submit</button>
-  </form>
-<input type="text"> - General text input.
-<input type="email"> - Email validation.
-<input type="password"> - Secure password input.
-<input type="number"> - Accepts only numeric input.
-<input type="date"> - Date picker.
 <input type="file"> - File uploads.
 <input type="checkbox"> & <input type="radio"> - Multiple choice inputs.
 <input type="text" name="username" required pattern="[A-Za-z]{3,10}" title="Only letters, 3-10 characters">
 -->
   <!-- <form action="/submit" method="post">
-    <div id="overview" class="section">
-      <div id="details">
-        <div id="name"><label>Name: <input type="text" name="name" required></label></div>
-        <label>Description: <textarea name="description"></textarea></label><br>
-        <label>Image URL: <input type="url" name="image"></label><br>
-        <label>Author: <input type="text" name="author"></label><br>
-        <label>Date: <input type="date" name="date"></label><br>
-        <label>Category: <input type="text" name="category"></label><br>
-        <label>Cuisine: <input type="text" name="cuisine"></label><br>
-        <label>Prep Time (ISO 8601 format): <input type="text" name="prepTime"></label><br>
-        <label>Cook Time (ISO 8601 format): <input type="text" name="cookTime"></label><br>
-        <label>Total Time (ISO 8601 format): <input type="text" name="totalTime"></label><br>  
-      </div>
-      <div id="image"></div>
-    </div>
-    <div id="ingredients" class="section">
-      <h3>Ingredients</h3>
-      <div id="ingredients"></div>
-      <button type="button" onclick="addIngredient()">Add Ingredient</button>
-    </div>
-    <div id="instructions" class="section">
-      <h3>Instructions</h3>
-      <div id="instructions"></div>
-      <button type="button" onclick="addInstruction()">Add Instruction</button>
-    </div>
     <div id="nutrition" class="section">
       <h3>Yield</h3>
       <label>Quantity: <input type="number" name="yieldQuantity" required></label>
