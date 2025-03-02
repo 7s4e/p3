@@ -49,9 +49,9 @@
       display: inline-block;
       width: 8ch;
     }
-    .ingredient-column {
+    /* .ingredient-column {
       width: 100%;
-    }
+    } */
     .time-line {
       display: flex;
       align-items: center;
@@ -210,7 +210,7 @@
             <thead>
               <tr>
                 <th>Qty</th>
-                <th>Unit</th>
+                <th class="unit-column">Unit</th>
                 <th class="ingredient-column">Ingredient</th>
                 <th>State</th>
                 <th></th>
@@ -263,8 +263,8 @@
                     </optgroup>
                   </select>
                 </td>
-                <td><input type="text" name="ingredient-1" ></td>
-                <td><input type="text" name="state-1"></td>
+                <td class="ingredient-column"><input type="text" name="ingredient-1" ></td>
+                <td><input type="text" name="state-1" placeholder="e.g. diced, frozen"></td>
                 <td><button>+</button></td>
               </td>
               </tr>
