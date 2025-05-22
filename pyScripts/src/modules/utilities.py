@@ -1,4 +1,5 @@
 import inspect
+import pandas
 import sys
 
 
@@ -30,6 +31,21 @@ def get_caller_info() -> dict[str, str]:
     return {"function": caller_frame.f_code.co_name,
             "file": caller_frame.f_code.co_filename, 
             "line": str(caller_frame.f_lineno)}
+
+
+def read_csv(file_path: str, sep: str = ",", header: int = 0) -> pandas.DataFrame:
+    """
+    Reads a CSV file and returns its content as a pandas DataFrame.
+
+    Args:
+        file_path (str): The path to the CSV file.
+        sep (str): The separator used in the CSV file. Default is ','.
+        header (int): The row number to use as the column names. Default is 0.
+
+    Returns:
+        pandas.DataFrame: The content of the CSV file as a DataFrame.
+    """
+    return pandas.read_csv(file_path, sep=sep, header=header)
 
 
 def snake_to_camel(snake_str: str) -> str:
