@@ -1,6 +1,22 @@
-import inspect
-import pandas
-import sys
+"""
+Utilities Module
+
+Functions:
+    abort(signal, scr_name): Exit the script if the signal is True.
+    get_calendar_difference(start, end): Calculate calendar-based date 
+        difference.
+    get_caller_info(): Retrieve function name, file, and line number of 
+        the caller.
+    snake_to_camel(snake_str): Convert a snake_case string to camelCase.
+    truncate_string(strng, max_lngth): Truncate a string and append 
+        ellipses.
+"""
+from datetime import date, datetime
+from dateutil.relativedelta import relativedelta
+from inspect import currentframe
+from pandas import Timestamp
+from typing import Union
+from sys import exit
 
 
 def abort(signal: bool, scr_name: str) -> None:
@@ -12,7 +28,25 @@ def abort(signal: bool, scr_name: str) -> None:
     """
     if signal:
         print(f"Aborted {scr_name}")
-        sys.exit(10)
+        exit(10)
+
+
+def get_calendar_difference(start: Union[date, datetime, Timestamp], 
+                            end: Union[date, datetime, Timestamp]
+                            ) -> relativedelta:
+    """
+    Calculate the calendar-based difference between two dates.
+
+    Args:
+        start (Union[date, datetime, Timestamp]): The starting date.
+        end (Union[date, datetime, Timestamp]): The ending date.
+
+    Returns:
+        relativedelta: The calendar-based difference between `end` and 
+            `start` as a `relativedelta` object with attributes for 
+            `years`, `months`, `days`, and other calendar components.
+    """
+    return relativedelta(end, start)
 
 
 def get_caller_info() -> dict[str, str]:
@@ -24,7 +58,7 @@ def get_caller_info() -> dict[str, str]:
         A dictionary with keys 'function', 'file', and 'line', 
         containing the respective information about the caller.
     """
-    frame = inspect.currentframe()
+    frame = currentframe()
     if frame is None or frame.f_back is None:
         return {"function": "", "file": "", "line": ""}
     caller_frame = frame.f_back
@@ -33,19 +67,9 @@ def get_caller_info() -> dict[str, str]:
             "line": str(caller_frame.f_lineno)}
 
 
-def read_csv(file_path: str, sep: str = ",", header: int = 0) -> pandas.DataFrame:
-    """
-    Reads a CSV file and returns its content as a pandas DataFrame.
-
-    Args:
-        file_path (str): The path to the CSV file.
-        sep (str): The separator used in the CSV file. Default is ','.
-        header (int): The row number to use as the column names. Default is 0.
-
-    Returns:
-        pandas.DataFrame: The content of the CSV file as a DataFrame.
-    """
-    return pandas.read_csv(file_path, sep=sep, header=header)
+def snake_to_allcaps(snake_str: str) -> str:
+    words = snake_str.split('_')
+    return ' '.join(word.upper() for word in words)
 
 
 def snake_to_camel(snake_str: str) -> str:
@@ -60,6 +84,11 @@ def snake_to_camel(snake_str: str) -> str:
     """
     parts = snake_str.split('_')
     return parts[0] + ''.join(part.capitalize() for part in parts[1:])
+
+
+def snake_to_title(snake_str: str) -> str:
+    words = snake_str.split('_')
+    return ' '.join(word.capitalize() for word in words)
 
 
 def truncate_string(strng: str, max_lngth: int) -> str:
