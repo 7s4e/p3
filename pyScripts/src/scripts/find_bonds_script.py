@@ -83,7 +83,18 @@ def compute_accrued_interest(last_coupon_date: pd.Timestamp,
     return (days / 360) * (coupon_rate / 100) * 1000
 
 
-def calculate_xirr(cashflow: pd.Series, guess: float = 0.05) -> float:
+def compute_return(dates: list[pd.Timestamp], row: pd.Series, tax: bool
+                   ) -> float:
+    if dates:
+        amounts = list_cashflow_amounts(dates, row, tax)
+        cashflows = pd.Series(data=amounts[1:], index=dates[1:])
+        xirr = compute_xirr(cashflows)
+    else:
+        xirr = pd.NA
+    return xirr
+    
+
+def compute_xirr(cashflow: pd.Series, guess: float = 0.05) -> float:
     def npv(rate):
         t0 = cashflow.index[0]
         total = 0.0
@@ -106,16 +117,13 @@ def calculate_xirr(cashflow: pd.Series, guess: float = 0.05) -> float:
         return pd.NA
 
 
-def compute_return(dates: list[pd.Timestamp], row: pd.Series, tax: bool) -> float:
-    if dates:
-        amounts = list_cashflow_amounts(dates, row, tax)
-        cashflows = pd.Series(data=amounts[1:], index=dates[1:])
-        xirr = calculate_xirr(cashflows)
-    else:
-        xirr = pd.NA
+def combine_data(dfs: list[pd.DataFrame]) -> pd.DataFrame:
+    dfs = process_dataframes(dfs)
+    source_dataframes(dfs)
+    df = pd.concat(dfs.values(), ignore_index=True)
+    df = process_dataframe(df)
+    return df
 
-    return xirr
-    
 
 def get_capital_gains_rate(row: pd.Series, purchase_dt: pd.Timestamp, 
                            maturity_dt: pd.Timestamp) -> float:
@@ -134,56 +142,37 @@ def get_marginal_tax_rate(row: pd.Series) -> float:
     return fed_rate + st_rate
 
 
-def evaluate_bonds(row: pd.Series, settlement_dt: pd.Timestamp) -> pd.Series:
-    # print(row[DESCRIPTION])
-    # print('.', end='')
-    row = set_returns(row, settlement_dt)
+def evaluate_bonds(row: pd.Series, settlement: pd.Timestamp) -> pd.Series:
+    print(row[DESCRIPTION])
+    row = set_returns(row, settlement)
     return row
 
 
 def find_bonds() -> None:
-    print(f"LOG: find_bonds() start")
     settlement = pdu.offset_date(pd.Timestamp.today().normalize(), biz_dys=1)
-    # print(f"LOG: settlement = {settlement}")
     df = prepare_data()
-    # print(f"LOG: prepared data =\n{df[[CUSIP, ASK_PRICE, ASK_TTL, ASK_MIN]]}")
-    print(f"LOG: unfiltered length = {len(df)}")
-    df = filter_data(df, pass_no=1)
-    print(f"LOG: first filtered length = {len(df)}")
-    df = modify_data(df)
-    # print(f"LOG: modified data =\n{df[[HZ_MAP, CR_SCORE]]}")
-    df = filter_data(df, pass_no=2)
-    print(f"LOG: second filtered length = {len(df)}")
     df = df.apply(lambda row: evaluate_bonds(row, settlement), axis=1)
-
-    te_df = filter_data(df, pass_no=3)
-    print(f"LOG: third filtered length = {len(te_df)}")
-    ta_df = filter_data(df, pass_no=4)
-    print(f"LOG: fourth filtered length = {len(ta_df)}")
-    ta_df.sort_values(by=TA_RTN, ascending=False).to_csv(f"{PATH_OUT}taxable.csv")
-    te_df.sort_values(by=TE_RTN, ascending=False).to_csv(f"{PATH_OUT}no_tax.csv")
-    print(f"LOG: find_bonds() end")
+    put_data(df)
 
 
-def filter_data(df: pd.DataFrame, pass_no: int) -> pd.DataFrame:
-    match pass_no:
-        case 1:
-            interest_calculable = df[COUPON_HZ] != "AT MATURITY"
-            return df[interest_calculable]
-        case 2:
-            acceptable_risk = df[CR_SCORE].isna() | (df[CR_SCORE] <= 7.)
-            return df[acceptable_risk]
-        case 3:
-            te_df = df.copy()
-            te_df.drop(columns=TA_RTN, inplace=True)
-            acceptable_tax_exempt_rtn = te_df[TE_RTN] > TE_RF_RTN
-            return te_df[acceptable_tax_exempt_rtn]
-        case 4:
-            ta_df = df.copy()
-            ta_df.drop(columns=TE_RTN, inplace=True)
-            acceptable_taxable_rtn = (ta_df[TA_RTN] > 
-                                      TA_RF_RTN * (1. - FED_TAX - VA_TAX))
-            return ta_df[acceptable_taxable_rtn]
+def filter_credit(df: pd.DataFrame) -> pd.DataFrame:
+    acceptable_risk = df[CR_SCORE].isna() | (df[CR_SCORE] <= MAX_CREDIT_RISK)
+    return df[acceptable_risk]
+
+
+def filter_frequency(df: pd.DataFrame) -> pd.DataFrame:
+    interest_calculable = df[COUPON_HZ] != "AT MATURITY"
+    return df[interest_calculable]
+
+
+def filter_returns(df: pd.DataFrame, tax_exempt: bool) -> pd.DataFrame:
+    if tax_exempt:
+        acceptable_return = df[TE_RTN] > TE_RF_RTN
+        df.drop(columns=TA_RTN, inplace=True)
+    else:
+        acceptable_return = df[TA_RTN] > TA_RF_RTN * (1. - FED_TAX - VA_TAX)
+        df.drop(columns=TE_RTN, inplace=True)
+    return df[acceptable_return]
 
 
 def list_cashflow_amounts(dates: list[pd.Timestamp], row: pd.Series, tax: bool
@@ -233,44 +222,30 @@ def list_cashflow_dates(end_dt: str, settlement_dt: pd.Timestamp,
     
 
 def modify_data(df: pd.DataFrame) -> pd.DataFrame:
-    # print(f"LOG: modify_data() start")
     df = set_frequency_map(df)
     df = set_credit_score(df)
-    # print(f"LOG: modify_data() end")
     return df
 
 
 def prepare_data() -> pd.DataFrame:
-    # print(f"LOG: prepare_data() start")
-    dataframes = read_files()
-    # print(f"LOG: read TR df =\n{dataframes['TREASURY']}")
-    dataframes = preprocess_dfs(dataframes)
-    # print(f"LOG: preprocessed TR df =\n{dataframes['TREASURY'][[MATURITY_DATE, NEXT_CALL_DATE, COUPON_HZ]]}")
-    source_dfs(dataframes)
-    # print(f"LOG: sourced TR df =\n{dataframes['TREASURY'][[MATURITY_DATE, NEXT_CALL_DATE, COUPON_HZ, BOND_TYPE]]}")
-    dataframe = pd.concat(dataframes.values(), ignore_index=True)
-    # print(f"LOG: concatenated df =\n{dataframe[[MATURITY_DATE, NEXT_CALL_DATE, COUPON_HZ, BOND_TYPE]]}")
-    dataframe = postprocess_df(dataframe)
-    # print(f"LOG: postprocessed df =\n{dataframe[[CUSIP, ASK_PRICE, ASK_TTL, ASK_MIN]]}")
-    # print(f"LOG: prepare_data() end")
-    return dataframe
-
-
-def postprocess_df(df: pd.DataFrame) -> pd.DataFrame:
-    # print(f"LOG: postprocess_df() start")
-    df = pdu.cast_as_string(df, [CUSIP, STATE, DESCRIPTION, MOODY_RATING, 
-                                 S_P_RATING])
-    # print(f"LOG: string columns =\n{df[[CUSIP, STATE, DESCRIPTION, MOODY_RATING, S_P_RATING]]}")
-    df = pdu.convert_to_number(df, [COUPON_RATE, ASK_PRICE])
-    # print(f"LOG: number columns =\n{df[[COUPON_RATE, ASK_PRICE, ASK_QTY]]}")
-    df = pdu.split_columns(df, ASK_QTY, (ASK_TTL, ASK_MIN), BND_QTY_REGEX, 
-                           pd.Int64Dtype())
-    # print(f"LOG: split columns =\n{df[[COUPON_RATE, ASK_PRICE, ASK_TTL, ASK_MIN]]}")
-    # print(f"LOG: postprocess_df() end")
+    dfs = read_files()
+    df = combine_data(dfs)
+    df = filter_frequency(df)
+    df = modify_data(df)
+    df = filter_credit(df)
     return df
 
 
-def preprocess_dfs(dfs: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
+def process_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    df = pdu.cast_as_string(df, [CUSIP, STATE, DESCRIPTION, MOODY_RATING, 
+                                 S_P_RATING])
+    df = pdu.convert_to_number(df, [COUPON_RATE, ASK_PRICE])
+    df = pdu.split_columns(df, ASK_QTY, (ASK_TTL, ASK_MIN), BND_QTY_REGEX, 
+                           pd.Int64Dtype())
+    return df
+
+
+def process_dataframes(dfs: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
     return {
         bond_type: (
             pdu.ensure_column(
@@ -292,6 +267,16 @@ def preprocess_dfs(dfs: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
     }
 
 
+def put_data(df: pd.DataFrame) -> None:
+    for exemption_status in [True, False]:
+        df_copy = df.copy()
+        df_filtered = filter_returns(df_copy, tax_exempt=exemption_status)
+        df_filtered.sort_values(
+            by=TE_RTN if exemption_status else TA_RTN,
+            ascending=False
+        ).to_csv(f"{PATH_OUT}{'exempt' if exemption_status else 'taxable'}.csv")
+
+
 def read_files() -> dict[str, pd.DataFrame]:
     return {
         utl.snake_to_allcaps(filename): 
@@ -308,23 +293,18 @@ def set_credit_score(df: pd.DataFrame) -> pd.DataFrame:
     df[CR_SCORE] = df[["moody_score", "s_p_score"]].max(axis=1, skipna=True)
     no_score = df["moody_score"].isna() & df["s_p_score"].isna()
     df.loc[no_score, CR_SCORE] = pd.NA
-    # print(f"LOG: scores =\n{df[['moody_score', 's_p_score', MOODY_RATING, S_P_RATING, CR_SCORE]]}")
     df.drop(columns=["moody_score", "s_p_score", MOODY_RATING, S_P_RATING], 
             inplace=True)
     return df
     
 
 def set_frequency_map(df: pd.DataFrame) -> pd.DataFrame:
-    # print(f"LOG: set_frequency_map() start")
     df[HZ_MAP] = df[COUPON_HZ].map(HZ_MAPS)
-    # print(f"LOG: frequencies =\n{df[[COUPON_HZ, HZ_MAP]]}")
     df.drop(columns=COUPON_HZ, inplace=True)
-    # print(f"LOG: set_frequency_map() end")
     return df
     
 
 def set_returns(row: pd.Series, settlement_dt: pd.Timestamp) -> pd.Series:
-
     def min_if_not_na(a, b):
         return a if pd.isna(b) else min(a, b)
     
@@ -348,15 +328,13 @@ def set_returns(row: pd.Series, settlement_dt: pd.Timestamp) -> pd.Series:
     return row
 
 
-def source_dfs(dfs: dict[str, pd.DataFrame]) -> None:
+def source_dataframes(dfs: dict[str, pd.DataFrame]) -> None:
     for bond_type, df in dfs.items(): df[BOND_TYPE] = bond_type
 
 
 def main() -> None:
     Console.clear_screen()
-    print(f"LOG: main() start")
     find_bonds()
-    print(f"LOG: main() end")
 
 
 if __name__ == "__main__":
