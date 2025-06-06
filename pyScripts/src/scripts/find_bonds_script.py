@@ -190,7 +190,7 @@ def list_cashflow_amounts(dates: list[pd.Timestamp], row: pd.Series, tax: bool
                  if tax else 0.)
     
     # Amounts
-    purchase_price = row[ASK_PRICE] * 10
+    purchase_price = row[ASK_PRICE] * 10 + 1
     accr_interest = (0. 
                      if row[COUPON_RATE] == 0. 
                      else compute_accrued_interest(last_coupon, settlement, 
