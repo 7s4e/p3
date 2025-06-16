@@ -5,8 +5,8 @@ $usbDrive = "E:"     # Change to USB drive letter (e.g., D:, E:)
 
 # --- PATH TO ADK TOOLS ---
 $adkPath   = "C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit"
-$copype    = "$adkPath\Deployment Tools\$arch\copype.cmd"
-$makeMedia = "$adkPath\Deployment Tools\MakeWinPEMedia.cmd"
+$copype    = "$adkPath\Windows Preinstallation Environment\$arch\copype.cmd"
+$makeMedia = "$adkPath\Windows Preinstallation Environment\MakeWinPEMedia.cmd"
 
 # --- VALIDATION ---
 if (-not (Test-Path $copype)) {
