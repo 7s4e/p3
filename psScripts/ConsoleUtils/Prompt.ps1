@@ -13,13 +13,13 @@ class Prompt {
         [string]$cue,
         [bool]$expectKeystroke = $false,
         [bool]$validateBool = $false,
-        [bool]$validateInteger = $false,
+        [bool]$validateInt = $false,
         [object]$integerValidation = $null
     ) {
-        if ($validateBool -and $validateInteger) {
+        if ($validateBool -and $validateInt) {
             throw "Cannot validate both boolean and integer input."
         }
-        if ($integerValidation -ne $null -and -not $validateInteger) {
+        if ($integerValidation -ne $null -and -not $validateInt) {
             throw "Integer validation provided without validation enabled."
         }
         if ($integerValidation -is [int] -and $integerValidation -lt 0) {
