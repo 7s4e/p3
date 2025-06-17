@@ -22,7 +22,7 @@ class Prompt {
         if ($intValidation -ne $null -and -not $validateInt) {
             throw "Integer validation provided without validation enabled."
         }
-        if ($intValidation -is [int] -and $intValidation -lt 0) {
+        if ($intValidation -is [int] -and $integerValidation -lt 0) {
             throw "Integer range must be positive."
         }
         if ($intValidation -is [array]) {
